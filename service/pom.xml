@@ -48,7 +48,7 @@
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
-            <groupId>eu.seaclouds-project</groupId>
+            <groupId>eu.atos.paas</groupId>
             <artifactId>unified-paas-library</artifactId>
         </dependency>
         <dependency>
