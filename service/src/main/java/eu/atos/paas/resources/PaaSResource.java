@@ -34,6 +34,7 @@ import eu.atos.paas.PaasSession.ScaleCommand;
 import eu.atos.paas.PaasSession.ScaleUpDownCommand;
 import eu.atos.paas.PaasSession.StartStopCommand;
 import eu.atos.paas.heroku.DeployParameters;
+import io.swagger.annotations.ApiOperation;
 
 
 /**
@@ -106,7 +107,7 @@ public abstract class PaaSResource
         return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON).entity(json).build();
     }
     
-
+    @ApiOperation(value="This is just a test")
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public Response index()
@@ -131,6 +132,7 @@ public abstract class PaaSResource
     @Path("/applications")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value="Creates a new application. Credentials are set in 'credential' headers")
     public Response createApplication(@Context HttpHeaders headers, FormDataMultiPart form)
     {
         try
@@ -199,6 +201,7 @@ public abstract class PaaSResource
 
     @GET
     @Path("applications/{name}")
+    @ApiOperation(value="Return the status of an application")
     public Response getApplication(@PathParam("name") String name, @Context HttpHeaders headers)
     {
         log.info("getApplication({})", name);
@@ -221,6 +224,7 @@ public abstract class PaaSResource
 
     @DELETE
     @Path("/applications/{name}")
+    @ApiOperation(value="Removes an application in the provider")
     public Response deleteApplication(@PathParam("name") String name, @Context HttpHeaders headers)
     {
         log.info("deleteApplication({})", name);
@@ -243,6 +247,7 @@ public abstract class PaaSResource
 
     @PUT
     @Path("/applications/{name}/start")
+    @ApiOperation(value="Starts an application")
     public Response startApplication(@PathParam("name") String name, @Context HttpHeaders headers)
     {
         log.info("startApplication({})", name);
@@ -266,6 +271,7 @@ public abstract class PaaSResource
 
     @PUT
     @Path("/applications/{name}/stop")
+    @ApiOperation(value="Stops an application")
     public Response stopApplication(@PathParam("name") String name, @Context HttpHeaders headers)
     {
         log.info("stopApplication({})", name);
@@ -287,8 +293,13 @@ public abstract class PaaSResource
     }
     
     
+    
     @PUT
     @Path("/applications/{name}/scale/{updown}")
+    @ApiOperation(value="Scales up/down an application adding or removing an instance")
+    /**
+     * @param updown Must have value in {"up", "down"}
+     */
     public Response scaleUpDownApplication(@PathParam("name") String name, @PathParam("updown") String updown, @Context HttpHeaders headers)
     {
         log.info("scaleUpDownApplication({}, {})", name, updown);
@@ -323,6 +334,7 @@ public abstract class PaaSResource
     
     @PUT
     @Path("/applications/{name}/scale/{type}/{value}")
+    @ApiOperation(value="Scales the resource 'type' an application with by 'value' units")
     public Response scaleApplication(@PathParam("name") String name, @PathParam("type") String type, 
             @PathParam("value") String value, @Context HttpHeaders headers)
     {

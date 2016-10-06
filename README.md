@@ -2,18 +2,85 @@
 SeaClouds Unified PaaS Library
 
 ---
-## 1. Usage
-1. Compile needed projects
-
-* https://github.com/rosogon/heroku-java-client. Compile with `mvn install –Dmaven.test.skip`. 
-
-* https://github.com/rosogon/unified-paas. To use the test, API_KEY with heroku key must be set.
-
-2. Start server: `java -jar service/target/unified-paas-service-0.0.1-SNAPSHOT.jar`
-
+## Usage
+1. Compile project
+2. Start server: `java -jar service/target/unified-paas-service-0.0.1-SNAPSHOT.jar server service/config.yml`
 3. Deploy an application: 
+    `curl http://localhost:8080/api/heroku/applications -X POST -F file=@"<warfile>" -F model='{"name":"samplewar"}' -H"Content-Type: multipart/form-data" -H"apikey:<heroku-api-key>"`
 
-`curl http://localhost:8080/heroku/applications -X POST -F file=@"<warfile>" -F model='{"name":"samplewar"}' -H"Content-Type: multipart/form-data" -H"apikey:<heroku-api-key>"`
+### API Overview
+
+Each supported PaaS is a resource on /api. For example, Heroku is on /api/heroku.
+
+Each invocation to the API must contain the credentials in the request headers. See below for specific
+instructions per provider.
+
+These are the supported operations:
+
+#### POST /api/{paas}/applications
+
+Creates an application and deploy its artifact. A multipart request with two fields:
+* model: contains information about the application. The name of the application is here, and is used to refer to the application in the rest of operations.
+* file: the bytes of the artifact
+
+Examples:
+
+`curl http://localhost:8080/api/heroku/applications -X POST -F file=@"<FILE>" -F model='{"name":"<APP_NAME>"'} -H"Content-Type: multipart/form-data" -H"apikey:<API_KEY>"`
+
+`curl http://localhost:8080/api/pivotal/applications -X POST -F file=@"<FILE>" -F model='{"name":"<APP_NAME>"}' -H"Content-Type: multipart/form-data"  -H"credentials:<API_URL>" -H"credentials:<USER>" -H"credentials:<PASSWORD>" -H"credentials:<ORG>" -H"credentials:<SPACE>"  -H"credentials:<TRUE_FALSE>"`
+
+#### GET /api/{paas}/applications/{name}
+
+Returns the status of an application.
+
+#### DELETE /api/{paas}/applications/{name}
+
+Removes an application
+
+#### PUT /api/{paas}/applications/{name}/start
+
+Starts an application
+
+#### PUT /api/{paas}/applications/{name}/stop
+
+Stops an application
+
+#### PUT /api/{paas}/applications/{name}/scale/{updown}
+
+Scales up/down an application adding or removing an instance. Updown have value `up` or `down`
+
+#### PUT /api/{paas}/applications/{name}/scale/{type}/{value}")
+
+Scales the resource 'type' an application by setting 'value' units.
+
+Supported types:
+
+* instances
+* memory
+* disk
+
+(TO BE COMPLETED)
+
+### Credentials
+
+Each invocation to the API must contain the credentials in the request headers.
+
+#### Heroku
+* `apikey: <API_KEY>`
+
+#### CloudFoundry
+
+* `credentials:<API_URL>`
+* `credentials:<USER>`
+* `credentials:<PASSWORD>`
+* `credentials:<ORG>`
+* `credentials:<SPACE>`
+* `credentials:<TRUE_FALSE>`
+
+#### OpenShift2
+
+* `credentials:<USER>`
+* `credentials:<PASSWORD>`
 
 ### Integration tests
 

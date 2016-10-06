@@ -9,7 +9,10 @@ import eu.atos.paas.resources.Openshift2Resource;
 import eu.atos.paas.resources.PivotalResource;
 import eu.atos.paas.PaasClientFactory;
 import io.dropwizard.Application;
+import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.swagger.jaxrs.config.BeanConfig;
+import io.swagger.jaxrs.listing.ApiListingResource;
 
 
 public class ServiceApplication extends Application<ServiceConfiguration>
@@ -43,6 +46,16 @@ public class ServiceApplication extends Application<ServiceConfiguration>
     @Override
     public void run(ServiceConfiguration configuration, Environment environment) throws Exception
     {
+        /*
+         * swagger conf
+         */
+        environment.jersey().register(new ApiListingResource());
+        BeanConfig config = new BeanConfig();
+        config.setTitle("PaaS Unified Service");
+        config.setResourcePackage(this.getClass().getPackage().getName());
+        config.setScan(true);
+
+        
         final HerokuResource heroku = new HerokuResource(paasClientFactory.getClient("heroku"));
         final CloudfoundryResource cloudfoundry = new CloudfoundryResource(paasClientFactory.getClient("cloudfoundry"));
         final PivotalResource pivotal = new PivotalResource(paasClientFactory.getClient("pivotal"));
@@ -56,6 +69,10 @@ public class ServiceApplication extends Application<ServiceConfiguration>
         environment.jersey().register(bluemix);
         environment.jersey().register(openshift2);
     }
+
     
+    @Override
+    public void initialize(Bootstrap<ServiceConfiguration> bootstrap) {
+    }
 
 }

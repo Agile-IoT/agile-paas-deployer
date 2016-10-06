@@ -45,6 +45,7 @@
         <openshift2-version>2.7.0.Final</openshift2-version>
         <heroku-deploy>0.5.7</heroku-deploy>
         <commons-configuration.version>1.10</commons-configuration.version>
+        <swagger.version>1.5.0</swagger.version>
         
         <!-- Test and logs dependencies -->
         <testng.version>6.8.8</testng.version>
@@ -189,6 +190,25 @@
                 <artifactId>commons-configuration</artifactId>
                 <version>${commons-configuration.version}</version>
             </dependency>
+            
+            <!-- Swagger -->
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-jersey2-jaxrs</artifactId>
+                <version>${swagger.version}</version>
+                <scope>compile</scope>
+                <exclusions>
+                  <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>*</artifactId>
+                  </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
 
             <!-- Dropwizard -->
             <dependency>
@@ -205,6 +225,11 @@
             <dependency>
                 <groupId>io.dropwizard</groupId>
                 <artifactId>dropwizard-assets</artifactId>
+                <version>${dropwizard.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-forms</artifactId>
                 <version>${dropwizard.version}</version>
             </dependency>
 

@@ -8,6 +8,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -104,7 +105,7 @@ public class Openshift2Resource extends PaaSResource
     @PUT
     @Path("/applications/{name}/bind/{service}")
     @Override
-    public Response bindApplication(String name, String service, HttpHeaders headers)
+    public Response bindApplication(@PathParam("name") String name, @PathParam("service") String service, @Context HttpHeaders headers)
     {
         log.info("bindApplication({}, {})", name, service);
         Credentials credentials = extractCredentials(headers);
@@ -129,7 +130,7 @@ public class Openshift2Resource extends PaaSResource
     @PUT
     @Path("/applications/{name}/unbind/{service}")
     @Override
-    public Response unbindApplication(String name, String service, HttpHeaders headers)
+    public Response unbindApplication(@PathParam("name") String name, @PathParam("service") String service, @Context HttpHeaders headers)
     {
         log.info("unbindApplication({}, {})", name, service);
         Credentials credentials = extractCredentials(headers);
