@@ -17,6 +17,18 @@ instructions per provider.
 
 These are the supported operations:
 
+#### GET /api
+
+Return a list of the supported subpaths.
+
+Example:
+`curl localhost:8080/api`
+`["heroku","cloudfoundry","pivotal","bluemix","openshift2"]`
+
+#### GET /api/{paas}
+
+Return a description of the provider.
+
 #### POST /api/{paas}/applications
 
 Creates an application and deploy its artifact. A multipart request with two fields:
