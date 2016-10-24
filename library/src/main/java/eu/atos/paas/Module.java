@@ -26,7 +26,7 @@ public interface Module {
      * Get application environment values
      * @return
      */
-    Map<String, Object> getmEnv();
+    Map<String, Object> getEnv();
     
     
 }

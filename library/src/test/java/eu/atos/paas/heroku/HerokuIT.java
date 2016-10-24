@@ -182,7 +182,7 @@ public class HerokuIT
         assertEquals(1, m.getServices().size());
         
         logger.info("### TEST > Heroku > bindToService() > environment values...");
-        for (Map.Entry<String, Object> entry : m.getmEnv().entrySet()) {
+        for (Map.Entry<String, Object> entry : m.getEnv().entrySet()) {
             logger.info("### TEST > Heroku > bindToService() > " + entry.getKey() + " / " + entry.getValue().toString());
         }
     }

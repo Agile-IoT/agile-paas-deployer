@@ -1,9 +1,9 @@
 package eu.atos.paas;
 
 import eu.atos.paas.cloudfoundry.CloudFoundryClient;
+import eu.atos.paas.dummy.DummyClient;
 import eu.atos.paas.heroku.HerokuClient;
 import eu.atos.paas.openshift2.Openshift2Client;
-import eu.atos.paas.openshift3.Openshift3Client;
 
 
 /**
@@ -24,6 +24,8 @@ public class PaasClientFactory {
                 return new CloudFoundryClient();
             case "openshift2":    
                 return new Openshift2Client();
+            case "dummy":
+                return new DummyClient();
             case "openshift3":
             default:
                 throw new IllegalArgumentException("Provider " + provider + " not supported");

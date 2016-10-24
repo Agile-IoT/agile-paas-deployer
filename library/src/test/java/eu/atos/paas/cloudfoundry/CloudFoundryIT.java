@@ -185,7 +185,7 @@ public class CloudFoundryIT
         assertEquals(1, m.getServices().size());
         
         logger.info("### TEST > CloudFoundry > bindToService() > environment values...");
-        for (Map.Entry<String, Object> entry : m.getmEnv().entrySet()) {
+        for (Map.Entry<String, Object> entry : m.getEnv().entrySet()) {
             logger.info("### TEST > CloudFoundry > bindToService() > " + entry.getKey() + " / " + entry.getValue().toString());
         }
     }

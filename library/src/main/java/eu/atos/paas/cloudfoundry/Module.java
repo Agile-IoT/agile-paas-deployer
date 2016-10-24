@@ -77,7 +77,7 @@ public class Module implements eu.atos.paas.Module {
     
     
     @Override
-    public Map<String, Object> getmEnv()
+    public Map<String, Object> getEnv()
     {
         return mEnv;
     }
