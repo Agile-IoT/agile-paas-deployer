@@ -3,12 +3,16 @@ package eu.atos.paas.data;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Provider {
 
     private String name;
     private URL url;
     
-    public Provider(String name, String url) {
+    @JsonCreator
+    public Provider(@JsonProperty("name") String name, @JsonProperty("url") String url) {
         this.name = name;
         try {
             this.url = new URL(url);
@@ -28,5 +32,10 @@ public class Provider {
 
     public URL getUrl() {
         return url;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Provider [name=%s, url=%s]", name, url);
     }
 }
