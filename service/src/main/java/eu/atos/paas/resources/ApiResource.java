@@ -12,14 +12,18 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
+import eu.atos.paas.dummy.DummyClient;
+
 
 @Path("/")
 public class ApiResource {
 
+    private static final String DUMMY_PATH = "dummy";
     private Map<String, PaaSResource> map;
-    
+    DummyResource dummyResource;
     public ApiResource(Map<String, PaaSResource> subResourceMap) {
         this.map = new HashMap<>(subResourceMap);
+        this.dummyResource = new DummyResource(new DummyClient());
     }
 
     @GET
@@ -30,6 +34,9 @@ public class ApiResource {
     
     @Path("{provider}")
     public PaaSResource getProvider(@PathParam("provider") String provider) {
+        if (DUMMY_PATH.equals(provider)) {
+            return dummyResource;
+        }
         if (map.containsKey(provider)) {
             return map.get(provider);
         }
