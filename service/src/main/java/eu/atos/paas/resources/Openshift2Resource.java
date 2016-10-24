@@ -30,11 +30,8 @@ import eu.atos.paas.ServiceApp;
 import eu.atos.paas.openshift2.DeployParameters;
 
 
-@Path("/openshift2")
 public class Openshift2Resource extends PaaSResource
 {
-    
-    
     private static Logger log = LoggerFactory.getLogger(Openshift2Resource.class);
 
     

@@ -17,11 +17,8 @@ import eu.atos.paas.ServiceApp;
 import eu.atos.paas.data.Provider;
 
 
-@Path("/heroku")
 public class HerokuResource extends PaaSResource
 {
-
-
     private static Logger log = LoggerFactory.getLogger(HerokuResource.class);
 
 

@@ -17,12 +17,9 @@ import eu.atos.paas.ServiceApp;
 import eu.atos.paas.data.Provider;
 
 
-public abstract class CFBasedResource extends PaaSResource
+public class CFBasedResource extends PaaSResource
 {
-    
-    
     private static Logger log = LoggerFactory.getLogger(CFBasedResource.class);
-    
 
     /**
      * 
@@ -33,7 +30,6 @@ public abstract class CFBasedResource extends PaaSResource
         super(client, provider);
     }
 
-    
     @PUT
     @Path("/applications/{name}/bind/{service}")
     @Override
