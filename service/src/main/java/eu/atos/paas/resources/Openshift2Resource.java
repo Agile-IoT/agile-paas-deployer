@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
 import eu.atos.paas.data.Application;
+import eu.atos.paas.data.Provider;
 import eu.atos.paas.Credentials;
 import eu.atos.paas.Module;
 import eu.atos.paas.PaasClient;
@@ -44,7 +45,7 @@ public class Openshift2Resource extends PaaSResource
      */
     public Openshift2Resource(PaasClient client)
     {
-        super(client);
+        super(client, new Provider("OpenShift", "http://api.openshift.com"));
     }
     
     

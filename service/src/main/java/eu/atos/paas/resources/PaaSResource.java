@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.atos.paas.data.Application;
+import eu.atos.paas.data.Provider;
 import eu.atos.paas.Credentials;
 import eu.atos.paas.Module;
 import eu.atos.paas.PaasClient;
@@ -48,6 +49,7 @@ public abstract class PaaSResource
 
     private static Logger log = LoggerFactory.getLogger(PaaSResource.class);
     protected PaasClient client;
+    protected Provider provider;
 
     public enum OperationResult
     {
@@ -61,13 +63,14 @@ public abstract class PaaSResource
      * 
      * @param client
      */
-    public PaaSResource(PaasClient client)
+    public PaaSResource(PaasClient client, Provider provider)
     {
         if (client == null)
         {
             throw new NullPointerException("client cannot be null");
         }
         this.client = client;
+        this.provider = provider;
     }
 
     
@@ -107,12 +110,11 @@ public abstract class PaaSResource
         return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON).entity(json).build();
     }
     
-    @ApiOperation(value="This is just a test")
     @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response index()
+    @Produces(MediaType.APPLICATION_JSON)
+    public Provider index()
     {
-        return generateJSONResponse(Response.Status.OK, OperationResult.OK, "index", "");
+        return provider;
     }
 
 

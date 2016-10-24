@@ -14,6 +14,7 @@ import eu.atos.paas.Module;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasSession;
 import eu.atos.paas.ServiceApp;
+import eu.atos.paas.data.Provider;
 
 
 @Path("/heroku")
@@ -30,7 +31,7 @@ public class HerokuResource extends PaaSResource
      */
     public HerokuResource(PaasClient client)
     {
-        super(client);
+        super(client, new Provider("Heroku", "https://api.heroku.com/"));
     }
     
     

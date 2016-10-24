@@ -14,6 +14,7 @@ import eu.atos.paas.Module;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasSession;
 import eu.atos.paas.ServiceApp;
+import eu.atos.paas.data.Provider;
 
 
 public abstract class CFBasedResource extends PaaSResource
@@ -27,9 +28,9 @@ public abstract class CFBasedResource extends PaaSResource
      * 
      * @param client
      */
-    public CFBasedResource(PaasClient client)
+    public CFBasedResource(PaasClient client, Provider provider)
     {
-        super(client);
+        super(client, provider);
     }
 
     
