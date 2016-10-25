@@ -2,16 +2,16 @@ package eu.atos.paas;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ServiceLoader;
 
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.atos.paas.resources.ApiResource;
-import eu.atos.paas.resources.CFBasedResource;
-import eu.atos.paas.resources.HerokuResource;
-import eu.atos.paas.resources.Openshift2Resource;
 import eu.atos.paas.resources.PaaSResource;
-import eu.atos.paas.PaasClientFactory;
-import eu.atos.paas.data.Provider;
+import eu.atos.paas.serviceloader.ResourceSet;
+import eu.atos.paas.serviceloader.ResourceSet.ResourceDescriptor;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -21,20 +21,17 @@ import io.swagger.jaxrs.listing.ApiListingResource;
 
 public class ServiceApplication extends Application<ServiceConfiguration>
 {
-    private PaasClientFactory paasClientFactory;
-
+    private static Logger logger = LoggerFactory.getLogger(ServiceApplication.class);
+    private static ServiceLoader<ResourceSet> resourceSetLoader = ServiceLoader.load(ResourceSet.class);
 
     public static void main(String[] args) throws Exception
     {
-        PaasClientFactory factory = new PaasClientFactory();
-
-        new ServiceApplication(factory).run(args);
+        new ServiceApplication().run(args);
     }
 
 
-    public ServiceApplication(PaasClientFactory paasClientFactory)
+    public ServiceApplication()
     {
-        this.paasClientFactory = paasClientFactory;
     }
 
 
@@ -57,25 +54,30 @@ public class ServiceApplication extends Application<ServiceConfiguration>
         config.setResourcePackage(this.getClass().getPackage().getName());
         config.setScan(true);
 
-        final HerokuResource heroku = new HerokuResource(paasClientFactory.getClient("heroku"));
-        final CFBasedResource cloudfoundry = new CFBasedResource(paasClientFactory.getClient("cloudfoundry"), 
-                new Provider("CloudFoundry", "https://www.example.com"));
-        final CFBasedResource pivotal = new CFBasedResource (paasClientFactory.getClient("pivotal"),
-                new Provider("Pivotal", "https://api.run.pivotal.io"));
-        final CFBasedResource bluemix = new CFBasedResource (paasClientFactory.getClient("bluemix"),
-                new Provider("Bluemix", "https://api.ng.bluemix.net"));
-        final Openshift2Resource openshift2 = new Openshift2Resource(paasClientFactory.getClient("openshift2"));
-        
+        /*
+         * key: path; value: resource
+         */
         Map<String, PaaSResource> resourcesMap = new HashMap<>();
-        resourcesMap.put("heroku", heroku);
-        resourcesMap.put("cloudfoundry", cloudfoundry);
-        resourcesMap.put("pivotal", pivotal);
-        resourcesMap.put("bluemix", bluemix);
-        resourcesMap.put("openshift2", openshift2);
+
+        /*
+         * Each ResourceSet declares a collection of REST resources and its subpath.
+         * The ResourceSet implementation is defined in META-INF/services/eu.atos.paas.serviceloader.ResourceSet file.
+         */
+        for (ResourceSet rs : resourceSetLoader) {
+            logger.info("Reading ResourceDescriptors from {}", rs.getClass().getName());
+            for (ResourceDescriptor descriptor : rs.getResources()) {
+                resourcesMap.put(descriptor.getPath(), descriptor.getResource());
+            }
+        }
         ApiResource api = new ApiResource(resourcesMap);
 
         environment.jersey().register(MultiPartFeature.class);
         environment.jersey().register(api);
+        
+        for (Map.Entry<String, PaaSResource> item : resourcesMap.entrySet()) {
+            logger.info("Added resource /{} ({})", item.getKey(), item.getValue().getClass().getName());
+        }
+
     }
 
     
