@@ -1,8 +1,9 @@
 package eu.atos.paas.openshift2;
 
-import eu.atos.paas.Credentials;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasSession;
+import eu.atos.paas.credentials.Credentials;
+import eu.atos.paas.credentials.UserPasswordCredentials;
 
 
 /**
@@ -18,9 +19,9 @@ public class Openshift2Client implements PaasClient
     @Override
     public PaasSession getSession(Credentials credentials) {
         PaasSession session = null;
-        if (credentials instanceof Credentials.UserPasswordCredentials) {
+        if (credentials instanceof UserPasswordCredentials) {
             
-            session = getSession((Credentials.UserPasswordCredentials)credentials);
+            session = getSession((UserPasswordCredentials)credentials);
         }
         else {
             
@@ -31,7 +32,7 @@ public class Openshift2Client implements PaasClient
     }
 
     
-    private PaasSession getSession(Credentials.UserPasswordCredentials credentials) {
+    private PaasSession getSession(UserPasswordCredentials credentials) {
         Openshift2Connector connector = new Openshift2Connector(credentials.getUser(), credentials.getPassword());
         PaasSession session = new Openshift2Session(connector);
         

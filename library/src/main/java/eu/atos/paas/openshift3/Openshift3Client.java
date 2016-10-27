@@ -1,9 +1,9 @@
 package eu.atos.paas.openshift3;
 
-import eu.atos.paas.Credentials;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasException;
 import eu.atos.paas.PaasSession;
+import eu.atos.paas.credentials.Credentials;
 
 
 /**

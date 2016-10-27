@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import eu.atos.paas.Credentials;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasClientFactory;
 import eu.atos.paas.PaasException;
@@ -21,6 +20,7 @@ import eu.atos.paas.TestConfigProperties;
 import eu.atos.paas.PaasSession.ScaleUpDownCommand;
 import eu.atos.paas.PaasSession.StartStopCommand;
 import eu.atos.paas.cloudfoundry.DeployParameters;
+import eu.atos.paas.credentials.ApiUserPasswordOrgSpaceCredentials;
 
 
 /**
@@ -54,7 +54,7 @@ public class CloudFoundryIT
         logger.info("### INTEGRATION TESTS > CloudFoundry user ..." + TestConfigProperties.getInstance().getCf_user());
         logger.info("### INTEGRATION TESTS > CloudFoundry psswd ..." + TestConfigProperties.getInstance().getCf_password());
 
-        session = client.getSession(new Credentials.ApiUserPasswordOrgSpaceCredentials(
+        session = client.getSession(new ApiUserPasswordOrgSpaceCredentials(
                 TestConfigProperties.getInstance().getCf_api(), 
                 TestConfigProperties.getInstance().getCf_user(),
                 TestConfigProperties.getInstance().getCf_password(), 

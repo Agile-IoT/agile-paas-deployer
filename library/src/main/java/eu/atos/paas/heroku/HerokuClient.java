@@ -1,8 +1,10 @@
 package eu.atos.paas.heroku;
 
-import eu.atos.paas.Credentials;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasSession;
+import eu.atos.paas.credentials.ApiKeyCredentials;
+import eu.atos.paas.credentials.Credentials;
+import eu.atos.paas.credentials.UserPasswordCredentials;
 
 
 public class HerokuClient implements PaasClient {
@@ -11,13 +13,13 @@ public class HerokuClient implements PaasClient {
     @Override
     public PaasSession getSession(Credentials credentials) {
         PaasSession session = null;
-        if (credentials instanceof Credentials.UserPasswordCredentials) {
+        if (credentials instanceof UserPasswordCredentials) {
             
-            session = getSession((Credentials.UserPasswordCredentials)credentials);
+            session = getSession((UserPasswordCredentials)credentials);
         }
-        else if (credentials instanceof Credentials.ApiKeyCredentials) {
+        else if (credentials instanceof ApiKeyCredentials) {
 
-            session = getSession((Credentials.ApiKeyCredentials)credentials);
+            session = getSession((ApiKeyCredentials)credentials);
             
         } else {
             
@@ -28,7 +30,7 @@ public class HerokuClient implements PaasClient {
     }
 
     
-    private PaasSession getSession(Credentials.UserPasswordCredentials credentials) {
+    private PaasSession getSession(UserPasswordCredentials credentials) {
         HerokuConnector connector = new HerokuConnector(credentials.getUser(), credentials.getPassword());
         PaasSession session = new HerokuSession(connector);
         
@@ -36,7 +38,7 @@ public class HerokuClient implements PaasClient {
     }
     
     
-    private PaasSession getSession(Credentials.ApiKeyCredentials credentials) {
+    private PaasSession getSession(ApiKeyCredentials credentials) {
         HerokuConnector connector = new HerokuConnector(credentials.getApiKey());
         
         PaasSession session = new HerokuSession(connector);

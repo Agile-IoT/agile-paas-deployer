@@ -3,7 +3,6 @@ package eu.atos.paas.dummy;
 import java.util.HashMap;
 import java.util.Map;
 
-import eu.atos.paas.Credentials;
 import eu.atos.paas.Module;
 import eu.atos.paas.PaasException;
 import eu.atos.paas.PaasSession;
@@ -13,7 +12,7 @@ public class DummySession implements PaasSession {
 
     private static Map<String, ModuleImpl> modules = new HashMap<String, ModuleImpl>();
     
-    public DummySession(Credentials credentials) {
+    public DummySession() {
     }
 
     @Override

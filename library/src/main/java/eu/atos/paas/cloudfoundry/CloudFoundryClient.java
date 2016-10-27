@@ -1,8 +1,9 @@
 package eu.atos.paas.cloudfoundry;
 
-import eu.atos.paas.Credentials;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasSession;
+import eu.atos.paas.credentials.ApiUserPasswordOrgSpaceCredentials;
+import eu.atos.paas.credentials.Credentials;
 
 
 /**
@@ -18,9 +19,9 @@ public class CloudFoundryClient implements PaasClient
     public PaasSession getSession(Credentials credentials)
     {
         PaasSession session = null;
-        if (credentials instanceof Credentials.ApiUserPasswordOrgSpaceCredentials)
+        if (credentials instanceof ApiUserPasswordOrgSpaceCredentials)
         {
-            session = getSession((Credentials.ApiUserPasswordOrgSpaceCredentials) credentials);
+            session = getSession((ApiUserPasswordOrgSpaceCredentials) credentials);
         }
         else
         {
@@ -31,7 +32,7 @@ public class CloudFoundryClient implements PaasClient
     }
 
 
-    private PaasSession getSession(Credentials.ApiUserPasswordOrgSpaceCredentials credentials)
+    private PaasSession getSession(ApiUserPasswordOrgSpaceCredentials credentials)
     {
         CloudFoundryConnector connector = new CloudFoundryConnector(credentials.getApi(), credentials.getUser(), credentials.getPassword(),
                 credentials.getOrg(), credentials.getSpace(), true);

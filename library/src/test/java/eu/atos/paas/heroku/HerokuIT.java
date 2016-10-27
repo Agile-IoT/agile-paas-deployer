@@ -11,13 +11,13 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import com.heroku.api.exception.RequestFailedException;
 
-import eu.atos.paas.Credentials;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasClientFactory;
 import eu.atos.paas.PaasException;
 import eu.atos.paas.PaasSession;
 import eu.atos.paas.ServiceApp;
 import eu.atos.paas.TestConfigProperties;
+import eu.atos.paas.credentials.ApiKeyCredentials;
 import eu.atos.paas.PaasSession.ScaleUpDownCommand;
 import eu.atos.paas.PaasSession.StartStopCommand;
 import eu.atos.paas.heroku.DeployParameters;
@@ -50,7 +50,7 @@ public class HerokuIT
         // login / connect to PaaS
         PaasClientFactory factory = new PaasClientFactory();
         PaasClient client = factory.getClient("heroku");
-        session = client.getSession(new Credentials.ApiKeyCredentials(TestConfigProperties.getInstance().getHeroku_apiKey()));
+        session = client.getSession(new ApiKeyCredentials(TestConfigProperties.getInstance().getHeroku_apiKey()));
     }
     
 
