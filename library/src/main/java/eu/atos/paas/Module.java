@@ -1,5 +1,6 @@
 package eu.atos.paas;
 
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +11,7 @@ public interface Module {
     String getName();
     
     
-    String getUrl();
+    URL getUrl();
     
     
     String getAppType();

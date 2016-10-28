@@ -1,5 +1,6 @@
 package eu.atos.paas.openshift3;
 
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +24,7 @@ public class Module implements eu.atos.paas.Module
 
     
     @Override
-    public String getUrl()
+    public URL getUrl()
     {
         // TODO Auto-generated method stub
         return null;

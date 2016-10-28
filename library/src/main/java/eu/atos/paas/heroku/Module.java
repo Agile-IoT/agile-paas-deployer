@@ -1,6 +1,9 @@
 package eu.atos.paas.heroku;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +22,7 @@ public class Module implements eu.atos.paas.Module {
     private App app;
     private List<String> lServices;
     private Map<String, Object> mEnv;
+    private URL url;
     
     
     /**
@@ -26,6 +30,7 @@ public class Module implements eu.atos.paas.Module {
      * @param app
      */
     public Module(App app) {
+        this(app, Collections.<Addon>emptyList(), Collections.<String, String>emptyMap());
         this.app = app;
         lServices = new ArrayList<String>(0);
     }
@@ -40,6 +45,15 @@ public class Module implements eu.atos.paas.Module {
      */
     public Module(App app, List<Addon> l, Map<String, String> m) {
         this.app = app;
+        try {
+            this.url = new URL(app.getWebUrl());
+        } catch (MalformedURLException e) {
+            /*
+             * this should not happen
+             */
+            throw new IllegalArgumentException("Error in URL=" + app.getWebUrl() + " from provider ", e);
+            
+        }
         
         if ((l != null) && (l.size() > 0))
         {
@@ -73,8 +87,8 @@ public class Module implements eu.atos.paas.Module {
     
     
     @Override
-    public String getUrl() {
-        return app.getWebUrl();
+    public URL getUrl() {
+        return url;
     }
     
     

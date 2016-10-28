@@ -18,6 +18,7 @@ public class Module implements eu.atos.paas.Module {
     private CloudApplication app;
     private List<String> lServices;
     private Map<String, Object> mEnv;
+    private URL url;
     
     
     /**
@@ -30,6 +31,17 @@ public class Module implements eu.atos.paas.Module {
         this.app = app;
         this.lServices = app.getServices();
         this.mEnv = m;
+        try {
+            
+            this.url = new URL(app.getUris().get(0));
+            
+        } catch (MalformedURLException e) {
+            
+            /*
+             * this should not happen
+             */
+            throw new IllegalArgumentException("Error in URL=" + app.getUris().get(0) + " from provider ", e);
+        }
     }
     
     
@@ -41,16 +53,9 @@ public class Module implements eu.atos.paas.Module {
 
     
     @Override
-    public String getUrl()
+    public URL getUrl()
     {
-        try
-        {
-            return new URL(app.getUris().get(0)).toString();
-        }
-        catch (MalformedURLException ex)
-        {
-            return "http://" + app.getUris().get(0);
-        }
+        return url;
     }
     
 

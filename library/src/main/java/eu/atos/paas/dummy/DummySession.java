@@ -1,5 +1,7 @@
 package eu.atos.paas.dummy;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +19,13 @@ public class DummySession implements PaasSession {
 
     @Override
     public Module deploy(String moduleName, DeployParameters params) throws PaasException {
-        ModuleImpl m = new ModuleImpl(moduleName, "http://www.example.com/" + moduleName, "web", 1);
+        URL url;
+        try {
+            url = new URL("http://www.example.com/" + moduleName);
+        } catch (MalformedURLException e) {
+            throw new PaasException(e.getMessage(), e);
+        }
+        ModuleImpl m = new ModuleImpl(moduleName, url, "web", 1);
         modules.put(moduleName, m);
         return m;
     }

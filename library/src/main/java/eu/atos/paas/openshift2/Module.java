@@ -1,5 +1,7 @@
 package eu.atos.paas.openshift2;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -21,7 +23,7 @@ public class Module implements eu.atos.paas.Module
 
     
     private IApplication app;
-    
+    private URL url;
     
     /**
      * 
@@ -31,6 +33,14 @@ public class Module implements eu.atos.paas.Module
     public Module(IApplication appl)
     {
         this.app = appl;
+        try {
+            this.url = new URL(app.getApplicationUrl());
+        } catch (MalformedURLException e) {
+            /*
+             * this should not happen
+             */
+            throw new IllegalArgumentException("Error in URL=" + app.getApplicationUrl() + " from provider ", e);
+        }
     }
     
     
@@ -42,9 +52,9 @@ public class Module implements eu.atos.paas.Module
 
     
     @Override
-    public String getUrl()
+    public URL getUrl()
     {
-        return this.app.getApplicationUrl();
+        return url;
     }
 
     
