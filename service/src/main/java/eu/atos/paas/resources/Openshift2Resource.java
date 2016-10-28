@@ -1,8 +1,5 @@
 package eu.atos.paas.resources;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -21,13 +18,16 @@ import org.slf4j.LoggerFactory;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
 import eu.atos.paas.data.Application;
+import eu.atos.paas.data.CredentialsMap;
+import eu.atos.paas.credentials.Credentials;
+import eu.atos.paas.credentials.UserPasswordCredentials;
 import eu.atos.paas.data.Provider;
-import eu.atos.paas.Credentials;
 import eu.atos.paas.Module;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasSession;
 import eu.atos.paas.ServiceApp;
 import eu.atos.paas.openshift2.DeployParameters;
+import eu.atos.paas.resources.Constants.Providers;
 
 
 public class Openshift2Resource extends PaaSResource
@@ -42,7 +42,7 @@ public class Openshift2Resource extends PaaSResource
      */
     public Openshift2Resource(PaasClient client)
     {
-        super(client, new Provider("OpenShift", "http://api.openshift.com"));
+        super(client, new Provider(Providers.OPENSHIFT2, "http://api.openshift.com"));
     }
     
     
@@ -65,25 +65,13 @@ public class Openshift2Resource extends PaaSResource
     {
         try
         {
-            Credentials credentials = extractCredentials(headers);
-            if (credentials == null) {
-                // Error Response
-                return generateCredentialsErrorJSONResponse("POST /applications");
-            }
-            
             log.info("createApplication({})", appname);
             
-            PaasSession session = client.getSession(credentials);
+            PaasSession session = getSession(headers);
 
             Application result;
-            try {
-                Module m = session.deploy(appname, new DeployParameters(appGitUrl, IStandaloneCartridge.NAME_JBOSSEWS));
-                result = new Application(m.getName(), new URL(m.getUrl()));
-            }
-            catch (IOException e)
-            {
-                throw new WebApplicationException(e);
-            }
+            Module m = session.deploy(appname, new DeployParameters(appGitUrl, IStandaloneCartridge.NAME_JBOSSEWS));
+            result = new Application(m.getName(), m.getUrl());
             
             // Response
             return generateJSONResponse(Response.Status.OK, OperationResult.OK,
@@ -106,13 +94,7 @@ public class Openshift2Resource extends PaaSResource
     public Response bindApplication(@PathParam("name") String name, @PathParam("service") String service, @Context HttpHeaders headers)
     {
         log.info("bindApplication({}, {})", name, service);
-        Credentials credentials = extractCredentials(headers);
-        if (credentials == null) {
-            // Error Response
-            return generateCredentialsErrorJSONResponse("PUT /applications/" + name + "/bind/" + service);
-        }
-        
-        PaasSession session = client.getSession(credentials);
+        PaasSession session = getSession(headers);
         
         Module m = session.getModule(name);
         // openshift ... mysql-5.5
@@ -131,13 +113,7 @@ public class Openshift2Resource extends PaaSResource
     public Response unbindApplication(@PathParam("name") String name, @PathParam("service") String service, @Context HttpHeaders headers)
     {
         log.info("unbindApplication({}, {})", name, service);
-        Credentials credentials = extractCredentials(headers);
-        if (credentials == null) {
-            // Error Response
-            return generateCredentialsErrorJSONResponse("PUT /applications/" + name + "/unbind/" + service);
-        }
-        
-        PaasSession session = client.getSession(credentials);
+        PaasSession session = getSession(headers);
         
         Module m = session.getModule(name);
         // openshift ... mysql-5.5
@@ -149,22 +125,12 @@ public class Openshift2Resource extends PaaSResource
                                     "service " + service + " unbinded from app: " + name);
     }
 
-    
+
     @Override
-    protected Credentials extractCredentials(HttpHeaders headers)
-    {
-        Credentials credentials = null;
+    protected Credentials buildCredentialsFromFieldsMap(CredentialsMap credentialsMap)
+            throws IllegalArgumentException {
         
-        log.debug("Checking credentials [Openshift2] ...");
-
-        List<String> crs = headers.getRequestHeader("credentials");
-        if (crs != null && !crs.isEmpty() && crs.size()==2)
-        {
-            credentials = new Credentials.UserPasswordCredentials(crs.get(0), crs.get(1));
-        }
-
-        return credentials;
+        return new UserPasswordCredentials(credentialsMap);
     }
 
-    
 }

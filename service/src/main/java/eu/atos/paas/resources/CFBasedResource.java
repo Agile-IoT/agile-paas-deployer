@@ -1,19 +1,22 @@
 package eu.atos.paas.resources;
 
-import java.util.List;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.atos.paas.Credentials;
+
 import eu.atos.paas.Module;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasSession;
 import eu.atos.paas.ServiceApp;
+import eu.atos.paas.credentials.ApiUserPasswordOrgSpaceCredentials;
+import eu.atos.paas.credentials.Credentials;
+import eu.atos.paas.data.CredentialsMap;
 import eu.atos.paas.data.Provider;
 
 
@@ -36,13 +39,7 @@ public class CFBasedResource extends PaaSResource
     public Response bindApplication(@PathParam("name") String name, @PathParam("service") String service, @Context HttpHeaders headers)
     {
         log.info("bindApplication({}, {})", name, service);
-        Credentials credentials = extractCredentials(headers);
-        if (credentials == null) {
-            // Error Response
-            return generateCredentialsErrorJSONResponse("PUT /applications/" + name + "/bind/" + service);
-        }
-        
-        PaasSession session = client.getSession(credentials);
+        PaasSession session = getSession(headers);
         
         Module m = session.getModule(name);
         
@@ -78,13 +75,7 @@ public class CFBasedResource extends PaaSResource
     public Response unbindApplication(@PathParam("name") String name, @PathParam("service") String service, @Context HttpHeaders headers)
     {
         log.info("unbindApplication({}, {})", name, service);
-        Credentials credentials = extractCredentials(headers);
-        if (credentials == null) {
-            // Error Response
-            return generateCredentialsErrorJSONResponse("PUT /applications/" + name + "/unbind/" + service);
-        }
-        
-        PaasSession session = client.getSession(credentials);
+        PaasSession session = getSession(headers);
         
         Module m = session.getModule(name);
         
@@ -106,23 +97,17 @@ public class CFBasedResource extends PaaSResource
                                     "service " + service + " unbinded from app: " + name);
     }
 
-
     @Override
-    protected Credentials extractCredentials(HttpHeaders headers)
-    {
-        Credentials credentials = null;
+    protected Credentials buildCredentialsFromFieldsMap(CredentialsMap credentialsMap) 
+        throws IllegalArgumentException {
         
-        log.debug("Checking credentials [CloudFoundry] ...");
-
-        List<String> crs = headers.getRequestHeader("credentials");
-        if (crs != null && !crs.isEmpty() && crs.size()==6)
-        {
-            credentials = new Credentials.ApiUserPasswordOrgSpaceCredentials(
-                    crs.get(0), crs.get(1), crs.get(2), crs.get(3), crs.get(4), Boolean.valueOf(crs.get(5)));
+        /*
+         * Remove API field if present in case using a specific CloudFoundry provider
+         */
+        if (!this.getProvider().getName().equals(Constants.Providers.CLOUDFOUNDRY)) {
+            credentialsMap.remove(ApiUserPasswordOrgSpaceCredentials.API);
         }
-
-        return credentials;
+        
+        return new ApiUserPasswordOrgSpaceCredentials(credentialsMap);
     }
-    
-
 }

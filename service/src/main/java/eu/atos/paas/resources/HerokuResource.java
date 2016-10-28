@@ -1,6 +1,5 @@
 package eu.atos.paas.resources;
 
-import java.util.List;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -9,12 +8,16 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.atos.paas.Credentials;
 import eu.atos.paas.Module;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasSession;
 import eu.atos.paas.ServiceApp;
+import eu.atos.paas.credentials.ApiKeyCredentials;
+import eu.atos.paas.credentials.Credentials;
+import eu.atos.paas.credentials.UserPasswordCredentials;
+import eu.atos.paas.data.CredentialsMap;
 import eu.atos.paas.data.Provider;
+import eu.atos.paas.resources.Constants.Providers;
 
 
 public class HerokuResource extends PaaSResource
@@ -28,7 +31,7 @@ public class HerokuResource extends PaaSResource
      */
     public HerokuResource(PaasClient client)
     {
-        super(client, new Provider("Heroku", "https://api.heroku.com/"));
+        super(client, new Provider(Providers.HEROKU, "https://api.heroku.com/"));
     }
     
     
@@ -38,13 +41,7 @@ public class HerokuResource extends PaaSResource
     public Response bindApplication(@PathParam("name") String name, @PathParam("service") String service, @Context HttpHeaders headers)
     {
         log.info("bindApplication({}, {})", name, service);
-        Credentials credentials = extractCredentials(headers);
-        if (credentials == null) {
-            // Error Response
-            return generateCredentialsErrorJSONResponse("PUT /applications/" + name + "/bind/" + service);
-        }
-        
-        PaasSession session = client.getSession(credentials);
+        PaasSession session = getSession(headers);
         
         Module m = session.getModule(name);
         // heroku ... cleardb:ignite
@@ -65,13 +62,7 @@ public class HerokuResource extends PaaSResource
     public Response unbindApplication(@PathParam("name") String name, @PathParam("service") String service, @Context HttpHeaders headers)
     {
         log.info("unbindApplication({}, {})", name, service);
-        Credentials credentials = extractCredentials(headers);
-        if (credentials == null) {
-            // Error Response
-            return generateCredentialsErrorJSONResponse("PUT /applications/" + name + "/unbind/" + service);
-        }
-        
-        PaasSession session = client.getSession(credentials);
+        PaasSession session = getSession(headers);
         
         Module m = session.getModule(name);
         // heroku ... cleardb
@@ -85,19 +76,16 @@ public class HerokuResource extends PaaSResource
                                     "service " + service + " unbinded from app: " + name);
     }
 
-
     @Override
-    protected Credentials extractCredentials(HttpHeaders headers)
-    {
-        Credentials credentials = null;
-
-        List<String> apikeys = headers.getRequestHeader("apikey");
-        if (apikeys != null && !apikeys.isEmpty())
-        {
-            credentials = new Credentials.ApiKeyCredentials(apikeys.get(0));
+    protected Credentials buildCredentialsFromFieldsMap(CredentialsMap credentialsMap) 
+            throws IllegalArgumentException {
+        
+        if (credentialsMap.containsKey(ApiKeyCredentials.API_KEY)) {
+            return new ApiKeyCredentials(credentialsMap);
         }
-        return credentials;
+        if (credentialsMap.containsKey(UserPasswordCredentials.USER)) {
+            return new UserPasswordCredentials(credentialsMap);
+        }
+        throw new IllegalArgumentException("Wrong credential scheme for provider: " + credentialsMap);
     }
-
-    
 }

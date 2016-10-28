@@ -3,7 +3,6 @@ package eu.atos.paas.data;
 import java.net.URL;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Optional;
 
 public class Application {
 
@@ -11,24 +10,26 @@ public class Application {
     private String name;
     
     @JsonProperty
-    private Optional<URL> url;
+    private URL url;
 
     public Application() {
-        this.name = "";
-        this.url = Optional.absent();
+        this("", null);
+    }
+    
+    public Application(String name) {
+        this(name, null);
     }
     
     public Application(String name, URL url) {
-        super();
         this.name = name;
-        this.url = Optional.of(url);
+        this.url = url;
     }
-
+    
     public String getName() {
         return name;
     }
 
-    public Optional<URL> getUrl() {
+    public URL getUrl() {
         return url;
     }
 

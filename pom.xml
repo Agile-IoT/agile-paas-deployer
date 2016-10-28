@@ -47,7 +47,7 @@
         <heroku-deploy>0.5.7</heroku-deploy>
         <commons-configuration.version>1.10</commons-configuration.version>
         <swagger.version>1.5.0</swagger.version>
-        <jackson.version>2.5.0</jackson.version>
+        <jackson.version>2.5.1</jackson.version>
         
         <!-- Test and logs dependencies -->
         <testng.version>6.8.8</testng.version>
@@ -189,6 +189,12 @@
 
             <dependency>
                 <groupId>org.glassfish.jersey.core</groupId>
+                <artifactId>jersey-common</artifactId>
+                <version>${jersey.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.glassfish.jersey.core</groupId>
                 <artifactId>jersey-client</artifactId>
                 <version>${jersey.version}</version>
             </dependency>
@@ -213,7 +219,25 @@
             
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-guava</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
             

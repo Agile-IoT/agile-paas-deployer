@@ -9,14 +9,16 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import eu.atos.paas.Credentials;
 import eu.atos.paas.PaasClient;
+import eu.atos.paas.credentials.Credentials;
+import eu.atos.paas.credentials.UserPasswordCredentials;
+import eu.atos.paas.data.CredentialsMap;
 import eu.atos.paas.data.Provider;
 
 public class DummyResource extends PaaSResource {
 
     public DummyResource(PaasClient client) {
-        super(client, new Provider("dummy", "http://www.example.com"));
+        super(client, new Provider(Constants.Providers.DUMMY, "http://www.example.com"));
     }
 
     @PUT
@@ -38,7 +40,7 @@ public class DummyResource extends PaaSResource {
     }
 
     @Override
-    protected Credentials extractCredentials(HttpHeaders headers) {
-        throw new WebApplicationException("Not supported", Status.NOT_IMPLEMENTED);
+    protected Credentials buildCredentialsFromFieldsMap(CredentialsMap credentialsMap) {
+        return new UserPasswordCredentials("don't care", "don't care");
     }
 }

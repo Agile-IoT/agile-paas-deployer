@@ -6,7 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -20,14 +21,19 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.atos.paas.data.Application;
+import eu.atos.paas.data.CredentialsMap;
+import eu.atos.paas.credentials.Credentials;
 import eu.atos.paas.data.Provider;
-import eu.atos.paas.Credentials;
+import eu.atos.paas.data.CredentialsMap.Base64Transformer;
+import eu.atos.paas.data.CredentialsMap.PlainTransformer;
 import eu.atos.paas.Module;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasSession;
@@ -45,10 +51,10 @@ import io.swagger.annotations.ApiOperation;
  */
 public abstract class PaaSResource
 {
-
-
     private static Logger log = LoggerFactory.getLogger(PaaSResource.class);
-    protected PaasClient client;
+    private static PlainTransformer plainTransformer = new PlainTransformer();
+    private static Base64Transformer base64Transformer = new Base64Transformer(plainTransformer);
+    private PaasClient client;
     protected Provider provider;
 
     public enum OperationResult
@@ -74,45 +80,9 @@ public abstract class PaaSResource
     }
 
     
-    /**
-     * 
-     * @param status
-     * @param res
-     * @param path
-     * @param message
-     * @return
-     */
-    protected Response generateJSONResponse(Response.Status status, OperationResult res, String path, String message)
-    {
-        log.debug(res.name() + " / " + message);
-        
-        String json = "{\"result\": \"" + res.name() + "\", " +
-                      "\"path\": \"" + path + "\", " +
-                      "\"message\": \"" + message + "\"}";
-        
-        return Response.status(status).type(MediaType.APPLICATION_JSON).entity(json).build();
-    }
-    
-    
-    /**
-     * Credentials error Response
-     * @param path
-     * @return
-     */
-    protected Response generateCredentialsErrorJSONResponse(String path)
-    {
-        log.debug("ERROR / Error extracting credentials");
-        
-        String json = "{\"result\": \"" + OperationResult.ERROR.name() + "\", " +
-                      "\"path\": \"" + path + "\", " +
-                      "\"message\": \"Error extracting credentials\"}";
-        
-        return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON).entity(json).build();
-    }
-    
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Provider index()
+    public Provider getProvider()
     {
         return provider;
     }
@@ -137,90 +107,81 @@ public abstract class PaaSResource
     @ApiOperation(value="Creates a new application. Credentials are set in 'credential' headers")
     public Response createApplication(@Context HttpHeaders headers, FormDataMultiPart form)
     {
+        PaasSession session = getSession(headers);
+        
+        FormDataBodyPart filePart = form.getField(Constants.MultiPartFields.FILE);
+        FormDataBodyPart modelPart = form.getField(Constants.MultiPartFields.MODEL);
+
+        modelPart.setMediaType(MediaType.APPLICATION_JSON_TYPE);
+        Application application = modelPart.getValueAs(Application.class);
+
+        log.info("createApplication({})", application.getName());
+
+        if (application.getName() == null || application.getName().isEmpty())
+        {
+            throw new WebApplicationException("application name must be specified", Response.Status.BAD_REQUEST);
+        }
+
+        InputStream is = filePart.getEntityAs(InputStream.class);
+
+        return createApplicationImpl(session, application, is);
+    }
+
+    /**
+     * Created for testing purposes
+     * 
+     * @see http://stackoverflow.com/questions/14456547/how-to-unit-test-handling-of-incoming-jersey-multipart-requests
+     */
+    public Response createApplication(HttpHeaders headers, Application application, InputStream is) {
+        PaasSession session = getSession(headers);
+
+        return createApplicationImpl(session, application, is);
+    }
+    
+    private Response createApplicationImpl(PaasSession session, Application application, InputStream is) {
+        File file = null;
+        Application result;
         try
         {
-            Credentials credentials = extractCredentials(headers);
-            if (credentials == null) {
-                // Error Response
-                return generateCredentialsErrorJSONResponse("POST /applications");
-            }
+            file = File.createTempFile("up-tmp-file", ".tmp");
+
+            saveToFile(is, file);
+
+            DeployParameters params = new DeployParameters(file.getAbsolutePath());
+            Module m = session.deploy(application.getName(), params);
             
-            FormDataBodyPart filePart = form.getField("file");
-            FormDataBodyPart modelPart = form.getField("model");
-
-            modelPart.setMediaType(MediaType.APPLICATION_JSON_TYPE);
-            Application application = modelPart.getValueAs(Application.class);
-
-            log.info("createApplication({})", application.getName());
-
-            if (application.getName() == null || application.getName().isEmpty())
-            {
-                throw new WebApplicationException("application name must be specified", Response.Status.BAD_REQUEST);
-            }
-            PaasSession session = client.getSession(credentials);
-
-            InputStream is = filePart.getEntityAs(InputStream.class);
-
-            File file = null;
-            Application result;
-            try
-            {
-                file = File.createTempFile("up-tmp-file", ".tmp");
-
-                saveToFile(is, file);
-
-                DeployParameters params = new DeployParameters(file.getAbsolutePath());
-                Module m = session.deploy(application.getName(), params);
-                
-                result = new Application(m.getName(), new URL(m.getUrl()));
-            }
-            catch (IOException e)
-            {
-                throw new WebApplicationException(e);
-            }
-            finally
-            {
-                if (file != null)
-                {
-                    file.delete();
-                }
-            }
-            
-            // Response
-            return generateJSONResponse(Response.Status.OK, OperationResult.OK,
-                                        "POST /applications/",
-                                        "application " + result.getName() + " created / deployed: " + result.getUrl());
+            result = new Application(m.getName(), m.getUrl());
         }
-        catch (Exception e)
+        catch (IOException e)
         {
-            // Response
-            return generateJSONResponse(Response.Status.INTERNAL_SERVER_ERROR, OperationResult.ERROR,
-                                        "POST /applications/",
-                                        "application not created / deployed: " + e.getMessage());
+            throw new WebApplicationException(e);
         }
+        finally
+        {
+            if (file != null)
+            {
+                file.delete();
+            }
+        }
+        
+        // Response
+        return generateJSONResponse(Response.Status.OK, OperationResult.OK,
+                                    "POST /applications/",
+                                    "application " + result.getName() + " created / deployed: " + result.getUrl());
     }
 
 
     @GET
     @Path("applications/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value="Return the status of an application")
-    public Response getApplication(@PathParam("name") String name, @Context HttpHeaders headers)
-    {
+    public Application getApplication(@PathParam("name") String name, @Context HttpHeaders headers) {
         log.info("getApplication({})", name);
-        Credentials credentials = extractCredentials(headers);
-        if (credentials == null) {
-            // Error Response
-            return generateCredentialsErrorJSONResponse("GET /applications/" + name);
-        }
-        
-        PaasSession session = client.getSession(credentials);
+        PaasSession session = getSession(headers);
         
         Module m = session.getModule(name);
 
-        // Response
-        return generateJSONResponse(Response.Status.OK, OperationResult.OK,
-                                    "GET /applications/" + name,
-                                    "application " + m.getName() + " : " + m.getUrl());
+        return new Application(m.getName(), m.getUrl());
     }
 
 
@@ -230,13 +191,7 @@ public abstract class PaaSResource
     public Response deleteApplication(@PathParam("name") String name, @Context HttpHeaders headers)
     {
         log.info("deleteApplication({})", name);
-        Credentials credentials = extractCredentials(headers);
-        if (credentials == null) {
-            // Error Response
-            return generateCredentialsErrorJSONResponse("DELETE /applications/" + name);
-        }
-        
-        PaasSession session = client.getSession(credentials);
+        PaasSession session = getSession(headers);
 
         session.undeploy(name);
 
@@ -253,13 +208,7 @@ public abstract class PaaSResource
     public Response startApplication(@PathParam("name") String name, @Context HttpHeaders headers)
     {
         log.info("startApplication({})", name);
-        Credentials credentials = extractCredentials(headers);
-        if (credentials == null) {
-            // Error Response
-            return generateCredentialsErrorJSONResponse("PUT /applications/" + name + "/start");
-        }
-        
-        PaasSession session = client.getSession(credentials);
+        PaasSession session = getSession(headers);
 
         Module m = session.getModule(name);
         session.startStop(m, StartStopCommand.START);
@@ -277,13 +226,7 @@ public abstract class PaaSResource
     public Response stopApplication(@PathParam("name") String name, @Context HttpHeaders headers)
     {
         log.info("stopApplication({})", name);
-        Credentials credentials = extractCredentials(headers);
-        if (credentials == null) {
-            // Error Response
-            return generateCredentialsErrorJSONResponse("PUT /applications/" + name + "/stop");
-        }
-        
-        PaasSession session = client.getSession(credentials);
+        PaasSession session = getSession(headers);
 
         Module m = session.getModule(name);
         session.startStop(m, StartStopCommand.STOP);
@@ -295,23 +238,16 @@ public abstract class PaaSResource
     }
     
     
-    
-    @PUT
-    @Path("/applications/{name}/scale/{updown}")
-    @ApiOperation(value="Scales up/down an application adding or removing an instance")
     /**
      * @param updown Must have value in {"up", "down"}
      */
+    @PUT
+    @Path("/applications/{name}/scale/{updown}")
+    @ApiOperation(value="Scales up/down an application adding or removing an instance")
     public Response scaleUpDownApplication(@PathParam("name") String name, @PathParam("updown") String updown, @Context HttpHeaders headers)
     {
         log.info("scaleUpDownApplication({}, {})", name, updown);
-        Credentials credentials = extractCredentials(headers);
-        if (credentials == null) {
-            // Error Response
-            return generateCredentialsErrorJSONResponse("PUT /applications/" + name + "/scale/" + updown);
-        }
-        
-        PaasSession session = client.getSession(credentials);
+        PaasSession session = getSession(headers);
 
         Module m = session.getModule(name);
         if ("up".equalsIgnoreCase(updown)) {
@@ -341,13 +277,7 @@ public abstract class PaaSResource
             @PathParam("value") String value, @Context HttpHeaders headers)
     {
         log.info("scaleApplication({}, {}, {})", name, type, value);
-        Credentials credentials = extractCredentials(headers);
-        if (credentials == null) {
-            // Error Response
-            return generateCredentialsErrorJSONResponse("PUT /applications/" + name + "/scale/" + type + "/" + value);
-        }
-        
-        PaasSession session = client.getSession(credentials);
+        PaasSession session = getSession(headers);
 
         Module m = session.getModule(name);
         if ("instances".equalsIgnoreCase(type)) {
@@ -395,14 +325,52 @@ public abstract class PaaSResource
      */
     public abstract Response unbindApplication(@PathParam("name") String name, @PathParam("service") String service, @Context HttpHeaders headers);
 
-    
     /**
+     * Build a eu.atos.paas.credentials.Credentials instance from a CredentialsMap.
      * 
-     * @param headers
-     * @return
+     * @param credentialsMap CredentialsMap created from the request headers.
+     * @return A instance of Credentials to be used in paas-library classes.
+     * @throws IllegalArgumentException
      */
-    protected abstract Credentials extractCredentials(HttpHeaders headers);
+    protected abstract Credentials buildCredentialsFromFieldsMap(CredentialsMap credentialsMap)
+        throws IllegalArgumentException;
+    
+    final protected Credentials extractCredentials(HttpHeaders headers)
+    {
+        CredentialsMap credentialsMap = null;
+        Credentials credentials;
+        
+        log.debug("Checking credentials [CloudFoundry] ...");
 
+        List<String> crs = headers.getRequestHeader(Constants.Headers.CREDENTIALS);
+        
+        if (!crs.isEmpty() && crs.size() == 1) {
+            String header = crs.get(0);
+            
+            try {
+                if (header.trim().startsWith("{")) {
+                    credentialsMap = plainTransformer.deserialize(header);
+                }
+                else {
+                    credentialsMap = base64Transformer.deserialize(header);
+                }
+                credentials = buildCredentialsFromFieldsMap(credentialsMap);
+                
+                if (credentials == null) {
+                    log.error("Credentials cannot be null. Check {}.buildCredentialsFromFieldsMap()", 
+                            provider.getName());
+                    throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+                }
+                return credentials;
+            } catch (IllegalArgumentException e) {
+                throw new WebApplicationException("Could not parse credentials", e, Status.BAD_REQUEST);
+            }
+        }
+        else {
+            throw new WebApplicationException("Credentials header not found", Status.BAD_REQUEST);
+        }
+    }
+    
     
     /**
      * 
@@ -424,6 +392,52 @@ public abstract class PaaSResource
         os.flush();
         os.close();
     }
+
     
+    /**
+     * 
+     * @param status
+     * @param res
+     * @param path
+     * @param message
+     * @return
+     */
+    protected Response generateJSONResponse(Response.Status status, OperationResult res, String path, String message)
+    {
+        log.debug(res.name() + " / " + message);
+        
+        String json = "{\"result\": \"" + res.name() + "\", " +
+                      "\"path\": \"" + path + "\", " +
+                      "\"message\": \"" + message + "\"}";
+        
+        return Response.status(status).type(MediaType.APPLICATION_JSON).entity(json).build();
+    }
+    
+    
+    /**
+     * Credentials error Response
+     * @param path
+     * @return
+     */
+    protected Response generateCredentialsErrorJSONResponse(String path)
+    {
+        log.debug("ERROR / Error extracting credentials");
+        
+        String json = "{\"result\": \"" + OperationResult.ERROR.name() + "\", " +
+                      "\"path\": \"" + path + "\", " +
+                      "\"message\": \"Error extracting credentials\"}";
+        
+        return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON).entity(json).build();
+    }
+    
+
+    /**
+     * Gets session from the client using the credentials or reuse an existing session
+     */
+    protected PaasSession getSession(HttpHeaders headers) {
+        Credentials credentials = extractCredentials(headers);
+        PaasSession session = client.getSession(credentials);
+        return session;
+    }
 
 }
