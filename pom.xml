@@ -25,6 +25,7 @@
         <module>library</module>
         <module>service-model</module>
         <module>service</module>
+        <module>client</module>
     </modules>
     <packaging>pom</packaging>
 
