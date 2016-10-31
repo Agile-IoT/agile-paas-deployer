@@ -12,10 +12,12 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import javax.ws.rs.core.Response.Status;
+
 import org.testng.annotations.BeforeClass;
 import static org.testng.AssertJUnit.*;
 
-public class RestClientTest {
+public class RestClientIT {
     
     RestClient client;
     ProviderClient provider;
@@ -46,6 +48,14 @@ public class RestClientTest {
     @Test
     public void getApplicationShouldFail() {
         
-        System.out.println(provider.getApplication("noexiste"));
+        try {
+            provider.getApplication("noexiste");
+            /* fails below */
+        }
+        catch (RestClientException e) {
+            assertEquals(Status.NOT_FOUND.getStatusCode(), e.getStatus());
+            return;
+        }
+        fail("Should have failed with 404");
     }
 }

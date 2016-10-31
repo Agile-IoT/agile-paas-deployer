@@ -181,6 +181,9 @@ public abstract class PaaSResource
         
         Module m = session.getModule(name);
 
+        if (m == null) {
+            throw new WebApplicationException("Application " + name + " not found", Status.NOT_FOUND);
+        }
         return new Application(m.getName(), m.getUrl());
     }
 

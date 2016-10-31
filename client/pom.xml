@@ -8,8 +8,17 @@
     </parent>
     <artifactId>unified-paas-client</artifactId>
     <packaging>jar</packaging>
+    
+    <properties>
+        <server-jar>${basedir}/../${server-jar.path}</server-jar>
+        <server-conf>${basedir}/../${server-conf.path}</server-conf>
+    </properties>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
     <dependencies>
@@ -35,5 +44,6 @@
             <artifactId>testng</artifactId>
             <scope>test</scope>
         </dependency>
+        
     </dependencies>
 </project>

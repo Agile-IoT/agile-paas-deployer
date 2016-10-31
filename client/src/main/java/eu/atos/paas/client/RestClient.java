@@ -76,7 +76,7 @@ public class RestClient {
                         .header(Constants.Headers.CREDENTIALS, transformer.serialize(credentials))
                         .get(Application.class);
             } catch (WebApplicationException e) {
-                throw new RestClientException(e.getMessage(), e);
+                throw new RestClientException(e.getMessage(), e, e.getResponse().getStatus());
             }
             return application;
         }

@@ -59,10 +59,15 @@
         <!-- Plugins -->
         <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
         <maven-shade-plugin.version>2.4</maven-shade-plugin.version>
-        <maven-compiler-plugin.version>2.4</maven-compiler-plugin.version>
-        <maven-failsafe-plugin.version>2.8.1</maven-failsafe-plugin.version>
+        <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>2.19.1</maven-failsafe-plugin.version>
         <maven-war-plugin.version>2.4</maven-war-plugin.version>
         <cobertura-maven-plugin.version>2.3</cobertura-maven-plugin.version>
+        <dropwizard-launcher-plugin.version>1.0.1</dropwizard-launcher-plugin.version>
+        
+        <server-jar.path>service/target/unified-paas-service-0.0.1-SNAPSHOT.jar</server-jar.path>
+        <server-conf.path>service/conf/config.yml</server-conf.path>
     </properties>
 
     <licenses>
@@ -79,13 +84,31 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.18.1</version>
+                    <version>${maven-surefire-plugin.version}</version>
                     <configuration>
                         <enableAssertions>true</enableAssertions>
                         <groups>${includedTestGroups}</groups>
                         <excludedGroups>${excludedTestGroups}</excludedGroups>
                         <testFailureIgnore>false</testFailureIgnore>
+                        <skipTests>${skip.unit.tests}</skipTests>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${maven-failsafe-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>integration-tests</id>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                            <configuration>
+                                <skipTests>${skip.integration.tests}</skipTests>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
@@ -104,11 +127,13 @@
                     <configuration>
                         <source>${java.version}</source>
                         <target>${java.version}</target>
+                        <encoding>${project.build.sourceEncoding}</encoding>
                     </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
+                    <version>${maven-shade-plugin.version}</version>
                     <configuration>
                         <createDependencyReducedPom>true</createDependencyReducedPom>
                         <filters>
@@ -156,6 +181,18 @@
                 <version>${project.version}</version>
             </dependency>
             
+            <dependency>
+                <groupId>eu.atos.paas</groupId>
+                <artifactId>unified-paas-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>eu.atos.paas</groupId>
+                <artifactId>unified-paas-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
@@ -288,6 +325,12 @@
                 <version>${dropwizard.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-testing</artifactId>
+                <version>${dropwizard.version}</version>
+            </dependency>
+
             <!-- HEROKU -->
             <dependency>
                 <groupId>com.heroku.api</groupId>
@@ -345,5 +388,27 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <build.profile.id>default</build.profile.id>
+                <skip.integration.tests>true</skip.integration.tests>
+                <skip.unit.tests>false</skip.unit.tests>
+            </properties>
+        </profile>
+        <profile>
+            <id>integration-test</id>
+            <properties>
+                <build.profile.id>integration-test</build.profile.id>
+                <skip.integration.tests>false</skip.integration.tests>
+                <skip.unit.tests>true</skip.unit.tests>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>
