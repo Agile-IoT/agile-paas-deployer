@@ -2,6 +2,7 @@ package eu.atos.paas.cloudfoundry;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
@@ -32,9 +33,15 @@ public class Module implements eu.atos.paas.Module {
         this.lServices = app.getServices();
         this.mEnv = m;
         try {
-            
-            this.url = new URL(app.getUris().get(0));
-            
+            /*
+             * app.getUris() do not return URIs!! Prefix "http://" if no protocol found.
+             */
+            System.out.println(Arrays.toString(app.getUris().toArray()));
+            String uri = app.getUris().get(0);
+            if (!uri.contains("://")) {
+                uri = String.format("http://%s", uri);
+            }
+            this.url = new URL(uri);
         } catch (MalformedURLException e) {
             
             /*
