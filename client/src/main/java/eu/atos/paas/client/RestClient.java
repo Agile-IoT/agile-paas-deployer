@@ -3,12 +3,13 @@ package eu.atos.paas.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.List;
 
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
@@ -25,12 +26,13 @@ import eu.atos.paas.resources.Constants;
 import eu.atos.paas.data.CredentialsMap.PlainTransformer;
 
 public class RestClient {
-
+    private static GenericType<List<Application>> APPLICATION_LIST_TYPE = new GenericType<List<Application>>(){};
     /*
      * URL of root api (/api)
      */
     private URL root;
     private Client client;
+    private ResponseHandler responseHandler = new ResponseHandler();
     
     public RestClient(URL root) {
         this.root = root;
@@ -42,7 +44,7 @@ public class RestClient {
     public ProviderClient getProvider(String provider, CredentialsMap credentials) {
         return new ProviderClient(provider, credentials);
     }
-
+    
     public class ProviderClient {
         
         private String provider;
@@ -63,25 +65,29 @@ public class RestClient {
         }
 
         public Provider getProviderDescription() {
-            Provider provider = rootTarget.request(MediaType.APPLICATION_JSON)
-                    .get(Provider.class);
+            Response response = rootTarget.request(MediaType.APPLICATION_JSON).get();
+            Provider provider = responseHandler.readEntity(response, Provider.class);
             return provider;
         }
         
+        public List<Application> getApplications() {
+            Response response = appsTarget.request(MediaType.APPLICATION_JSON)
+                .header(Constants.Headers.CREDENTIALS, transformer.serialize(credentials))
+                .get();
+            List<Application> applications = responseHandler.readEntity(response, APPLICATION_LIST_TYPE);
+            return applications;
+        }
+        
         public Application getApplication(String name) {
-            Application application;
             WebTarget appTarget = appsTarget.path(name);
-            try {
-                application = appTarget.request(MediaType.APPLICATION_JSON)
-                        .header(Constants.Headers.CREDENTIALS, transformer.serialize(credentials))
-                        .get(Application.class);
-            } catch (WebApplicationException e) {
-                throw new RestClientException(e.getMessage(), e, e.getResponse().getStatus());
-            }
+            Response response = appTarget.request(MediaType.APPLICATION_JSON)
+                .header(Constants.Headers.CREDENTIALS, transformer.serialize(credentials))
+                .get();
+            Application application = responseHandler.readEntity(response, Application.class);
             return application;
         }
         
-        public boolean createApplication(String name, InputStream is) throws IOException {
+        public Application createApplication(String name, InputStream is) throws IOException {
 
             try (FormDataMultiPart multipart = new FormDataMultiPart()) {
                 
@@ -95,8 +101,34 @@ public class RestClient {
                         .accept(MediaType.APPLICATION_JSON_TYPE)
                         .header(Constants.Headers.CREDENTIALS, transformer.serialize(credentials))
                         .post(Entity.entity(multipart, multipart.getMediaType()));
-                
-                return Family.SUCCESSFUL.equals(response.getStatusInfo().getFamily());
+
+                Application createdApplication = responseHandler.readEntity(response, Application.class);
+                return createdApplication;
+            }
+        }
+    }
+    
+    /**
+     * Handles a response, returning the entity as the specified type, or throwing an exception.
+     */
+    public static class ResponseHandler {
+        
+        public <T> T readEntity(Response response, Class<T> entityType) throws RestClientException {
+            if (Family.SUCCESSFUL.equals(response.getStatusInfo().getFamily())) {
+                return response.readEntity(entityType);
+            }
+            else {
+                throw new RestClientException(response);
+            }
+        }
+
+        
+        public <T> T readEntity(Response response, GenericType<T> entityType) {
+            if (Family.SUCCESSFUL.equals(response.getStatusInfo().getFamily())) {
+                return response.readEntity(entityType);
+            }
+            else {
+                throw new RestClientException(response);
             }
         }
     }

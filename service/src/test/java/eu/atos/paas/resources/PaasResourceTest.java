@@ -26,9 +26,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import eu.atos.paas.credentials.UserPasswordCredentials;
 import eu.atos.paas.data.Application;
+import eu.atos.paas.data.CredentialsMap;
 import eu.atos.paas.data.Provider;
 import eu.atos.paas.dummy.DummyClient;
+import eu.atos.paas.resources.exceptions.AuthenticationException;
+import eu.atos.paas.resources.exceptions.CredentialsParsingException;
 
 /**
  * This test creates a DummyPaasResource and tries to execute the operations inside PaasResource.
@@ -52,12 +56,7 @@ public class PaasResourceTest {
     @BeforeClass
     public void beforeClass() {
         resource = new DummyResource(new DummyClient());
-        /*
-         * credentials are ignored in DummyResource, but they cannot be empty
-         */
-        Map<String, String> map = new HashMap<>();
-        map.put(Constants.Headers.CREDENTIALS, "{}");
-        headers = new DummyHttpHeaders(map);
+        headers = buildHeaders(DummyClient.USER, DummyClient.PASSWORD);
     }
 
     @AfterClass
@@ -71,16 +70,86 @@ public class PaasResourceTest {
         
         assertEquals(Constants.Providers.DUMMY, provider.getName());
     }
-
+    
     @Test(priority = 2)
+    public void testAuthenticate() {
+        
+        resource.getApplications(headers);
+    }
+    
+    @Test(priority = 3)
+    public void testCredentialsHeaderNotFoundShouldFail() {
+        
+        Map<String, String> map = new HashMap<>();
+        DummyHttpHeaders emptyHeaders = new DummyHttpHeaders(map);
+        try {
+            
+            resource.getApplications(emptyHeaders);
+            fail("Did not throw exception");
+        } catch (CredentialsParsingException e) {
+            assertTrue(true);
+            return;
+        }
+        /* other exception fails */
+    }
+    
+    @Test(priority = 3)
+    public void testCouldNotParseCredentials() {
+        
+        Map<String, String> map = new HashMap<>();
+        map.put(Constants.Headers.CREDENTIALS, "{}");
+        DummyHttpHeaders wrongHeaders = new DummyHttpHeaders(map);
+        try {
+            resource.getApplications(wrongHeaders);
+            fail("Did not throw exception");
+        } catch (CredentialsParsingException e) {
+            assertTrue(true);
+            return;
+        }
+        /* other exception fails */
+    }
+    
+    @Test(priority = 3)
+    public void testWrongCredentialsSchemeShouldFail() {
+        
+        Map<String, String> map = new HashMap<>();
+        map.put(Constants.Headers.CREDENTIALS, "{\"user-field\":\"\"}");
+        DummyHttpHeaders wrongHeaders = new DummyHttpHeaders(map);
+        try {
+            resource.getApplications(wrongHeaders);
+            fail("Did not throw exception");
+        } catch (CredentialsParsingException e) {
+            assertTrue(true);
+            return;
+        }
+        /* other exception fails */
+    }
+    
+    @Test(priority = 3)
+    public void testWrongAuthenticationShouldFail() {
+
+        DummyHttpHeaders wrongHeaders = buildHeaders("wrong-user", "wrong-pwd");
+        try {
+            resource.getApplications(wrongHeaders);
+            fail("Did not throw Exception");
+        }
+        catch (AuthenticationException e) {
+            assertTrue(true);
+            return;
+        }
+        /* other exception fails */
+    }
+    
+    @Test(priority = 5)
     public void testCreateApplication() throws IOException {
         
         Application app = new Application(APP_NAME, new URL("http://www.example.com"));
         InputStream is = new ByteArrayInputStream(new byte[] {});
             
-        Response response = resource.createApplication(headers, app, is);
+        Application createdApp = resource.createApplication(headers, app, is);
         
-        assertEquals(Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(APP_NAME, createdApp.getName());
+        assertTrue(!createdApp.getUrl().toString().isEmpty());
     }
     
     @Test(priority = 10) 
@@ -106,7 +175,17 @@ public class PaasResourceTest {
         Response response = resource.deleteApplication(APP_NAME, headers);
         assertEquals(Status.OK.getStatusCode(), response.getStatus());
     }
-    
+
+    private DummyHttpHeaders buildHeaders(String user, String password) {
+        CredentialsMap map = CredentialsMap.builder()
+                .item(UserPasswordCredentials.USER, user)
+                .item(UserPasswordCredentials.PASSWORD, password)
+                .build();
+        map.put(Constants.Headers.CREDENTIALS, new CredentialsMap.PlainTransformer().serialize(map));
+        DummyHttpHeaders headers = new DummyHttpHeaders(map);
+        return headers;
+    }
+
     private static final class DummyHttpHeaders implements HttpHeaders {
         
         private MultivaluedMap<String, String> map = new MultivaluedHashMap<>();

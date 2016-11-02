@@ -51,7 +51,7 @@ public class Openshift2Resource extends PaaSResource
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     @Override
-    public Response createApplication(@Context HttpHeaders headers, FormDataMultiPart form)
+    public Application createApplication(@Context HttpHeaders headers, FormDataMultiPart form)
     {
         throw new WebApplicationException("method not implemented", Response.Status.BAD_REQUEST);
     }

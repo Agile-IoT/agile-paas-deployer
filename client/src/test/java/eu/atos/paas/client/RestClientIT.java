@@ -28,29 +28,58 @@ public class RestClientIT {
         
         client = new RestClient(new URL("http://localhost:8080/api"));
         CredentialsMap credentials = CredentialsMap.builder()
-                .item(UserPasswordCredentials.USER, "admin")
-                .item(UserPasswordCredentials.PASSWORD, "pwd")
+                .item(UserPasswordCredentials.USER, "user")
+                .item(UserPasswordCredentials.PASSWORD, "password")
                 .build();
         provider = client.getProvider("dummy", credentials);
     }
 
-    @Test
+    @Test(priority = 1)
+    public void testAuthentication() {
+        /*
+         * Just check if authorization do not fail
+         */
+        provider.getApplications();
+    }
+    
+    @Test(priority = 1)
+    public void testWrongAuthentication() {
+        
+        CredentialsMap wrongCredentials = CredentialsMap.builder()
+                .item(UserPasswordCredentials.USER, "user")
+                .item(UserPasswordCredentials.PASSWORD, "wrong-password")
+                .build();
+        ProviderClient provider = client.getProvider("dummy", wrongCredentials);
+        try {
+            provider.getApplications();
+            fail("Did not throw exception");
+        } catch (RestClientException e) {
+            assertEquals(Status.UNAUTHORIZED.getStatusCode(), e.getError().getCode());
+        }
+    }
+    
+    
+    @Test(priority = 10)
     public void getProviderDescription() {
         Provider p = provider.getProviderDescription();
         
         assertEquals(Constants.Providers.DUMMY, p.getName());
     }
     
-    @Test
+    @Test(priority = 20)
     public void createApplication() throws IOException {
         
-        boolean result = provider.createApplication("test", RestClient.class.getResourceAsStream("/SampleApp1.war"));
-        assertTrue(result);
-        Application app = provider.getApplication("test");
-        assertEquals("test", app.getName());
+        Application app1 = provider.createApplication("test", RestClient.class.getResourceAsStream("/SampleApp1.war"));
+        assertNotNull(app1);
+        assertEquals("test", app1.getName());
+        Application app2 = provider.getApplication("test");
+        assertEquals("test", app2.getName());
+        
+        assertTrue(!app1.getUrl().toString().isEmpty());
+        assertEquals(app1.getUrl(), app2.getUrl());
     }
     
-    @Test
+    @Test(priority = 10)
     public void getApplicationShouldFail() {
         
         try {
@@ -58,7 +87,7 @@ public class RestClientIT {
             /* fails below */
         }
         catch (RestClientException e) {
-            assertEquals(Status.NOT_FOUND.getStatusCode(), e.getStatus());
+            assertEquals(Status.NOT_FOUND.getStatusCode(), e.getError().getCode());
             return;
         }
         fail("Should have failed with 404");

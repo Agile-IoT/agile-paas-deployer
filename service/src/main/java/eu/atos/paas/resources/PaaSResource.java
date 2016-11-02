@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -41,6 +42,10 @@ import eu.atos.paas.PaasSession.ScaleCommand;
 import eu.atos.paas.PaasSession.ScaleUpDownCommand;
 import eu.atos.paas.PaasSession.StartStopCommand;
 import eu.atos.paas.heroku.DeployParameters;
+import eu.atos.paas.resources.exceptions.AuthenticationException;
+import eu.atos.paas.resources.exceptions.CredentialsParsingException;
+import eu.atos.paas.resources.exceptions.EntityNotFoundException;
+import eu.atos.paas.resources.exceptions.ResourceException;
 import io.swagger.annotations.ApiOperation;
 
 
@@ -105,7 +110,7 @@ public abstract class PaaSResource
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value="Creates a new application. Credentials are set in 'credential' headers")
-    public Response createApplication(@Context HttpHeaders headers, FormDataMultiPart form)
+    public Application createApplication(@Context HttpHeaders headers, FormDataMultiPart form)
     {
         PaasSession session = getSession(headers);
         
@@ -119,7 +124,8 @@ public abstract class PaaSResource
 
         if (application.getName() == null || application.getName().isEmpty())
         {
-            throw new WebApplicationException("application name must be specified", Response.Status.BAD_REQUEST);
+            throw new ResourceException(
+                    new ErrorEntity(Response.Status.BAD_REQUEST, "Application name must be specified"));
         }
 
         InputStream is = filePart.getEntityAs(InputStream.class);
@@ -132,13 +138,13 @@ public abstract class PaaSResource
      * 
      * @see http://stackoverflow.com/questions/14456547/how-to-unit-test-handling-of-incoming-jersey-multipart-requests
      */
-    public Response createApplication(HttpHeaders headers, Application application, InputStream is) {
+    public Application createApplication(HttpHeaders headers, Application application, InputStream is) {
         PaasSession session = getSession(headers);
 
         return createApplicationImpl(session, application, is);
     }
     
-    private Response createApplicationImpl(PaasSession session, Application application, InputStream is) {
+    private Application createApplicationImpl(PaasSession session, Application application, InputStream is) {
         File file = null;
         Application result;
         try
@@ -164,13 +170,25 @@ public abstract class PaaSResource
             }
         }
         
-        // Response
-        return generateJSONResponse(Response.Status.OK, OperationResult.OK,
-                                    "POST /applications/",
-                                    "application " + result.getName() + " created / deployed: " + result.getUrl());
+        return result;
     }
 
 
+    @GET
+    @Path("applications")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value="Return the existent applications")
+    public List<Application> getApplications(@Context HttpHeaders headers) {
+        log.info("getApplications()");
+        @SuppressWarnings("unused")
+        PaasSession session = getSession(headers);
+
+        /*
+         * TODO
+         */
+        return Collections.<Application>emptyList();
+    }
+    
     @GET
     @Path("applications/{name}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -182,7 +200,7 @@ public abstract class PaaSResource
         Module m = session.getModule(name);
 
         if (m == null) {
-            throw new WebApplicationException("Application " + name + " not found", Status.NOT_FOUND);
+            throw new EntityNotFoundException("applications/" + name);
         }
         return new Application(m.getName(), m.getUrl());
     }
@@ -347,7 +365,7 @@ public abstract class PaaSResource
 
         List<String> crs = headers.getRequestHeader(Constants.Headers.CREDENTIALS);
         
-        if (!crs.isEmpty() && crs.size() == 1) {
+        if (crs != null && !crs.isEmpty() && crs.size() == 1) {
             String header = crs.get(0);
             log.debug("Credentials header: {}", header);
             try {
@@ -366,11 +384,11 @@ public abstract class PaaSResource
                 }
                 return credentials;
             } catch (IllegalArgumentException e) {
-                throw new WebApplicationException("Could not parse credentials", e, Status.BAD_REQUEST);
+                throw new CredentialsParsingException("Could not parse credentials");
             }
         }
         else {
-            throw new WebApplicationException("Credentials header not found", Status.BAD_REQUEST);
+            throw new CredentialsParsingException("Credentials header not found or duplicated");
         }
     }
     
@@ -439,7 +457,12 @@ public abstract class PaaSResource
      */
     protected PaasSession getSession(HttpHeaders headers) {
         Credentials credentials = extractCredentials(headers);
-        PaasSession session = client.getSession(credentials);
+        PaasSession session;
+        try {
+            session = client.getSession(credentials);
+        } catch (eu.atos.paas.AuthenticationException e) {
+            throw new AuthenticationException();
+        }
         return session;
     }
 

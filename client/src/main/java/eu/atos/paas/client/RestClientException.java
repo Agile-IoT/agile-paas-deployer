@@ -1,26 +1,46 @@
 package eu.atos.paas.client;
 
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import eu.atos.paas.resources.ErrorEntity;
+
 public class RestClientException extends RuntimeException {
     private static final long serialVersionUID = 1L;
-    private int status;
+    private ErrorEntity error;
     
-    public RestClientException() {
+    public RestClientException(ErrorEntity error) {
+        super(error.getMessage());
+        this.error = error;
+    }
+    
+    public RestClientException(Response response) {
+        this(extractEntity(response));
     }
 
     public RestClientException(String message) {
         super(message);
+        this.error = new ErrorEntity(Status.INTERNAL_SERVER_ERROR, message);
     }
 
     public RestClientException(Throwable cause) {
         super(cause);
+        this.error = new ErrorEntity(Status.INTERNAL_SERVER_ERROR, cause.getMessage());
     }
 
-    public RestClientException(String message, Throwable cause, int status) {
-        super(message, cause);
-        this.status = status;
+    public ErrorEntity getError() {
+        return error;
     }
-
-    public int getStatus() {
-        return status;
+    
+    private static ErrorEntity extractEntity(Response response) {
+        ErrorEntity error;
+        
+        if (response.hasEntity()) {
+            error = response.readEntity(ErrorEntity.class);
+        }
+        else {
+            error = new ErrorEntity(Status.INTERNAL_SERVER_ERROR, "Unknown error"); 
+        }
+        return error;
     }
 }

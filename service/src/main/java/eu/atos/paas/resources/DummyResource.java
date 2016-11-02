@@ -41,6 +41,6 @@ public class DummyResource extends PaaSResource {
 
     @Override
     protected Credentials buildCredentialsFromFieldsMap(CredentialsMap credentialsMap) {
-        return new UserPasswordCredentials("don't care", "don't care");
+        return new UserPasswordCredentials(credentialsMap);
     }
 }
