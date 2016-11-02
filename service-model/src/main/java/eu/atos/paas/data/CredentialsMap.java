@@ -13,18 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CredentialsMap extends LinkedHashMap<String, String> {
     
-    public static final class CloudFoundry {
-        public static final String API = "api";
-        public static final String USER = "user";
-        public static final String PASSWORD = "password";
-        public static final String ORG = "org";
-        public static final String SPACE = "space";
-    }
-    
-    public static final class Heroku {
-        public static final String API_KEY = "api-key";
-    }
-    
     private static final long serialVersionUID = 1L;
     private static final TypeReference<Map<String,String>> typeRef = new TypeReference<Map<String,String>>() {};
     

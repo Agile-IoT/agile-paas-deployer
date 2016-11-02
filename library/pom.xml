@@ -16,6 +16,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>eu.atos.paas</groupId>
+            <artifactId>unified-paas-common</artifactId>
+        </dependency>
+    
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>

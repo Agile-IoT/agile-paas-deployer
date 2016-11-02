@@ -9,10 +9,6 @@
     <artifactId>unified-paas-client</artifactId>
     <packaging>jar</packaging>
     
-    <properties>
-        <server-jar>${basedir}/../${server-jar.path}</server-jar>
-        <server-conf>${basedir}/../${server-conf.path}</server-conf>
-    </properties>
     <build>
         <plugins>
             <plugin>
@@ -22,6 +18,10 @@
         </plugins>
     </build>
     <dependencies>
+        <dependency>
+            <groupId>eu.atos.paas</groupId>
+            <artifactId>unified-paas-common</artifactId>
+        </dependency>
         <dependency>
             <groupId>eu.atos.paas</groupId>
             <artifactId>unified-paas-service-model</artifactId>

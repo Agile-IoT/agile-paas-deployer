@@ -22,6 +22,7 @@
     <artifactId>unified-paas</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <modules>
+        <module>common</module>
         <module>library</module>
         <module>service-model</module>
         <module>service</module>
@@ -169,6 +170,12 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>eu.atos.paas</groupId>
+                <artifactId>unified-paas-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            
             <dependency>
                 <groupId>eu.atos.paas</groupId>
                 <artifactId>unified-paas-library</artifactId>

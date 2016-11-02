@@ -343,13 +343,13 @@ public abstract class PaaSResource
         CredentialsMap credentialsMap = null;
         Credentials credentials;
         
-        log.debug("Checking credentials [CloudFoundry] ...");
+        log.debug("Checking credentials...");
 
         List<String> crs = headers.getRequestHeader(Constants.Headers.CREDENTIALS);
         
         if (!crs.isEmpty() && crs.size() == 1) {
             String header = crs.get(0);
-            
+            log.debug("Credentials header: {}", header);
             try {
                 if (header.trim().startsWith("{")) {
                     credentialsMap = plainTransformer.deserialize(header);

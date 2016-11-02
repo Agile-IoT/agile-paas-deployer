@@ -6,6 +6,9 @@ public class Constants {
         public static final String CREDENTIALS = "X-PaaS-Credentials";
     }
     
+    /**
+     * Names of providers
+     */
     public static final class Providers {
         public static final String DUMMY = "dummy";
         public static final String CLOUDFOUNDRY = "CloudFoundry";

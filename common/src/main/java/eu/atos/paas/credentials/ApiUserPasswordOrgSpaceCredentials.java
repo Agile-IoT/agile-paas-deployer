@@ -9,7 +9,7 @@ import java.util.Map;
 public class ApiUserPasswordOrgSpaceCredentials extends AbstractCredentials implements Credentials {
     public static final String TRUST_SELF_SIGNED_CERTS = "trustSelfSignedCerts";
     public static final String SPACE = "space";
-    private static final String ORG = "org";
+    public static final String ORG = "org";
     public static final String PASSWORD = "password";
     public static final String USER = "user";
     public static final String API = "api";

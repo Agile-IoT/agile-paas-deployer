@@ -83,7 +83,6 @@ public class RestClient {
         
         public boolean createApplication(String name, InputStream is) throws IOException {
 
-            
             try (FormDataMultiPart multipart = new FormDataMultiPart()) {
                 
                 Application application = new Application(name);

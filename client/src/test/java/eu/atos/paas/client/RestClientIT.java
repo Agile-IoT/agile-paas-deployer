@@ -3,6 +3,7 @@ package eu.atos.paas.client;
 import org.testng.annotations.Test;
 
 import eu.atos.paas.client.RestClient.ProviderClient;
+import eu.atos.paas.credentials.UserPasswordCredentials;
 import eu.atos.paas.data.Application;
 import eu.atos.paas.data.CredentialsMap;
 import eu.atos.paas.data.Provider;
@@ -26,7 +27,11 @@ public class RestClientIT {
     public void beforeClass() throws MalformedURLException {
         
         client = new RestClient(new URL("http://localhost:8080/api"));
-        provider = client.getProvider("dummy", CredentialsMap.builder().item("user", "admin").build());
+        CredentialsMap credentials = CredentialsMap.builder()
+                .item(UserPasswordCredentials.USER, "admin")
+                .item(UserPasswordCredentials.PASSWORD, "pwd")
+                .build();
+        provider = client.getProvider("dummy", credentials);
     }
 
     @Test
