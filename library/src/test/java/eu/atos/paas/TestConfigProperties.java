@@ -16,6 +16,8 @@ public class TestConfigProperties
 {
 
     
+    private static final String CONFIG_FILE = "tests.config.properties";
+
     // log
     private static Logger logger = LoggerFactory.getLogger(TestConfigProperties.class);
     
@@ -49,9 +51,9 @@ public class TestConfigProperties
     { 
         try
         {
-            PropertiesConfiguration props = new PropertiesConfiguration("tests.config.properties");
+            PropertiesConfiguration props = new PropertiesConfiguration(CONFIG_FILE);
             if ((props == null) || (props.isEmpty())) {
-                logger.error("PropertiesConfiguration file not found: tests.config.properties");
+                logger.error("PropertiesConfiguration file not found: " + CONFIG_FILE);
             }
             
             app_name = props.getString("app_name", "");
