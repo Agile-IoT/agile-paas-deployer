@@ -4,16 +4,16 @@ SeaClouds Unified PaaS Library
 ---
 ## Usage
 1. Compile project
-2. Start server: `java -jar service/target/unified-paas-service-0.0.1-SNAPSHOT.jar server service/config.yml`
+2. Start server: `cd service; bin/runserver.sh`
 3. Deploy an application: 
-    `curl http://localhost:8080/api/heroku/applications -X POST -F file=@"<warfile>" -F model='{"name":"samplewar"}' -H"Content-Type: multipart/form-data" -H"apikey:<heroku-api-key>"`
+    `curl http://localhost:8080/api/heroku/applications -X POST -F file=@"<warfile>" -F model='{"name":"samplewar"}' -H"Content-Type: multipart/form-data" -H'X-PaaS-Credentials:{"api-key":"<heroku-api-key>"}'`
 
 ### API Overview
 
 Each supported PaaS is a resource on /api. For example, Heroku is on /api/heroku.
 
-Each invocation to the API must contain the credentials in the request headers. See below for specific
-instructions per provider.
+Each invocation to the API must contain the credentials in the X-PaaS-Credentials header, in json format.
+See below for specific instructions per provider.
 
 These are the supported operations:
 
@@ -23,6 +23,7 @@ Return a list of the supported subpaths.
 
 Example:
 `curl localhost:8080/api`
+
 `["heroku","cloudfoundry","pivotal","bluemix","openshift2"]`
 
 #### GET /api/{paas}
@@ -37,9 +38,9 @@ Creates an application and deploy its artifact. A multipart request with two fie
 
 Examples:
 
-`curl http://localhost:8080/api/heroku/applications -X POST -F file=@"<FILE>" -F model='{"name":"<APP_NAME>"'} -H"Content-Type: multipart/form-data" -H"apikey:<API_KEY>"`
+`curl http://localhost:8080/api/heroku/applications -X POST -F file=@"<FILE>" -F model='{"name":"<APP_NAME>"'} -H"Content-Type: multipart/form-data" `
 
-`curl http://localhost:8080/api/pivotal/applications -X POST -F file=@"<FILE>" -F model='{"name":"<APP_NAME>"}' -H"Content-Type: multipart/form-data"  -H"credentials:<API_URL>" -H"credentials:<USER>" -H"credentials:<PASSWORD>" -H"credentials:<ORG>" -H"credentials:<SPACE>"  -H"credentials:<TRUE_FALSE>"`
+`curl http://localhost:8080/api/pivotal/applications -X POST -F file=@"<FILE>" -F model='{"name":"<APP_NAME>"}' -H"Content-Type: multipart/form-data" `
 
 #### GET /api/{paas}/applications/{name}
 
@@ -75,31 +76,42 @@ Supported types:
 
 ### Credentials
 
-Each invocation to the API must contain the credentials in the request headers.
+Each invocation to the API must contain the credentials in the X-PaaS-Credentials header in the request.
+The credentials are serialized in json format, optionally encoded in base64. The fields to be filled in the 
+json for each provider are shown below.
 
 #### Heroku
-* `apikey: <API_KEY>`
+* `api-key`
 
 #### CloudFoundry
 
-* `credentials:<API_URL>`
-* `credentials:<USER>`
-* `credentials:<PASSWORD>`
-* `credentials:<ORG>`
-* `credentials:<SPACE>`
-* `credentials:<TRUE_FALSE>`
+* `api`
+* `user`
+* `password`
+* `org`
+* `space`
+
+#### Pivotal, BlueMix
+
+* `user`
+* `password`
+* `org`
+* `space`
 
 #### OpenShift2
 
-* `credentials:<USER>`
-* `credentials:<PASSWORD>`
+* `user`
+* `password`
 
 ### Integration tests
 
 ##### Configuration
+
 * Set values in /library/src/test/resources/tests.config.properties
+* Start instance of service: `cd service && bin/runserver.sh`
 
 ##### Integration Tests
+
 * Execute tests: `mvn clean verify -P integration-test`
 
 ---
