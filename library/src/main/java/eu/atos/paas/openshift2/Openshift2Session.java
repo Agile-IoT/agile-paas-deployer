@@ -143,7 +143,7 @@ public class Openshift2Session implements PaasSession
         IApplication app = connector.getAppFromDomains(moduleName);
         
         if (app == null) {
-            throw new PaasException("Application " + moduleName + " is NULL");
+            return null;
         }
 
         return new eu.atos.paas.openshift2.Module(app);

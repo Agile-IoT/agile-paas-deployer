@@ -1,5 +1,8 @@
 package eu.atos.paas.openshift2;
 
+import com.openshift.client.InvalidCredentialsOpenShiftException;
+
+import eu.atos.paas.AuthenticationException;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasSession;
 import eu.atos.paas.credentials.Credentials;
@@ -33,10 +36,19 @@ public class Openshift2Client implements PaasClient
 
     
     private PaasSession getSession(UserPasswordCredentials credentials) {
-        Openshift2Connector connector = new Openshift2Connector(credentials.getUser(), credentials.getPassword());
-        PaasSession session = new Openshift2Session(connector);
-        
-        return session;
+        try {
+            
+            Openshift2Connector connector = new Openshift2Connector(credentials.getUser(), credentials.getPassword());
+            Openshift2Session session = new Openshift2Session(connector);
+            /*
+             * Just to trigger the login
+             */
+            session.getModule("don't care");
+            return session;
+            
+        } catch (InvalidCredentialsOpenShiftException e) {
+            throw new AuthenticationException();
+        }
     }
     
 
