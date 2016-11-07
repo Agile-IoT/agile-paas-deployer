@@ -4,9 +4,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
+import eu.atos.paas.AlreadyExistsException;
 import eu.atos.paas.Module;
+import eu.atos.paas.NotFoundException;
 import eu.atos.paas.PaasException;
+import eu.atos.paas.PaasProviderException;
 import eu.atos.paas.PaasSession;
 import eu.atos.paas.ServiceApp;
 
@@ -18,7 +22,16 @@ public class DummySession implements PaasSession {
     }
 
     @Override
-    public Module deploy(String moduleName, DeployParameters params) throws PaasException {
+    public Module deploy(String moduleName, DeployParameters params) 
+        throws PaasProviderException, AlreadyExistsException {
+        
+        Objects.requireNonNull(moduleName);
+        Objects.requireNonNull(params);
+        
+        if (getModule(moduleName) != null) {
+            throw new AlreadyExistsException(moduleName + " is already created");
+        }
+
         URL url;
         try {
             url = new URL("http://www.example.com/" + moduleName);
@@ -26,24 +39,58 @@ public class DummySession implements PaasSession {
             throw new PaasException(e.getMessage(), e);
         }
         ModuleImpl m = new ModuleImpl(moduleName, url, "web", 1);
+        
+        /*
+         * If this throws a client API exception, should be encapsulated by PaasProviderException
+         */
         modules.put(moduleName, m);
+
         return m;
     }
 
     @Override
-    public void undeploy(String moduleName) throws PaasException {
+    public void undeploy(String moduleName) throws NotFoundException, PaasProviderException {
+        Objects.requireNonNull(moduleName);
+        
+        if (getModule(moduleName) == null) {
+            throw new NotFoundException(moduleName + " do not exist");
+        }
+        /*
+         * If this throws a client API exception, should be encapsulated by PaasProviderException
+         */
         modules.remove(moduleName);
     }
 
     @Override
-    public void startStop(Module module, StartStopCommand command) throws PaasException, UnsupportedOperationException {
-        return;
+    public void startStop(Module module, StartStopCommand command) throws NotFoundException, PaasProviderException {
+        Objects.requireNonNull(module);
+        Objects.requireNonNull(command);
+        Objects.requireNonNull(module.getName());
+        
+        String moduleName = module.getName();
+        ModuleImpl actualModule = (ModuleImpl) getModule(moduleName);
+        if (actualModule == null) {
+            throw new NotFoundException(moduleName + " do not exist");
+        }
+        switch(command) {
+        case START:
+            actualModule.start();
+            break;
+        case STOP:
+            actualModule.stop();
+            break;
+        default:
+            throw new IllegalArgumentException(command + " not recognized");
+        }
     }
 
     @Override
     public void scaleUpDown(Module module, ScaleUpDownCommand command)
             throws PaasException, UnsupportedOperationException {
-
+        Objects.requireNonNull(module);
+        Objects.requireNonNull(command);
+        Objects.requireNonNull(module.getName());
+        
         ModuleImpl m = modules.get(module.getName());
         switch (command) {
         case SCALE_UP_INSTANCES:
@@ -85,6 +132,8 @@ public class DummySession implements PaasSession {
 
     @Override
     public Module getModule(String moduleName) throws PaasException {
+        Objects.requireNonNull(moduleName);
+        
         ModuleImpl m = modules.get(moduleName);
         return m;
     }

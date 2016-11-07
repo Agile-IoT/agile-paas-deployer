@@ -15,6 +15,7 @@ public class ModuleImpl implements eu.atos.paas.Module {
     private List<String> services;
     private Map<String, Object> env;
     private int instances;
+    private boolean started;
     
     public ModuleImpl(String name, URL url, String type, int instances) {
         this.name = name;
@@ -23,6 +24,7 @@ public class ModuleImpl implements eu.atos.paas.Module {
         this.services = new ArrayList<String>();
         this.env = new HashMap<String, Object>();
         this.instances = instances;
+        this.started = true;
     }
 
     public void addServices(List<String> services) {
@@ -43,6 +45,14 @@ public class ModuleImpl implements eu.atos.paas.Module {
 
     public void scaleInstances(int instances) {
         this.instances = instances;
+    }
+    
+    public void start() {
+        this.started = true;
+    }
+    
+    public void stop() {
+        this.started = false;
     }
     
     @Override
@@ -75,4 +85,7 @@ public class ModuleImpl implements eu.atos.paas.Module {
         return Collections.unmodifiableMap(env);
     }
 
+    public boolean isStarted() {
+        return started;
+    }
 }

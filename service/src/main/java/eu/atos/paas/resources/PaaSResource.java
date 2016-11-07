@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -50,8 +51,17 @@ import io.swagger.annotations.ApiOperation;
 
 
 /**
+ * Parent of Paas resources.
  * 
- * @author 
+ * Exception handling from library:
+ * <li>PaasProviderException : 502
+ * <li>AuthenticationException : 401
+ * <li>NotFoundException : 404
+ * <li>AlreadyExistsException : 409
+ * <li>NotImplementedException : 501
+ * <li>Any other runtime exception : 500
+ * 
+ * Wrong input should be detected in validation and return 400.
  *
  */
 public abstract class PaaSResource
@@ -76,12 +86,8 @@ public abstract class PaaSResource
      */
     public PaaSResource(PaasClient client, Provider provider)
     {
-        if (client == null)
-        {
-            throw new NullPointerException("client cannot be null");
-        }
-        this.client = client;
-        this.provider = provider;
+        this.client = Objects.requireNonNull(client);
+        this.provider = Objects.requireNonNull(provider);
     }
 
     
@@ -455,15 +461,16 @@ public abstract class PaaSResource
     /**
      * Gets session from the client using the credentials or reuse an existing session
      */
-    protected PaasSession getSession(HttpHeaders headers) {
+    protected PaasSessionProxy getSession(HttpHeaders headers) {
         Credentials credentials = extractCredentials(headers);
-        PaasSession session;
+        PaasSessionProxy sessionProxy;
         try {
-            session = client.getSession(credentials);
+            PaasSession session = client.getSession(credentials);
+            sessionProxy = new PaasSessionProxy(session);
         } catch (eu.atos.paas.AuthenticationException e) {
             throw new AuthenticationException();
         }
-        return session;
+        return sessionProxy;
     }
 
 }
