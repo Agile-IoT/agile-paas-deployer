@@ -178,6 +178,14 @@
             
             <dependency>
                 <groupId>eu.atos.paas</groupId>
+                <artifactId>unified-paas-common</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+            
+            <dependency>
+                <groupId>eu.atos.paas</groupId>
                 <artifactId>unified-paas-library</artifactId>
                 <version>${project.version}</version>
             </dependency>

@@ -44,6 +44,18 @@
             <artifactId>testng</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>eu.atos.paas</groupId>
+            <artifactId>unified-paas-common</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.openshift</groupId>
+            <artifactId>openshift-java-client</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
         
     </dependencies>
 </project>

@@ -1,5 +1,7 @@
 package eu.atos.paas.cloudfoundry;
 
+import java.net.URL;
+
 import eu.atos.paas.PaasSession;
 
 
@@ -11,7 +13,6 @@ import eu.atos.paas.PaasSession;
  */
 public class DeployParameters implements PaasSession.DeployParameters
 {
-    
     
     private String path;
     private String buildpack_url;
@@ -45,9 +46,11 @@ public class DeployParameters implements PaasSession.DeployParameters
     @Override
     public String getCartridge()
     {
-        // TODO Auto-generated method stub
         return null;
     }
     
-
+    @Override
+    public URL getGitUrl() {
+        return null;
+    }
 }

@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.atos.paas.data.Application;
+import eu.atos.paas.data.ApplicationToCreate;
 import eu.atos.paas.data.CredentialsMap;
 import eu.atos.paas.credentials.Credentials;
 import eu.atos.paas.data.Provider;
@@ -39,14 +40,14 @@ import eu.atos.paas.data.CredentialsMap.PlainTransformer;
 import eu.atos.paas.Module;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasSession;
+import eu.atos.paas.PaasSession.DeployParameters;
 import eu.atos.paas.PaasSession.ScaleCommand;
 import eu.atos.paas.PaasSession.ScaleUpDownCommand;
 import eu.atos.paas.PaasSession.StartStopCommand;
-import eu.atos.paas.heroku.DeployParameters;
 import eu.atos.paas.resources.exceptions.AuthenticationException;
 import eu.atos.paas.resources.exceptions.CredentialsParsingException;
 import eu.atos.paas.resources.exceptions.EntityNotFoundException;
-import eu.atos.paas.resources.exceptions.ResourceException;
+import eu.atos.paas.resources.exceptions.ValidationException;
 import io.swagger.annotations.ApiOperation;
 
 
@@ -123,20 +124,18 @@ public abstract class PaaSResource
         FormDataBodyPart filePart = form.getField(Constants.MultiPartFields.FILE);
         FormDataBodyPart modelPart = form.getField(Constants.MultiPartFields.MODEL);
 
-        modelPart.setMediaType(MediaType.APPLICATION_JSON_TYPE);
-        Application application = modelPart.getValueAs(Application.class);
-
-        log.info("createApplication({})", application.getName());
-
-        if (application.getName() == null || application.getName().isEmpty())
-        {
-            throw new ResourceException(
-                    new ErrorEntity(Response.Status.BAD_REQUEST, "Application name must be specified"));
+        if (modelPart == null) {
+            throw new ValidationException("ApplicationToCreate model not found");
         }
-
-        InputStream is = filePart.getEntityAs(InputStream.class);
-
-        return createApplicationImpl(session, application, is);
+        modelPart.setMediaType(MediaType.APPLICATION_JSON_TYPE);
+        
+        ApplicationToCreate application = new ApplicationToCreate(
+                modelPart.getValueAs(ApplicationToCreate.class), 
+                filePart != null? filePart.getEntityAs(InputStream.class) : null);
+        application.validate();
+        
+        log.info("createApplication({})", application.getName());
+        return createApplicationImpl(session, application);
     }
 
     /**
@@ -144,22 +143,36 @@ public abstract class PaaSResource
      * 
      * @see http://stackoverflow.com/questions/14456547/how-to-unit-test-handling-of-incoming-jersey-multipart-requests
      */
-    public Application createApplication(HttpHeaders headers, Application application, InputStream is) {
+    public Application createApplication(HttpHeaders headers, ApplicationToCreate application) {
         PaasSession session = getSession(headers);
 
-        return createApplicationImpl(session, application, is);
+        application.validate();
+        return createApplicationImpl(session, application);
     }
     
-    private Application createApplicationImpl(PaasSession session, Application application, InputStream is) {
+    /*
+     * At this point, ApplicationToCreate is valid.
+     */
+    private Application createApplicationImpl(
+            PaasSession session, ApplicationToCreate application) {
+        
         File file = null;
         Application result;
         try
         {
-            file = File.createTempFile("up-tmp-file", ".tmp");
+            /*
+             * TODO: Create the appropriate class
+             */
+            DeployParameters params;
+            if (application.getArtifact() != null) {
+                file = File.createTempFile("up-tmp-file", ".tmp");
+                saveToFile(application.getArtifact(), file);
+                params = new eu.atos.paas.heroku.DeployParameters(file.getAbsolutePath());
+            }
+            else {
+                params = new eu.atos.paas.openshift2.DeployParameters(application.getGitUrl(), application.getCartridge());
+            }
 
-            saveToFile(is, file);
-
-            DeployParameters params = new DeployParameters(file.getAbsolutePath());
             Module m = session.deploy(application.getName(), params);
             
             result = new Application(m.getName(), m.getUrl());

@@ -1,5 +1,7 @@
 package eu.atos.paas.heroku;
 
+import java.net.URL;
+
 import eu.atos.paas.PaasSession;
 
 
@@ -14,7 +16,7 @@ public class DeployParameters implements PaasSession.DeployParameters {
     
     private String path;
     private String buildpack_url;
-
+    private URL gitUrl;
     
     public DeployParameters(String path) {
         this.path = path;
@@ -27,6 +29,9 @@ public class DeployParameters implements PaasSession.DeployParameters {
         this.buildpack_url = buildpack_url;
     }
     
+    public DeployParameters(URL gitUrl) {
+        this.gitUrl = gitUrl;
+    }
     
     @Override
     public String getPath() {
@@ -44,8 +49,13 @@ public class DeployParameters implements PaasSession.DeployParameters {
     @Override
     public String getCartridge()
     {
-        // TODO Auto-generated method stub
         return null;
+    }
+
+
+    @Override
+    public URL getGitUrl() {
+        return gitUrl;
     }
     
     

@@ -20,6 +20,7 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
 
 import eu.atos.paas.data.Application;
+import eu.atos.paas.data.ApplicationToCreate;
 import eu.atos.paas.data.CredentialsMap;
 import eu.atos.paas.data.Provider;
 import eu.atos.paas.resources.Constants;
@@ -87,15 +88,21 @@ public class RestClient {
             return application;
         }
         
-        public Application createApplication(String name, InputStream is) throws IOException {
-
+        public Application createApplication(ApplicationToCreate application) throws IOException {
+            return createApplicationImpl(application, application.getArtifact());
+        }
+        
+        private Application createApplicationImpl(ApplicationToCreate application, InputStream is)
+                throws IOException {
+            
             try (FormDataMultiPart multipart = new FormDataMultiPart()) {
                 
-                Application application = new Application(name);
-                final StreamDataBodyPart filePart = new StreamDataBodyPart(Constants.MultiPartFields.FILE, is);
                 multipart
-                    .field(Constants.MultiPartFields.MODEL, application, MediaType.APPLICATION_JSON_TYPE)
-                    .bodyPart(filePart);
+                    .field(Constants.MultiPartFields.MODEL, application, MediaType.APPLICATION_JSON_TYPE);
+                if (is != null) {
+                    final StreamDataBodyPart filePart = new StreamDataBodyPart(Constants.MultiPartFields.FILE, is);
+                    multipart.bodyPart(filePart);
+                }
 
                 Response response = appsTarget.request()
                         .accept(MediaType.APPLICATION_JSON_TYPE)
@@ -106,6 +113,7 @@ public class RestClient {
                 return createdApplication;
             }
         }
+        
     }
     
     /**

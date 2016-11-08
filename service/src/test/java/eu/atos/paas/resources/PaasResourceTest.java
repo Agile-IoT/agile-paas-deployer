@@ -28,6 +28,7 @@ import org.testng.annotations.Test;
 
 import eu.atos.paas.credentials.UserPasswordCredentials;
 import eu.atos.paas.data.Application;
+import eu.atos.paas.data.ApplicationToCreate;
 import eu.atos.paas.data.CredentialsMap;
 import eu.atos.paas.data.Provider;
 import eu.atos.paas.dummy.DummyClient;
@@ -141,14 +142,26 @@ public class PaasResourceTest {
     }
     
     @Test(priority = 5)
-    public void testCreateApplication() throws IOException {
+    public void testCreateApplicationWithArtifact() throws IOException {
         
-        Application app = new Application(APP_NAME, new URL("http://www.example.com"));
         InputStream is = new ByteArrayInputStream(new byte[] {});
+        ApplicationToCreate appToCreate = new ApplicationToCreate(APP_NAME, is, "");
             
-        Application createdApp = resource.createApplication(headers, app, is);
+        Application createdApp = resource.createApplication(headers, appToCreate);
         
         assertEquals(APP_NAME, createdApp.getName());
+        assertTrue(!createdApp.getUrl().toString().isEmpty());
+    }
+    
+    @Test(priority = 6)
+    public void testCreateApplicationWithGitUrl() throws IOException {
+        
+        ApplicationToCreate appToCreate = new ApplicationToCreate(
+                "other_app_name", new URL("https://github.com/octocat/Hello-World.git"), "");
+        
+        Application createdApp = resource.createApplication(headers, appToCreate);
+        
+        assertEquals("other_app_name", createdApp.getName());
         assertTrue(!createdApp.getUrl().toString().isEmpty());
     }
     

@@ -4,6 +4,10 @@ import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
 import static org.testng.AssertJUnit.assertTrue;
 import static org.testng.AssertJUnit.fail;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeTest;
@@ -13,7 +17,6 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
 import eu.atos.paas.Module;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasClientFactory;
-import eu.atos.paas.PaasException;
 import eu.atos.paas.PaasSession;
 import eu.atos.paas.ServiceApp;
 import eu.atos.paas.TestConfigProperties;
@@ -44,12 +47,18 @@ public class Openshift2IT
     private static final String GIT_APP_URL = "https://github.com/OpenMEAP/openshift-openmeap-quickstart";
     private static final String SERV_NAME = "mysql-5.5";
 
+    private URL gitAppUrl;
+    
     // session
     private PaasSession session;
     
     // log
     private static Logger logger = LoggerFactory.getLogger(Openshift2IT.class);
 
+    public Openshift2IT() throws MalformedURLException {
+        
+        gitAppUrl = new URL(GIT_APP_URL);
+    }
     
     @BeforeTest
     public void initialize()
@@ -59,7 +68,7 @@ public class Openshift2IT
         PaasClientFactory factory = new PaasClientFactory();
         PaasClient client = factory.getClient("openshift2");
         session = client.getSession(new UserPasswordCredentials(TestConfigProperties.getInstance().getOp_user(),
-                                                                            TestConfigProperties.getInstance().getOp_password()));
+                                                                TestConfigProperties.getInstance().getOp_password()));
     }
     
     
@@ -90,12 +99,12 @@ public class Openshift2IT
     }
 
 
-    @Test
+    @Test(priority = 10)
     public void deploy() 
     {
         logger.info("### TEST > Openshift 2 > deploy()");
 
-        Module m = session.deploy(APP_NAME, new DeployParameters(GIT_APP_URL, IStandaloneCartridge.NAME_JBOSSEWS));
+        Module m = session.deploy(APP_NAME, new DeployParameters(gitAppUrl, IStandaloneCartridge.NAME_JBOSSEWS));
 
         assertNotNull(m);
         logger.info(">> " + String.format("name='%s',  url='%s'", m.getName(), m.getUrl()));
@@ -108,7 +117,7 @@ public class Openshift2IT
     }
     
     
-    @Test (dependsOnMethods={"deploy"})
+    @Test (priority = 20)
     public void stop() 
     {
         logger.info("### TEST > Openshift 2 > stop()");
@@ -123,7 +132,7 @@ public class Openshift2IT
     }
     
     
-    @Test (dependsOnMethods={"stop"})
+    @Test (priority = 30)
     public void start() 
     {
         logger.info("### TEST > Openshift 2 > start()");
@@ -138,7 +147,7 @@ public class Openshift2IT
     }
     
     
-    @Test (dependsOnMethods={"start"})
+    @Test (priority = 40)
     public void scaleUp() 
     {
         logger.info("### TEST > Openshift 2 > scaleUp()");
@@ -153,7 +162,7 @@ public class Openshift2IT
     }
     
     
-    @Test (dependsOnMethods={"scaleUp"})
+    @Test (priority = 50)
     public void scaleDown() 
     {
         logger.info("### TEST > Openshift 2 > scaleDown()");
@@ -168,7 +177,7 @@ public class Openshift2IT
     }
     
     
-    @Test (dependsOnMethods={"scaleDown"})
+    @Test (priority = 60)
     public void bindToService() 
     {
         logger.info("### TEST > Openshift 2 > bindToService()");
@@ -186,7 +195,7 @@ public class Openshift2IT
     }
 
     
-    @Test (dependsOnMethods={"bindToService"})
+    @Test (priority = 70)
     public void unbindFromService() 
     {
         logger.info("### TEST > Openshift 2 > unbindFromService()");
@@ -199,21 +208,17 @@ public class Openshift2IT
     }
     
     
-    @Test (dependsOnMethods={"unbindFromService"})
+    @Test (priority = 80)
     public void undeploy() 
     {
         logger.info("### TEST > Openshift 2 > undeploy()");
 
         session.undeploy(APP_NAME);
         
-        try {
-            eu.atos.paas.Module m = session.getModule(APP_NAME);
+        eu.atos.paas.Module m = session.getModule(APP_NAME);
+        if (m != null) {
             logger.warn("### TEST > Openshift 2 > undeploy() FAILED: "+ m.getName());
             fail(APP_NAME + " still exists");
-        }
-        catch (PaasException ex)
-        {
-            assertTrue(true);
         }
     }
 

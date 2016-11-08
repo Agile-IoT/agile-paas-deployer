@@ -9,11 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import com.heroku.api.exception.RequestFailedException;
 
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasClientFactory;
-import eu.atos.paas.PaasException;
 import eu.atos.paas.PaasSession;
 import eu.atos.paas.ServiceApp;
 import eu.atos.paas.TestConfigProperties;
@@ -209,14 +207,10 @@ public class HerokuIT
 
         session.undeploy(APP_NAME);
         
-        try {
-            eu.atos.paas.Module m = session.getModule(APP_NAME);
+        eu.atos.paas.Module m = session.getModule(APP_NAME);
+        if (m != null) {
             System.out.println("### TEST > Heroku > undeploy() > " + m.getName());
             fail(APP_NAME + " still exists");
-        }
-        catch (RequestFailedException | PaasException ex)
-        {
-            assertTrue(true);
         }
     }
 

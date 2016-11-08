@@ -1,10 +1,7 @@
 package eu.atos.paas;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  * 
@@ -16,11 +13,8 @@ public class TestConfigProperties
 {
 
     
-    private static final String CONFIG_FILE = "tests.config.properties";
+    private static final String CONFIG_FILE = "/tests.config.properties";
 
-    // log
-    private static Logger logger = LoggerFactory.getLogger(TestConfigProperties.class);
-    
     // TestConfigProperties instance
     private static TestConfigProperties _instance;
         
@@ -49,32 +43,32 @@ public class TestConfigProperties
      */
     private TestConfigProperties() 
     { 
-        try
-        {
-            PropertiesConfiguration props = new PropertiesConfiguration(CONFIG_FILE);
-            if ((props == null) || (props.isEmpty())) {
-                logger.error("PropertiesConfiguration file not found: " + CONFIG_FILE);
-            }
-            
-            app_name = props.getString("app_name", "");
-            
-            heroku_apiKey = props.getString("heroku_apikey", "");
-            heroku_user = props.getString("heroku_user", "");
-            heroku_password = props.getString("heroku_password", "");
-            
-            cf_user = props.getString("cf_user", "");
-            cf_password = props.getString("cf_password", "");
-            cf_org = props.getString("cf_org", "");
-            cf_space = props.getString("cf_space", "");
-            cf_api = props.getString("cf_api", "");
-            
-            op_user = props.getString("op_user", "");
-            op_password = props.getString("op_password", "");
+        Properties props = new Properties();
+        try {
+            props.load(TestConfigProperties.class.getResourceAsStream(CONFIG_FILE));
+        } catch (IOException e) {
+            throw new IllegalStateException("Properties not valid: " + CONFIG_FILE);
         }
-        catch (ConfigurationException e)
-        {
-            e.printStackTrace();
+        if ((props == null) || (props.isEmpty())) {
+            throw new IllegalStateException("Properties not valid: " + CONFIG_FILE);
         }
+        
+        app_name = props.getProperty("app_name", "");
+        
+        heroku_apiKey = props.getProperty("heroku_apikey", "");
+        heroku_user = props.getProperty("heroku_user", "");
+        heroku_password = props.getProperty("heroku_password", "");
+        
+        cf_user = props.getProperty("cf_user", "");
+        cf_password = props.getProperty("cf_password", "");
+        cf_org = props.getProperty("cf_org", "");
+        cf_space = props.getProperty("cf_space", "");
+        cf_api = props.getProperty("cf_api", "");
+        
+        op_user = props.getProperty("op_user", "");
+        op_password = props.getProperty("op_password", "");
+        
+        cf_trustSelfSignedCerts = true;
     }
     
     

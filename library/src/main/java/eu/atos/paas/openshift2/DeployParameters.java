@@ -1,5 +1,7 @@
 package eu.atos.paas.openshift2;
 
+import java.net.URL;
+
 import eu.atos.paas.PaasSession;
 
 
@@ -14,11 +16,12 @@ public class DeployParameters implements PaasSession.DeployParameters {
     
     private String path;
     private String cartridge;
+    private URL gitUrl;
 
     
-    public DeployParameters(String path, String cartridge) {
-        this.path = path;
+    public DeployParameters(URL gitUrl, String cartridge) {
         this.cartridge = cartridge;
+        this.gitUrl = gitUrl;
     }
     
     
@@ -38,9 +41,11 @@ public class DeployParameters implements PaasSession.DeployParameters {
     @Override
     public String getBuildpackUrl()
     {
-        // TODO Auto-generated method stub
         return null;
     }
     
-    
+    @Override
+    public URL getGitUrl() {
+        return gitUrl;
+    }
 }

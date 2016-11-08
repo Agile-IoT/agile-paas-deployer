@@ -5,6 +5,7 @@ import org.testng.annotations.Test;
 import eu.atos.paas.client.RestClient.ProviderClient;
 import eu.atos.paas.credentials.UserPasswordCredentials;
 import eu.atos.paas.data.Application;
+import eu.atos.paas.data.ApplicationToCreate;
 import eu.atos.paas.data.CredentialsMap;
 import eu.atos.paas.data.Provider;
 import eu.atos.paas.resources.Constants;
@@ -67,18 +68,37 @@ public class RestClientIT {
     }
     
     @Test(priority = 20)
-    public void createApplication() throws IOException {
+    public void createApplicationWithArtifact() throws IOException {
         
-        Application app1 = provider.createApplication("test", RestClient.class.getResourceAsStream("/SampleApp1.war"));
+        String appName = "test";
+        ApplicationToCreate appToCreate = 
+                new ApplicationToCreate(appName, RestClient.class.getResourceAsStream("/SampleApp1.war"), "");
+        Application app1 = provider.createApplication(appToCreate);
         assertNotNull(app1);
-        assertEquals("test", app1.getName());
-        Application app2 = provider.getApplication("test");
-        assertEquals("test", app2.getName());
+        assertEquals(appName, app1.getName());
+        Application app2 = provider.getApplication(appName);
+        assertEquals(appName, app2.getName());
         
         assertTrue(!app1.getUrl().toString().isEmpty());
         assertEquals(app1.getUrl(), app2.getUrl());
     }
     
+    @Test(priority = 21)
+    public void createApplicationWithGitUrl() throws IOException {
+        
+        String appName = "test2";
+        ApplicationToCreate appToCreate = 
+                new ApplicationToCreate(appName, new URL("https://github.com/octocat/Hello-World.git"), "");
+        Application app1 = provider.createApplication(appToCreate);
+        assertNotNull(app1);
+        assertEquals(appName, app1.getName());
+        Application app2 = provider.getApplication(appName);
+        assertEquals(appName, app2.getName());
+        
+        assertTrue(!app1.getUrl().toString().isEmpty());
+        assertEquals(app1.getUrl(), app2.getUrl());
+    }
+
     @Test(priority = 10)
     public void getApplicationShouldFail() {
         

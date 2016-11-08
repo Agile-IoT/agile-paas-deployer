@@ -29,7 +29,7 @@ public class DummySession implements PaasSession {
         Objects.requireNonNull(params);
         
         if (getModule(moduleName) != null) {
-            throw new AlreadyExistsException(moduleName + " is already created");
+            throw new AlreadyExistsException(moduleName);
         }
 
         URL url;

@@ -46,46 +46,35 @@ public class Openshift2Resource extends PaaSResource
     }
     
     
-    @POST
-    @Path("/applications")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Override
-    public Application createApplication(@Context HttpHeaders headers, FormDataMultiPart form)
-    {
-        throw new WebApplicationException("method not implemented", Response.Status.BAD_REQUEST);
-    }
-
-    
-    @POST
-    @Path("/applications/git")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createApplication2(@Context HttpHeaders headers, @FormParam("appName") String appname, 
-            @FormParam("appGitUrl") String appGitUrl)
-    {
-        try
-        {
-            log.info("createApplication({})", appname);
-            
-            PaasSession session = getSession(headers);
-
-            Application result;
-            Module m = session.deploy(appname, new DeployParameters(appGitUrl, IStandaloneCartridge.NAME_JBOSSEWS));
-            result = new Application(m.getName(), m.getUrl());
-            
-            // Response
-            return generateJSONResponse(Response.Status.OK, OperationResult.OK,
-                                        "POST /applications/",
-                                        "application " + result.getName() + " created / deployed: " + result.getUrl());
-        }
-        catch (Exception e)
-        {
-            // Response
-            return generateJSONResponse(Response.Status.INTERNAL_SERVER_ERROR, OperationResult.ERROR,
-                                        "POST /applications/",
-                                        "application not created / deployed: " + e.getMessage());
-        }
-    }
+//    @POST
+//    @Path("/applications/git")
+//    @Produces(MediaType.APPLICATION_JSON)
+//    public Response createApplication2(@Context HttpHeaders headers, @FormParam("appName") String appname, 
+//            @FormParam("appGitUrl") String appGitUrl)
+//    {
+//        try
+//        {
+//            log.info("createApplication({})", appname);
+//            
+//            PaasSession session = getSession(headers);
+//
+//            Application result;
+//            Module m = session.deploy(appname, new DeployParameters(appGitUrl, IStandaloneCartridge.NAME_JBOSSEWS));
+//            result = new Application(m.getName(), m.getUrl());
+//            
+//            // Response
+//            return generateJSONResponse(Response.Status.OK, OperationResult.OK,
+//                                        "POST /applications/",
+//                                        "application " + result.getName() + " created / deployed: " + result.getUrl());
+//        }
+//        catch (Exception e)
+//        {
+//            // Response
+//            return generateJSONResponse(Response.Status.INTERNAL_SERVER_ERROR, OperationResult.ERROR,
+//                                        "POST /applications/",
+//                                        "application not created / deployed: " + e.getMessage());
+//        }
+//    }
     
     
     @PUT

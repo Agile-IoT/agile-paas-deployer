@@ -75,8 +75,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>commons-configuration</groupId>
-            <artifactId>commons-configuration</artifactId>
+            <groupId>eu.atos.paas</groupId>
+            <artifactId>unified-paas-common</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

@@ -1,5 +1,7 @@
 package eu.atos.paas;
 
+import java.net.URL;
+
 /**
  * Defines the operations to be implemented by a provider session.
  * 
@@ -20,6 +22,7 @@ public interface PaasSession {
         String getPath();
         String getBuildpackUrl();
         String getCartridge();
+        URL getGitUrl();
     }
 
     

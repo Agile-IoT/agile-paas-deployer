@@ -1,5 +1,6 @@
 package eu.atos.paas.client;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -33,13 +34,16 @@ public class RestClientException extends RuntimeException {
     }
     
     private static ErrorEntity extractEntity(Response response) {
-        ErrorEntity error;
+        ErrorEntity error = null;
         
-        if (response.hasEntity()) {
+        MediaType mediaType = response.getMediaType();
+        if (response.hasEntity() && MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType)) {
             error = response.readEntity(ErrorEntity.class);
         }
-        else {
-            error = new ErrorEntity(Status.INTERNAL_SERVER_ERROR, "Unknown error"); 
+        if (error == null) {
+            Status status = Status.fromStatusCode(response.getStatus());
+            error = new ErrorEntity(status, 
+                    String.format("%d %s", status.getStatusCode(), status.getReasonPhrase()));
         }
         return error;
     }
