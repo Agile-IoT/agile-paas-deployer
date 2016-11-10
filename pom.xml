@@ -55,7 +55,8 @@
         <testng.version>6.8.8</testng.version>
         <slf4j.version>1.7.12</slf4j.version>
         <slf4j-simple.version>1.6.4</slf4j-simple.version>
-        <logback.version>1.0.7</logback.version>
+        <logback.version>1.1.2</logback.version>
+        <integration.groups>dummy</integration.groups>
 
         <!-- Plugins -->
         <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
@@ -233,7 +234,7 @@
                 <artifactId>slf4j-log4j12</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
@@ -322,12 +323,6 @@
                 <groupId>io.dropwizard</groupId>
                 <artifactId>dropwizard-core</artifactId>
                 <version>${dropwizard.version}</version>
-                <exclusions>
-                    <exclusion> 
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>log4j-over-slf4j</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard</groupId>
@@ -405,6 +400,8 @@
     </dependencyManagement>
 
     <profiles>
+    
+        <!-- Default profile that runs only unit tests -->
         <profile>
             <id>default</id>
             <activation>
@@ -416,6 +413,13 @@
                 <skip.unit.tests>false</skip.unit.tests>
             </properties>
         </profile>
+        
+        <!--  
+            Profile to run integration tests.
+            By default only run tests in dummy group.
+            To modify group, pass integration.groups param to mvn command.
+                Ex: mvn verify -P integration-test -Dintegration.groups=openshift2,cloudfoundry
+         -->
         <profile>
             <id>integration-test</id>
             <properties>
@@ -423,7 +427,18 @@
                 <skip.integration.tests>false</skip.integration.tests>
                 <skip.unit.tests>true</skip.unit.tests>
             </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                      <artifactId>maven-failsafe-plugin</artifactId>
+                      <configuration>
+                        <groups>${integration.groups}</groups>
+                      </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
+        
     </profiles>
 
 </project>

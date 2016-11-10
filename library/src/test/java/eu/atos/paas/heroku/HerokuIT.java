@@ -5,11 +5,13 @@ import static org.testng.AssertJUnit.assertNotNull;
 import static org.testng.AssertJUnit.assertTrue;
 import static org.testng.AssertJUnit.fail;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import eu.atos.paas.Groups;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasClientFactory;
 import eu.atos.paas.PaasSession;
@@ -21,12 +23,7 @@ import eu.atos.paas.PaasSession.StartStopCommand;
 import eu.atos.paas.heroku.DeployParameters;
 
 
-/**
- * 
- *
- * @author ATOS
- * @date 8/1/2016-15:50:20
- */
+@Test(groups = Groups.HEROKU)
 public class HerokuIT
 {
     

@@ -2,6 +2,7 @@ package eu.atos.paas.client;
 
 import org.testng.annotations.Test;
 
+import eu.atos.paas.Groups;
 import eu.atos.paas.client.RestClient.ProviderClient;
 import eu.atos.paas.credentials.UserPasswordCredentials;
 import eu.atos.paas.data.Application;
@@ -19,6 +20,7 @@ import javax.ws.rs.core.Response.Status;
 import org.testng.annotations.BeforeClass;
 import static org.testng.AssertJUnit.*;
 
+@Test(groups = Groups.DUMMY)
 public class RestClientIT {
     
     RestClient client;

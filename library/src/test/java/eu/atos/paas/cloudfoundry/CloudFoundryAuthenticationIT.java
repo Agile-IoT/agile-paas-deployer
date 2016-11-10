@@ -4,6 +4,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import eu.atos.paas.AuthenticationException;
+import eu.atos.paas.Groups;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasClientFactory;
 import eu.atos.paas.TestConfigProperties;
@@ -11,6 +12,7 @@ import eu.atos.paas.credentials.ApiUserPasswordOrgSpaceCredentials;
 
 import static org.testng.AssertJUnit.*;
 
+@Test(groups = Groups.CLOUDFOUNDRY)
 public class CloudFoundryAuthenticationIT {
 
     PaasClient client; 

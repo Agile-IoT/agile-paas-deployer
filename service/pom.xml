@@ -15,6 +15,7 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>service-shade-plugin</id>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
@@ -37,6 +38,10 @@
             <groupId>eu.atos.paas</groupId>
             <artifactId>unified-paas-service-model</artifactId>
         </dependency>
+        <dependency>
+            <groupId>eu.atos.paas</groupId>
+            <artifactId>unified-paas-library</artifactId>
+        </dependency>
     
         <dependency>
             <groupId>io.dropwizard</groupId>
@@ -53,10 +58,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>eu.atos.paas</groupId>
-            <artifactId>unified-paas-library</artifactId>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
@@ -76,5 +77,38 @@
             <artifactId>testng</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>integration-test</id>
+            <build>
+                <plugins>
+                    <!-- 
+                        Skip execution of shade plugin in integration-test profile
+                        This was making the server instance fail because the 
+                        jar was overwritten in disk after server startup
+                     -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>service-shade-plugin</id>
+                                <phase/>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

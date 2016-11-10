@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import eu.atos.paas.Groups;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasClientFactory;
 import eu.atos.paas.PaasException;
@@ -23,12 +24,7 @@ import eu.atos.paas.cloudfoundry.DeployParameters;
 import eu.atos.paas.credentials.ApiUserPasswordOrgSpaceCredentials;
 
 
-/**
- * 
- *
- * @author ATOS
- * @date 23/2/2016-16:02:35
- */
+@Test(groups = Groups.CLOUDFOUNDRY)
 public class CloudFoundryIT
 {
     

@@ -9,6 +9,7 @@ import org.testng.annotations.Test;
 
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
+import eu.atos.paas.Groups;
 import eu.atos.paas.TestConfigProperties;
 import eu.atos.paas.client.RestClient.ProviderClient;
 import eu.atos.paas.data.Application;
@@ -18,6 +19,7 @@ import eu.atos.paas.data.CredentialsMap;
 import static eu.atos.paas.credentials.UserPasswordCredentials.*;
 import static org.testng.AssertJUnit.*;
 
+@Test(groups = Groups.OPENSHIFT2)
 public class RestClientOpenShift2IT {
 
         private static final String APP_NAME = "paaslibraryexample";

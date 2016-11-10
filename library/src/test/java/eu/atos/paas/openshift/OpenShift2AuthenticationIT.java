@@ -7,17 +7,18 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import eu.atos.paas.AuthenticationException;
+import eu.atos.paas.Groups;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasClientFactory;
 import eu.atos.paas.TestConfigProperties;
 import eu.atos.paas.credentials.UserPasswordCredentials;
 
+@Test(groups = Groups.OPENSHIFT2)
 public class OpenShift2AuthenticationIT {
 
     PaasClient client;
     
     public OpenShift2AuthenticationIT() {
-        // TODO Auto-generated constructor stub
     }
 
     @BeforeTest

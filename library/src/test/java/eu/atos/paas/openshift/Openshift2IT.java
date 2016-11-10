@@ -14,6 +14,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
+import eu.atos.paas.Groups;
 import eu.atos.paas.Module;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasClientFactory;
@@ -34,10 +35,8 @@ import eu.atos.paas.openshift2.DeployParameters;
  * URL with available cartridges:
  * 		https://github.com/openshift/openshift-java-client/blob/master/src/test/resources/samples/get-cartridges.json
  * 
- *
- * @author ATOS
- * @date 21/3/2016-13:23:28
  */
+@Test(groups = Groups.CLOUDFOUNDRY)
 public class Openshift2IT
 {
 

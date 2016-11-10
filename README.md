@@ -105,6 +105,16 @@ json for each provider are shown below.
 
 ### Integration tests
 
+Integration tests are run in `integration-test` profile. Each integration test 
+have a group according to the PaaS provider being tested. By default, the 
+profile only run tests in dummy group (the dummy provider is a fake provider).
+The provider to test can be changed passing an integration.groups parameter
+to the mvn command. 
+
+Ex: 
+`mvn verify -P integration-test -Dintegration.groups=openshift2,cloudfoundry`
+
+
 ##### Configuration
 
 * Set values in /library/src/test/resources/tests.config.properties
@@ -112,10 +122,10 @@ json for each provider are shown below.
 
 ##### Integration Tests
 
-* Execute tests: `mvn clean verify -P integration-test`
+* Execute tests: `mvn clean verify -P integration-test [-Dintegration.groups=...]`
 
 ---
-## 2. Java Client Libraries
+## Java Client Libraries
 Java client libraries used in the project:
 
 #### Cloud Foundry
