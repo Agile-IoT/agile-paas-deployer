@@ -16,7 +16,7 @@ public class ModuleTest {
         List<String> uris = Collections.singletonList("app.example.com");
         CloudApplication app = new CloudApplication("name", "command", null, 0, 0, uris, null, null);
         
-        Module m = new Module(app, Collections.<String, Object>emptyMap());
+        ModuleImpl m = new ModuleImpl(app, Collections.<String, Object>emptyMap());
         
         assertEquals("http://app.example.com", m.getUrl().toString());
     }
@@ -27,7 +27,7 @@ public class ModuleTest {
         List<String> uris = Collections.singletonList("http://app.example.com");
         CloudApplication app = new CloudApplication("name", "command", null, 0, 0, uris, null, null);
         
-        Module m = new Module(app, Collections.<String, Object>emptyMap());
+        ModuleImpl m = new ModuleImpl(app, Collections.<String, Object>emptyMap());
         
         assertEquals("http://app.example.com", m.getUrl().toString());
     }

@@ -13,18 +13,18 @@ public class ModuleImpl implements eu.atos.paas.Module {
     private URL url;
     private String type;
     private List<String> services;
-    private Map<String, Object> env;
+    private Map<String, String> env;
     private int instances;
-    private boolean started;
+    private State state;
     
-    public ModuleImpl(String name, URL url, String type, int instances) {
+    public ModuleImpl(String name, URL url, String type, int instances, boolean started) {
         this.name = name;
         this.url = url;
         this.type = type;
         this.services = new ArrayList<String>();
-        this.env = new HashMap<String, Object>();
+        this.env = new HashMap<String, String>();
         this.instances = instances;
-        this.started = true;
+        this.state = started? State.STARTED : State.UNDEPLOYED;
     }
 
     public void addServices(List<String> services) {
@@ -39,7 +39,7 @@ public class ModuleImpl implements eu.atos.paas.Module {
         this.services.remove(serviceName);
     }
 
-    public void addEnvVars(Map<String, Object> envVars) {
+    public void addEnvVars(Map<String, String> envVars) {
         this.env.putAll(envVars);
     }
 
@@ -48,11 +48,11 @@ public class ModuleImpl implements eu.atos.paas.Module {
     }
     
     public void start() {
-        this.started = true;
+        this.state = State.STARTED;
     }
     
     public void stop() {
-        this.started = false;
+        this.state = State.STOPPED;
     }
     
     @Override
@@ -81,11 +81,17 @@ public class ModuleImpl implements eu.atos.paas.Module {
     }
 
     @Override
-    public Map<String, Object> getEnv() {
+    public Map<String, String> getEnv() {
         return Collections.unmodifiableMap(env);
+    }
+    
+    @Override
+    public State getState() {
+        
+        return state;
     }
 
     public boolean isStarted() {
-        return started;
+        return State.STARTED.equals(state);
     }
 }

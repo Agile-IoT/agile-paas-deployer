@@ -1,6 +1,7 @@
 package eu.atos.paas.cloudfoundry;
 
 import java.net.URL;
+import java.util.Objects;
 
 import eu.atos.paas.PaasSession;
 
@@ -19,14 +20,14 @@ public class DeployParameters implements PaasSession.DeployParameters
 
     
     public DeployParameters(String path) {
-        this.path = path;
+        this.path = Objects.requireNonNull(path);
         this.buildpack_url = "";
     }
     
     
     public DeployParameters(String path, String buildpack_url) {
-        this.path = path;
-        this.buildpack_url = buildpack_url;
+        this.path = Objects.requireNonNull(path);
+        this.buildpack_url = Objects.requireNonNull(buildpack_url);
     }
     
     
@@ -46,7 +47,7 @@ public class DeployParameters implements PaasSession.DeployParameters
     @Override
     public String getCartridge()
     {
-        return null;
+        return "";
     }
     
     @Override

@@ -36,7 +36,7 @@ import eu.atos.paas.openshift2.DeployParameters;
  * 		https://github.com/openshift/openshift-java-client/blob/master/src/test/resources/samples/get-cartridges.json
  * 
  */
-@Test(groups = Groups.CLOUDFOUNDRY)
+@Test(groups = Groups.OPENSHIFT2)
 public class Openshift2IT
 {
 

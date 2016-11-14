@@ -6,6 +6,9 @@ import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.domain.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import eu.atos.paas.PaasProviderException;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -13,6 +16,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 public class CloudFoundryConnector
@@ -120,7 +124,7 @@ public class CloudFoundryConnector
         CloudApplication app = createApplication(applicationName, domainName, buildpackUrl);
 
         // 2. Upload application
-        if ((app != null) && (uploadApplication(app, warFile)))
+        if ((app != null) && (uploadApplication(app.getName(), warFile)))
         {
             // 3. Start application
             logger.info(">> Starting application ... ");
@@ -178,7 +182,7 @@ public class CloudFoundryConnector
             }
 
             // 5. Upload application
-            if (uploadApplication(app, warFile))
+            if (uploadApplication(app.getName(), warFile))
             {
                 // 6. Start application
                 logger.info(">> Starting application ... ");
@@ -214,59 +218,52 @@ public class CloudFoundryConnector
     {
         CloudApplication app = null;
 
-        try
-        {
-            app = _cfclient.getApplication(applicationName);
-        }
-        catch (CloudFoundryException ex)
-        {
-            logger.warn(">> [" + applicationName + "] not found ");
-        }
+        /*
+         * throws CloudFoundryException
+         */
+        app = _cfclient.getApplication(applicationName);
 
-        if (app != null)
+        // 1. delete application
+        logger.info(">> Deleting application [" + applicationName + "] ... ");
+        _cfclient.deleteApplication(applicationName);
+
+        // 2. delete services if not attached to other applications
+        List<String> lServices = app.getServices(); // services used by the deleted application
+
+        if (lServices.size() > 0)
         {
-            // 1. delete application
-            logger.info(">> Deleting application [" + applicationName + "] ... ");
-            _cfclient.deleteApplication(applicationName);
+            List<CloudApplication> lApplications = _cfclient.getApplications(); // other client  applications
 
-            // 2. delete services if not attached to other applications
-            List<String> lServices = app.getServices(); // services used by the deleted application
-
-            if (lServices.size() > 0)
+            for (String serviceName : lServices)
             {
-                List<CloudApplication> lApplications = _cfclient.getApplications(); // other client  applications
-
-                for (String serviceName : lServices)
+                // if there are other applications, check if the services are being used by any of them
+                if (lApplications.size() > 0)
                 {
-                    // if there are other applications, check if the services are being used by any of them
-                    if (lApplications.size() > 0)
+                    for (CloudApplication capp : lApplications)
                     {
-                        for (CloudApplication capp : lApplications)
-                        {
-                            List<String> lServices2 = capp.getServices();
+                        List<String> lServices2 = capp.getServices();
 
-                            if (!lServices2.contains(serviceName))
-                            {
-                                logger.info(">> Deleting service [" + serviceName + "] ... ");
-                                _cfclient.deleteService(serviceName);
-                            }
-                            else
-                            {
-                                logger.info(">> Service [" + serviceName
-                                        + "] is used by other applications ");
-                            }
+                        if (!lServices2.contains(serviceName))
+                        {
+                            logger.info(">> Deleting service [" + serviceName + "] ... ");
+                            _cfclient.deleteService(serviceName);
+                        }
+                        else
+                        {
+                            logger.info(">> Service [" + serviceName
+                                    + "] is used by other applications ");
                         }
                     }
-                    // if there are no more applications, then it's safe to delete the service
-                    else
-                    {
-                        logger.info(">> Deleting service [" + serviceName + "] ... ");
-                        _cfclient.deleteService(serviceName);
-                    }
+                }
+                // if there are no more applications, then it's safe to delete the service
+                else
+                {
+                    logger.info(">> Deleting service [" + serviceName + "] ... ");
+                    _cfclient.deleteService(serviceName);
                 }
             }
-            logger.info(">> [" + applicationName + "] deleted ");
         }
+        logger.info(">> [" + applicationName + "] deleted ");
     }
 
 
@@ -277,44 +274,36 @@ public class CloudFoundryConnector
      * @param buildpackUrl
      * @return
      */
-    private CloudApplication createApplication(String applicationName, String domainName, String buildpackUrl)
+    public CloudApplication createApplication(String applicationName, String domainName, String buildpackUrl)
     {
-        try
+        // initialize parameters ...
+        // buildpack: -b https://github.com/cloudfoundry/java-buildpack.git
+        Staging staging = null;
+        if (buildpackUrl != null)
         {
-            // initialize parameters ...
-            // buildpack: -b https://github.com/cloudfoundry/java-buildpack.git
-            Staging staging = null;
-            if (buildpackUrl != null)
-            {
-                staging = new Staging(null, buildpackUrl);
-            }
-            else
-            {
-                staging = new Staging();
-            }
-
-            // uris
-            List<String> uris = new ArrayList<String>();
-            uris.add(computeAppUrl(applicationName, domainName));
-
-            // serviceNames
-            List<String> serviceNames = new ArrayList<String>();
-
-            // 1. Create application
-            logger.info(">> Creating application ... ");
-
-            _cfclient.createApplication(applicationName, staging, DEFAULT_MEMORY, uris, serviceNames);
-            CloudApplication app = _cfclient.getApplication(applicationName);
-
-            logger.info(">> Application details: " + app.toString());
-
-            return app;
+            staging = new Staging(null, buildpackUrl);
         }
-        catch (Exception e)
+        else
         {
-            e.printStackTrace();
-            return null;
+            staging = new Staging();
         }
+
+        // uris
+        List<String> uris = new ArrayList<String>();
+        uris.add(computeAppUrl(applicationName, domainName));
+
+        // serviceNames
+        List<String> serviceNames = new ArrayList<String>();
+
+        // 1. Create application
+        logger.info(">> Creating application ... ");
+
+        _cfclient.createApplication(applicationName, staging, DEFAULT_MEMORY, uris, serviceNames);
+        CloudApplication app = _cfclient.getApplication(applicationName);
+
+        logger.info(">> Application details: " + app.toString());
+
+        return app;
     }
 
 
@@ -324,23 +313,44 @@ public class CloudFoundryConnector
      * @param warFile
      * @return
      */
-    private boolean uploadApplication(CloudApplication app, String warFile)
+    public boolean uploadApplication(String appName, String warFile)
     {
+        String path;
+            
+        try {
+            
+            File f = new File(warFile);
+            if (!f.isFile()) {
+                throw new IllegalArgumentException(f.getPath() + " is not a regular file");
+            }
+            path = f.getCanonicalPath();
+            
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e.getMessage(), e);
+        }
+        
         try
         {
             // 2. Upload application
-            logger.info(">> Uploading application from " + new File(warFile).getCanonicalPath() + " ... ");
-            _cfclient.uploadApplication(app.getName(), new File(warFile).getCanonicalPath());
+            logger.info(">> Uploading application from " + path + " ... ");
+            _cfclient.uploadApplication(appName, path);
             return true;
         }
         catch (IOException e)
         {
-            e.printStackTrace();
-            return false;
+            throw new PaasProviderException(e.getMessage(), e);
         }
     }
 
 
+    public void updateEnvironment(String appName, Map<String, String> vars) {
+        _cfclient.updateApplicationEnv(appName, vars);
+    }
+
+    
+    public void updateEnvironment(CloudApplication app, Map<String, String> vars) {
+        _cfclient.updateApplicationEnv(app.getName(), vars);
+    }
     /**
      * 
      * @param serviceOffered

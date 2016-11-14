@@ -32,6 +32,13 @@ public class Module implements eu.atos.paas.Module
 
     
     @Override
+    public State getState() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    
+    @Override
     public String getAppType()
     {
         // TODO Auto-generated method stub
@@ -56,7 +63,7 @@ public class Module implements eu.atos.paas.Module
     
 
     @Override
-    public Map<String, Object> getEnv()
+    public Map<String, String> getEnv()
     {
         // TODO Auto-generated method stub
         return null;

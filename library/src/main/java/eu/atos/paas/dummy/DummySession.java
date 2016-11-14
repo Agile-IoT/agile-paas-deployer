@@ -8,6 +8,8 @@ import java.util.Objects;
 
 import eu.atos.paas.AlreadyExistsException;
 import eu.atos.paas.Module;
+import eu.atos.paas.Module.State;
+import eu.atos.paas.NotDeployedException;
 import eu.atos.paas.NotFoundException;
 import eu.atos.paas.PaasException;
 import eu.atos.paas.PaasProviderException;
@@ -21,6 +23,39 @@ public class DummySession implements PaasSession {
     public DummySession() {
     }
 
+    @Override
+    public Module createApplication(String moduleName, DeployParameters params)
+            throws PaasProviderException, AlreadyExistsException {
+        
+        Objects.requireNonNull(moduleName);
+        Objects.requireNonNull(params);
+        
+        if (getModule(moduleName) != null) {
+            throw new AlreadyExistsException(moduleName);
+        }
+        
+        ModuleImpl m = new ModuleImpl(moduleName, null, "web", 1, false);
+        modules.put(moduleName, m);
+
+        return m;
+    }
+    
+    @Override
+    public Module updateApplication(String moduleName, DeployParameters params) 
+            throws NotFoundException, PaasProviderException {
+
+        Objects.requireNonNull(moduleName);
+        Objects.requireNonNull(params);
+        
+        ModuleImpl m = modules.get(moduleName);
+
+        if (m == null) {
+            throw new NotFoundException(moduleName);
+        }
+        m.start();
+        return m;
+    }
+    
     @Override
     public Module deploy(String moduleName, DeployParameters params) 
         throws PaasProviderException, AlreadyExistsException {
@@ -38,7 +73,7 @@ public class DummySession implements PaasSession {
         } catch (MalformedURLException e) {
             throw new PaasException(e.getMessage(), e);
         }
-        ModuleImpl m = new ModuleImpl(moduleName, url, "web", 1);
+        ModuleImpl m = new ModuleImpl(moduleName, url, "web", 1, true);
         
         /*
          * If this throws a client API exception, should be encapsulated by PaasProviderException
@@ -74,6 +109,9 @@ public class DummySession implements PaasSession {
         }
         switch(command) {
         case START:
+            if (actualModule.getState().equals(State.UNDEPLOYED)) {
+                throw new NotDeployedException(moduleName);
+            }
             actualModule.start();
             break;
         case STOP:

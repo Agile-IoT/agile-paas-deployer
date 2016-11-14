@@ -7,8 +7,11 @@ import org.slf4j.LoggerFactory;
 import com.heroku.api.Addon;
 import com.heroku.api.App;
 
+import eu.atos.paas.AlreadyExistsException;
 import eu.atos.paas.Module;
+import eu.atos.paas.NotFoundException;
 import eu.atos.paas.PaasException;
+import eu.atos.paas.PaasProviderException;
 import eu.atos.paas.PaasSession;
 import eu.atos.paas.ServiceApp;
 
@@ -30,7 +33,23 @@ public class HerokuSession implements PaasSession {
         this.connector = connector;
     }
     
+    
+    @Override
+    public Module createApplication(String moduleName, DeployParameters params)
+            throws PaasProviderException, AlreadyExistsException {
+        
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+    
 
+    @Override
+    public Module updateApplication(String moduleName, DeployParameters params)
+            throws NotFoundException, PaasProviderException {
+
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+    
+    
     @Override
     public Module deploy(String moduleName, PaasSession.DeployParameters params) throws PaasException {
         logger.info("DEPLOY({})", moduleName);

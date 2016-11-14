@@ -7,27 +7,25 @@ import java.util.Map;
 
 public interface Module {
     
-    
     String getName();
-    
     
     URL getUrl();
     
+    State getState();
     
     String getAppType();
     
-    
     int getRunningInstances();
     
-    
     List<String> getServices();
-    
     
     /**
      * Get application environment values
      * @return
      */
-    Map<String, Object> getEnv();
+    Map<String, String> getEnv();
     
-    
+    public enum State {
+        UNDEPLOYED, STARTED, STOPPED, UPDATING, UNKNOWN
+    }
 }

@@ -31,14 +31,35 @@ public class PaasSessionProxy implements PaasSession {
     }
 
     @Override
+    public Module createApplication(String moduleName, DeployParameters params)
+            throws PaasProviderException, AlreadyExistsException {
+
+        try {
+            return session.createApplication(moduleName, params);
+        } catch (RuntimeException e) {
+            throw handle(e);
+        }
+    }
+    
+    @Override
+    public Module updateApplication(String moduleName, DeployParameters params)
+            throws NotFoundException, PaasProviderException {
+
+        try {
+            return session.updateApplication(moduleName, params);
+        } catch (RuntimeException e) {
+            throw handle(e);
+        }
+    }
+    
+    @Override
     public Module deploy(String moduleName, DeployParameters params)
             throws PaasProviderException, AlreadyExistsException {
         
         try {
             return session.deploy(moduleName, params);
         } catch (RuntimeException e) {
-            handle(e);
-            throw new AssertionError("this should not be reached");
+            throw handle(e);
         }
     }
 
@@ -48,7 +69,7 @@ public class PaasSessionProxy implements PaasSession {
         try {
             session.undeploy(moduleName);
         } catch (RuntimeException e) {
-            handle(e);
+            throw handle(e);
         }
     }
 
@@ -58,7 +79,7 @@ public class PaasSessionProxy implements PaasSession {
         try {
             session.startStop(module, command);
         } catch (RuntimeException e) {
-            handle(e);
+            throw handle(e);
         }
     }
 
@@ -69,7 +90,7 @@ public class PaasSessionProxy implements PaasSession {
         try {
             session.scaleUpDown(module, command);
         } catch (RuntimeException e) {
-            handle(e);
+            throw handle(e);
         }
     }
 
@@ -80,7 +101,7 @@ public class PaasSessionProxy implements PaasSession {
         try {
             session.scale(module, command, scale_value);
         } catch (RuntimeException e) {
-            handle(e);
+            throw handle(e);
         }
     }
 
@@ -90,7 +111,7 @@ public class PaasSessionProxy implements PaasSession {
         try {
             session.bindToService(module, service);
         } catch (RuntimeException e) {
-            handle(e);
+            throw handle(e);
         }
     }
 
@@ -100,7 +121,7 @@ public class PaasSessionProxy implements PaasSession {
         try {
             session.unbindFromService(module, service);
         } catch (RuntimeException e) {
-            handle(e);
+            throw handle(e);
         }
     }
 
@@ -110,8 +131,7 @@ public class PaasSessionProxy implements PaasSession {
         try {
             return session.getModule(moduleName);
         } catch (RuntimeException e) {
-            handle(e);
-            throw new AssertionError("this should not be reached");
+            throw handle(e);
         }
     }
 
@@ -123,18 +143,20 @@ public class PaasSessionProxy implements PaasSession {
      * - a switch with the class name
      * - static map
      */
-    private void handle(RuntimeException e) {
+    private RuntimeException handle(RuntimeException e) {
 
         if (e instanceof PaasProviderException) {
-            throw new ResourceException(new ErrorEntity(Status.BAD_GATEWAY, e.getMessage()));
+            return new ResourceException(new ErrorEntity(Status.BAD_GATEWAY, e.getMessage()));
         } else if (e instanceof NotFoundException) {
-            throw new ResourceException(new ErrorEntity(Status.NOT_FOUND, e.getMessage()));
+            return new ResourceException(new ErrorEntity(Status.NOT_FOUND, e.getMessage()));
         } else if (e instanceof AlreadyExistsException) {
-            throw new ResourceException(new ErrorEntity(Status.CONFLICT, e.getMessage()));
+            return new ResourceException(new ErrorEntity(Status.CONFLICT, e.getMessage()));
         } else if (e instanceof UnsupportedOperationException) {
-            throw new ResourceException(new ErrorEntity(Status.NOT_IMPLEMENTED, e.getMessage()));
+            return new ResourceException(new ErrorEntity(Status.NOT_IMPLEMENTED, e.getMessage()));
+        } else if (e instanceof IllegalArgumentException) {
+            return new ResourceException(new ErrorEntity(Status.BAD_REQUEST, e.getMessage()));
         } else {
-            throw e;
+            return e;
         }
     }
 }

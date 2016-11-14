@@ -47,7 +47,34 @@ public interface PaasSession {
     }
 
     /**
-     * Creates and deploy an application.
+     * Creates an application.
+     * 
+     * The application must be later deployed using createApplication.
+     * 
+     * @param moduleName Name of module to deploy
+     * @param params Parameters of deployment (buildpack, cartridge, artifact or git url..., number of instances)
+     * @return Current model of application
+     * @throws AlreadyExistsException if an application named <code>moduleName</code> is already created.
+     * @throws PaasProviderException on unexpected error from provider.
+     */
+    Module createApplication(String moduleName, PaasSession.DeployParameters params)
+        throws PaasProviderException, AlreadyExistsException;
+    
+
+    /**
+     * Updates the application code or env vars of a created application.
+     * 
+     * @param moduleName Name of module to deploy
+     * @param params Parameters to be changed
+     * @return Current model of application
+     * @throws NotFoundException if the application has not been created.
+     * @throws PaasProviderException on unexpected error from provider.
+     */
+    Module updateApplication(String moduleName, PaasSession.DeployParameters params)
+        throws NotFoundException, PaasProviderException;
+    
+    /**
+     * Creates and deploy an application. It is simply a facade over createApplication and updateApplication.
      * 
      * @param moduleName Name of module to deploy
      * @param params Parameters of deployment (buildpack, cartridge, artifact or git url..., number of instances)
@@ -74,11 +101,12 @@ public interface PaasSession {
      * 
      * @param module Name of module to start/stop.
      * @param command Start/Stop command
-     * @throws NotFoundException
-     * @throws PaasProviderException
+     * @throws NotFoundException if the application is not created
+     * @throws NotDeployedException if the application is not deployed, only created
+     * @throws PaasProviderException on unexpected error from provider
      */
     void startStop(Module module, PaasSession.StartStopCommand command) 
-            throws NotFoundException, PaasProviderException;
+            throws NotFoundException, NotDeployedException, PaasProviderException;
     
     
     /**

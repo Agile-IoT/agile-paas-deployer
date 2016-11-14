@@ -23,6 +23,7 @@ public class CloudFoundryAuthenticationIT {
     @BeforeTest
     public void initialize()
     {
+        System.out.println("---" + this.getClass().getName() + "---");
         client = new PaasClientFactory().getClient("cloudfoundry");
     }
     

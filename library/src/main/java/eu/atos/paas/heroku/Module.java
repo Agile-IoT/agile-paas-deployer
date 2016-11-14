@@ -21,7 +21,7 @@ public class Module implements eu.atos.paas.Module {
     
     private App app;
     private List<String> lServices;
-    private Map<String, Object> mEnv;
+    private Map<String, String> mEnv;
     private URL url;
     
     
@@ -68,7 +68,7 @@ public class Module implements eu.atos.paas.Module {
             lServices = new ArrayList<String>(0);
         }
         
-        this.mEnv = new HashMap<String, Object>(3);
+        this.mEnv = new HashMap<String, String>(3);
         if ((m != null) && (m.size() > 0))
         {
             // Map<String, String> to Map<String, Object>
@@ -93,6 +93,13 @@ public class Module implements eu.atos.paas.Module {
     
     
     @Override
+    public State getState() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    
+    @Override
     public String getAppType() {
         return "web";
     }
@@ -113,7 +120,7 @@ public class Module implements eu.atos.paas.Module {
 
 
     @Override
-    public Map<String, Object> getEnv()
+    public Map<String, String> getEnv()
     {
         return mEnv;
     }
