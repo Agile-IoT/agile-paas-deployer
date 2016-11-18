@@ -144,6 +144,9 @@ public class CloudFoundrySession implements PaasSession {
     public void startStop(Module module, StartStopCommand command) 
             throws PaasException, NotFoundException, UnsupportedOperationException
     {
+        Objects.nonNull(module);
+        Objects.nonNull(command);
+
         try {
             logger.info(command.name() + "({})", module.getName());
             
@@ -271,15 +274,14 @@ public class CloudFoundrySession implements PaasSession {
             }
             throw new PaasProviderException(e.getMessage(), e);
         }
-        
     }
 
 
-    private RuntimeException handle(String moduleName, CloudFoundryException e) {
+    private PaasException handle(String moduleName, CloudFoundryException e) {
         if (isNotFound(e)) {
             return new NotFoundException(moduleName, e);
         }
-        return e;
+        return new PaasProviderException(e.getMessage(), e);
     }
 
 

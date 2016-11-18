@@ -14,7 +14,6 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
-import eu.atos.paas.Groups;
 import eu.atos.paas.Module;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasClientFactory;
@@ -36,8 +35,8 @@ import eu.atos.paas.openshift2.DeployParameters;
  * 		https://github.com/openshift/openshift-java-client/blob/master/src/test/resources/samples/get-cartridges.json
  * 
  */
-@Test(groups = Groups.OPENSHIFT2)
-public class Openshift2IT
+@Test(groups = "XXX", enabled = false)
+public class Openshift2OldIT
 {
 
     
@@ -52,9 +51,9 @@ public class Openshift2IT
     private PaasSession session;
     
     // log
-    private static Logger logger = LoggerFactory.getLogger(Openshift2IT.class);
+    private static Logger logger = LoggerFactory.getLogger(Openshift2OldIT.class);
 
-    public Openshift2IT() throws MalformedURLException {
+    public Openshift2OldIT() throws MalformedURLException {
         
         gitAppUrl = new URL(GIT_APP_URL);
     }

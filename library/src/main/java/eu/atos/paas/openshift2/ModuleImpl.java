@@ -6,10 +6,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
 import com.openshift.client.IApplication;
 import com.openshift.client.IGear;
 import com.openshift.client.IGearGroup;
 import com.openshift.client.cartridge.ICartridge;
+
+import eu.atos.paas.PaasProviderException;
 
 
 /**
@@ -18,7 +21,7 @@ import com.openshift.client.cartridge.ICartridge;
  * @author ATOS
  * @date 21/3/2016-14:05:37
  */
-public class Module implements eu.atos.paas.Module
+public class ModuleImpl implements eu.atos.paas.Module
 {
 
     
@@ -30,16 +33,18 @@ public class Module implements eu.atos.paas.Module
      * Constructor
      * @param app
      */
-    public Module(IApplication appl)
+    public ModuleImpl(IApplication appl)
     {
         this.app = appl;
         try {
+            
             this.url = new URL(app.getApplicationUrl());
+            
         } catch (MalformedURLException e) {
             /*
              * this should not happen
              */
-            throw new IllegalArgumentException("Error in URL=" + app.getApplicationUrl() + " from provider ", e);
+            throw new PaasProviderException("Error in URL=" + app.getApplicationUrl() + " from provider ", e);
         }
     }
     
@@ -60,8 +65,7 @@ public class Module implements eu.atos.paas.Module
     
     @Override
     public State getState() {
-        // TODO Auto-generated method stub
-        return null;
+        return getRunningInstances() > 0? State.STARTED : State.STOPPED;
     }
     
     
@@ -77,16 +81,16 @@ public class Module implements eu.atos.paas.Module
     {
         int runningInst = 0;
         
-        Collection<IGearGroup> res = app.getGearGroups();
-        for (IGearGroup g : res)
+        Collection<IGearGroup> gearGroups = app.getGearGroups();
+        for (IGearGroup group : gearGroups)
         {
-            for (ICartridge cres2 : g.getCartridges())
+            for (ICartridge cartridges : group.getCartridges())
             {
-                if (cres2.getName().equalsIgnoreCase(app.getCartridge().getName()))
+                if (cartridges.getName().equalsIgnoreCase(app.getCartridge().getName()))
                 {
-                    for (IGear ig : g.getGears())
+                    for (IGear gear : group.getGears())
                     {
-                        if (ig.getState().getState().equalsIgnoreCase("STARTED"))
+                        if (gear.getState().getState().equalsIgnoreCase("STARTED"))
                         {
                             runningInst++;
                         }

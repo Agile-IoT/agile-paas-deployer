@@ -1,5 +1,7 @@
 package eu.atos.paas;
 
+import org.testng.SkipException;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import eu.atos.paas.Module.State;
@@ -33,9 +35,33 @@ public abstract class AbstractProviderIT {
         this.initialized = true;
     }
     
+    @AfterClass
+    public void cleanup() {
+        if (session.getModule(APP_NAME) != null) {
+            session.undeploy(APP_NAME);
+        }
+        if (session.getModule(APP_NAME_NOT_EXISTS) != null) {
+            session.undeploy(APP_NAME_NOT_EXISTS);
+        }
+    }
+    
     @Test(priority = 0, groups = "default")
+    public void checkCleanState() {
+        beforeMethod();
+        
+        if (session.getModule(APP_NAME) != null) {
+            this.initialized = false;
+            fail(String.format("Cannot run test: app %s exists", APP_NAME));
+        }
+        if (session.getModule(APP_NAME_NOT_EXISTS) != null) {
+            this.initialized = false;
+            fail(String.format("Cannot run test: app %s exists", APP_NAME_NOT_EXISTS));
+        }
+    }
+    
+    @Test(priority = 5, groups = "default")
     public void getNonExistentApplication() {
-        if (!initialized) { return; }
+        beforeMethod();
 
         System.out.println("Running test with session " + session.getClass().getName());
         Module m = session.getModule(APP_NAME);
@@ -44,7 +70,7 @@ public abstract class AbstractProviderIT {
     
     @Test(priority = 10, groups = "default")
     public void createApplication() {
-        if (!initialized) { return; }
+        beforeMethod();
         
         Module m = session.createApplication(APP_NAME, params);
         assertNotNull(m);
@@ -52,7 +78,7 @@ public abstract class AbstractProviderIT {
     
     @Test(priority = 13, groups = "default")
     public void createExistentApplicationShouldFail() {
-        if (!initialized) { return; }
+        beforeMethod();
 
         try {
             session.createApplication(APP_NAME, params);
@@ -64,17 +90,17 @@ public abstract class AbstractProviderIT {
     
     @Test(priority = 16, groups = "default")
     public void getCreatedApplication() {
-        if (!initialized) { return; }
+        beforeMethod();
         
         Module m = session.getModule(APP_NAME);
         assertNotNull(m);
         assertEquals(APP_NAME, m.getName());
-        assertEquals(State.UNDEPLOYED, m.getState());
+        assertTrue(State.UNDEPLOYED.equals(m.getState()) || State.STARTED.equals(m.getState()));
     }
     
     @Test(priority = 20, groups = "default")
     public void uploadNonExistentApplicationShouldFail() {
-        if (!initialized) { return; }
+        beforeMethod();
         
         try {
             session.updateApplication(APP_NAME_NOT_EXISTS, params);
@@ -86,7 +112,7 @@ public abstract class AbstractProviderIT {
     
     @Test(priority = 25, groups = "default")
     public void uploadApplication() {
-        if (!initialized) { return; }
+        beforeMethod();
         
         Module m = session.updateApplication(APP_NAME, params);
         assertNotNull(m);
@@ -96,7 +122,7 @@ public abstract class AbstractProviderIT {
     
     @Test(priority = 28, groups = "default")
     public void getUploadedApplication() {
-        if (!initialized) { return; }
+        beforeMethod();
 
         Module m = session.getModule(APP_NAME);
         assertNotNull(m);
@@ -106,7 +132,7 @@ public abstract class AbstractProviderIT {
     
     @Test(priority = 30, groups = "default")
     public void stopApplication() {
-        if (!initialized) { return; }
+        beforeMethod();
 
         Module m = session.getModule(APP_NAME);
         session.startStop(m, StartStopCommand.STOP);
@@ -114,7 +140,7 @@ public abstract class AbstractProviderIT {
     
     @Test(priority = 35, groups = "default")
     public void getStoppedApplication() {
-        if (!initialized) { return; }
+        beforeMethod();
 
         Module m = session.getModule(APP_NAME);
         assertNotNull(m);
@@ -124,7 +150,7 @@ public abstract class AbstractProviderIT {
     
     @Test(priority = 37, groups = "default")
     public void stopNonExistentApplicationShouldFail() {
-        if (!initialized) { return; }
+        beforeMethod();
 
         Module m = new NonExistentModule();
         try {
@@ -138,7 +164,7 @@ public abstract class AbstractProviderIT {
     
     @Test(priority = 40, groups = "default")
     public void startApplication() {
-        if (!initialized) { return; }
+        beforeMethod();
 
         Module m = session.getModule(APP_NAME);
         session.startStop(m, StartStopCommand.START);
@@ -146,7 +172,7 @@ public abstract class AbstractProviderIT {
     
     @Test(priority = 43, groups = "default")
     public void getStartedApplication() {
-        if (!initialized) { return; }
+        beforeMethod();
 
         Module m = session.getModule(APP_NAME);
         assertNotNull(m);
@@ -156,7 +182,7 @@ public abstract class AbstractProviderIT {
     
     @Test(priority = 45, groups = "default")
     public void startNonExistentApplicationShouldFail() {
-        if (!initialized) { return; }
+        beforeMethod();
         
         Module m = new NonExistentModule();
         try {
@@ -170,10 +196,14 @@ public abstract class AbstractProviderIT {
     
     @Test(priority = 45, groups = "default")
     public void startNonDeployedApplicationShouldFail() {
-        if (!initialized) { return; }
+        beforeMethod();
 
         Module m = session.createApplication(APP_NAME_NOT_EXISTS, params);
         try {
+            if (State.STARTED.equals(m.getState())) {
+                /* nothing to test here */
+                return;
+            }
             session.startStop(m, StartStopCommand.START);
             fail("Should have thrown NotDeployedException");
         }
@@ -187,14 +217,14 @@ public abstract class AbstractProviderIT {
     
     @Test(priority = 50, groups = "default")
     public void deleteApplication() {
-        if (!initialized) { return; }
+        beforeMethod();
 
         session.undeploy(APP_NAME);
     }
     
     @Test(priority = 52, groups = "default")
     public void getDeletedApplication() {
-        if (!initialized) { return; }
+        beforeMethod();
 
         Module m = session.getModule(APP_NAME);
         assertNull(m);
@@ -202,7 +232,7 @@ public abstract class AbstractProviderIT {
     
     @Test(priority = 55, groups = "default")
     public void deleteNonExistentApplicationShouldFail() {
-        if (!initialized) { return; }
+        beforeMethod();
 
         try {
             session.undeploy(APP_NAME);
@@ -212,6 +242,16 @@ public abstract class AbstractProviderIT {
         }
     }
 
+    /*
+     * Manually called by each test method
+     * Tried to use @BeforeMethod, but it brings lots of problems
+     */
+    private void beforeMethod() {
+        if (!initialized) { 
+            throw new SkipException("Not initialized");
+        }
+    }
+    
     private static final class NonExistentModule implements Module {
         @Override
         public URL getUrl() {

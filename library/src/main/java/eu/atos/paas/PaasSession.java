@@ -49,7 +49,8 @@ public interface PaasSession {
     /**
      * Creates an application.
      * 
-     * The application must be later deployed using createApplication.
+     * The application must be later deployed using createApplication. 
+     * The status of the application is State.UNDEPLOYED or State.STARTED.
      * 
      * @param moduleName Name of module to deploy
      * @param params Parameters of deployment (buildpack, cartridge, artifact or git url..., number of instances)
@@ -63,6 +64,8 @@ public interface PaasSession {
 
     /**
      * Updates the application code or env vars of a created application.
+     * 
+     * If the application is in state UNDEPLOYED and the code is supplied, the state is STARTED.
      * 
      * @param moduleName Name of module to deploy
      * @param params Parameters to be changed

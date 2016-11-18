@@ -1,8 +1,12 @@
 package eu.atos.paas.openshift2;
 
+import java.util.Objects;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openshift.client.IApplication;
+import com.openshift.client.InvalidCredentialsOpenShiftException;
+import com.openshift.client.OpenShiftException;
 
 import eu.atos.paas.AlreadyExistsException;
 import eu.atos.paas.Module;
@@ -15,14 +19,9 @@ import eu.atos.paas.ServiceApp;
 
 /**
  * 
- *
- * @author ATOS
- * @date 11/3/2016-15:54:03
  */
 public class Openshift2Session implements PaasSession
 {
-    
-    
     private static Logger logger = LoggerFactory.getLogger(Openshift2Session.class);
     // paas connector
     private Openshift2Connector connector;
@@ -50,8 +49,23 @@ public class Openshift2Session implements PaasSession
     @Override
     public Module createApplication(String moduleName, DeployParameters params)
             throws PaasProviderException, AlreadyExistsException {
+        Objects.nonNull(moduleName);
+        Objects.nonNull(params);
+        
+        try {
+            
+            if (getModule(moduleName) != null) {
+                throw new AlreadyExistsException(moduleName);
+            }
+            eu.atos.paas.openshift2.DeployParameters p = (eu.atos.paas.openshift2.DeployParameters) params;
+            IApplication app = connector.deployAppFromGit(moduleName, p.getGitUrl().toString(), p.getCartridge());
+            
+            return new ModuleImpl(app);
 
-        throw new UnsupportedOperationException("Not implemented yet");
+        } catch (OpenShiftException e) {
+            
+            throw handle(moduleName, e);
+        }
     }
     
     
@@ -59,43 +73,91 @@ public class Openshift2Session implements PaasSession
     public Module updateApplication(String moduleName, DeployParameters params)
             throws NotFoundException, PaasProviderException {
 
-        throw new UnsupportedOperationException("Not implemented yet");
+        Objects.nonNull(moduleName);
+        Objects.nonNull(params);
+        
+        if (getModule(moduleName) == null) {
+            throw new NotFoundException(moduleName);
+        }
+        
+        /*
+         * TODO
+         */
+        
+        return getModule(moduleName);
     }
     
     
     @Override
     public Module deploy(String moduleName, DeployParameters params) throws PaasException
     {
+        Objects.nonNull(moduleName);
+        Objects.nonNull(params);
+        
         logger.info("DEPLOY({})", moduleName);
-        IApplication app = connector.deployAppFromGit(moduleName, params.getPath(), params.getCartridge());
-        return getModule(moduleName, app);
+        
+        try {
+            
+            IApplication app = connector.deployAppFromGit(moduleName, params.getPath(), params.getCartridge());
+            return new ModuleImpl(app);
+        
+        } catch (OpenShiftException e) {
+            
+            throw handle(moduleName, e);
+        }
     }
 
     
     @Override
     public void undeploy(String moduleName) throws PaasException
     {
+        Objects.nonNull(moduleName);
+
         logger.info("UNDEPLOY({})", moduleName);
-        connector.deleteApp(moduleName);
+        if (getModule(moduleName) == null) {
+            throw new NotFoundException(moduleName);
+        }
+        
+        try {
+            
+            connector.deleteApp(moduleName);
+        
+        } catch (OpenShiftException e) {
+            
+            throw handle(moduleName, e);
+        }
     }
     
 
     @Override
     public void startStop(Module module, StartStopCommand command) throws PaasException, UnsupportedOperationException
     {
+        Objects.nonNull(module);
+        Objects.nonNull(command);
+        
         logger.info(command.name() + "({})", module.getName());
-        switch (command)
-        {
-            case START:
-                connector.startApp(module.getName());
-                break;
-                
-            case STOP:
-                connector.stopApp(module.getName());
-                break;
-                
-            default:
-                throw new UnsupportedOperationException(command.name() + " command not supported (Cloud Foundry)");
+        
+        try {
+            if (getModule(module.getName()) == null) {
+                throw new NotFoundException(module.getName());
+            }
+            
+            switch (command)
+            {
+                case START:
+                    connector.startApp(module.getName());
+                    break;
+                    
+                case STOP:
+                    connector.stopApp(module.getName());
+                    break;
+                    
+                default:
+                    throw new UnsupportedOperationException(command.name() + " command not supported (OpenShift2)");
+            }
+        } catch (OpenShiftException e) {
+            
+            throw handle(module.getName(), e);
         }
     }
 
@@ -159,33 +221,31 @@ public class Openshift2Session implements PaasSession
     {
         logger.debug("getModule({})", moduleName);
         
-        IApplication app = connector.getAppFromDomains(moduleName);
-        
-        if (app == null) {
-            return null;
-        }
+        try {
+            
+            IApplication app = connector.getAppFromDomains(moduleName);
+            
+            if (app == null) {
+                return null;
+            }
+    
+            return new eu.atos.paas.openshift2.ModuleImpl(app);
 
-        return new eu.atos.paas.openshift2.Module(app);
+        } catch (InvalidCredentialsOpenShiftException e) {
+            /*
+             * This should only happen when called from Client.getSession().
+             * Let the exception bubble up
+             */
+            throw e;
+            
+        } catch (OpenShiftException e) {
+            
+            throw handle(moduleName, e);
+        }
     }
     
-    
-    /**
-     * 
-     * @param moduleName
-     * @param app
-     * @return
-     * @throws PaasException
-     */
-    private Module getModule(String moduleName, IApplication app) throws PaasException
-    {
-        logger.debug("getModule({})", moduleName);
+    private PaasException handle(String moduleName, OpenShiftException e) {
         
-        if (app == null) {
-            throw new PaasException("Application " + moduleName + " is NULL");
-        }
-
-        return new eu.atos.paas.openshift2.Module(app);
+        return new PaasProviderException(e.getMessage(), e);
     }
-    
-
 }
