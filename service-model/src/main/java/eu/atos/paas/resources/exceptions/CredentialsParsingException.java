@@ -8,6 +8,6 @@ public class CredentialsParsingException extends ResourceException {
     private static final long serialVersionUID = 1L;
 
     public CredentialsParsingException(String message) {
-        super(new ErrorEntity(Status.UNAUTHORIZED, "Could not parse credentials"));
+        super(new ErrorEntity(Status.UNAUTHORIZED, "Could not parse credentials. " + message));
     }
 }

@@ -403,7 +403,7 @@ public abstract class PaaSResource
                 }
                 return credentials;
             } catch (IllegalArgumentException e) {
-                throw new CredentialsParsingException("Could not parse credentials");
+                throw new CredentialsParsingException(e.getMessage());
             }
         }
         else {
