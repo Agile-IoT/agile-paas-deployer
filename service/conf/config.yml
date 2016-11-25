@@ -4,7 +4,7 @@ server:
   rootPath: /api/*
   connector:
     type: http
-    port: 8080
+    port: 8002
 
 value: value
 

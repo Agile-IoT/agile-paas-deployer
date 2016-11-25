@@ -11,6 +11,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
 
 import eu.atos.paas.Groups;
 import eu.atos.paas.TestConfigProperties;
+import eu.atos.paas.TestConstants;
 import eu.atos.paas.client.RestClient.ProviderClient;
 import eu.atos.paas.data.Application;
 import eu.atos.paas.data.ApplicationToCreate;
@@ -29,7 +30,7 @@ public class RestClientOpenShift2IT {
         @BeforeClass
         public void beforeClass() throws MalformedURLException {
             
-            client = new RestClient(new URL("http://localhost:8080/api"));
+            client = new RestClient(TestConstants.SERVER_URL);
             CredentialsMap credentials = CredentialsMap.builder()
                     .item(USER, TestConfigProperties.getInstance().getOp_user())
                     .item(PASSWORD, TestConfigProperties.getInstance().getOp_password())
