@@ -97,8 +97,8 @@ public class Openshift2Session implements PaasSession
         logger.info("DEPLOY({})", moduleName);
         
         try {
-            
-            IApplication app = connector.deployAppFromGit(moduleName, params.getPath(), params.getCartridge());
+            String url = params.getGitUrl().toString();
+            IApplication app = connector.deployAppFromGit(moduleName, url, params.getCartridge());
             return new ModuleImpl(app);
         
         } catch (OpenShiftException e) {
