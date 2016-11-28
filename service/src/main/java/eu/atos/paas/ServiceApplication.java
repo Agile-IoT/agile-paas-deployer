@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.atos.paas.resources.ApiResource;
-import eu.atos.paas.resources.PaaSResource;
+import eu.atos.paas.resources.PaasResource;
 import eu.atos.paas.serviceloader.ResourceSet;
 import eu.atos.paas.serviceloader.ResourceSet.ResourceDescriptor;
 import io.dropwizard.Application;
@@ -57,7 +57,7 @@ public class ServiceApplication extends Application<ServiceConfiguration>
         /*
          * key: path; value: resource
          */
-        Map<String, PaaSResource> resourcesMap = new HashMap<>();
+        Map<String, PaasResource> resourcesMap = new HashMap<>();
 
         /*
          * Each ResourceSet declares a collection of REST resources and its subpath.
@@ -74,7 +74,7 @@ public class ServiceApplication extends Application<ServiceConfiguration>
         environment.jersey().register(MultiPartFeature.class);
         environment.jersey().register(api);
         
-        for (Map.Entry<String, PaaSResource> item : resourcesMap.entrySet()) {
+        for (Map.Entry<String, PaasResource> item : resourcesMap.entrySet()) {
             logger.info("Added resource /{} ({})", item.getKey(), item.getValue().getClass().getName());
         }
 

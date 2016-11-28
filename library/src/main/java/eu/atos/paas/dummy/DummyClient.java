@@ -8,7 +8,9 @@ import eu.atos.paas.credentials.Credentials;
 import eu.atos.paas.credentials.UserPasswordCredentials;
 
 public class DummyClient implements PaasClient {
-
+    
+    public static final String VERSION = "v1";
+    
     /**
      * Value of accepted user
      */
@@ -32,4 +34,8 @@ public class DummyClient implements PaasClient {
         }
     }
 
+    @Override
+    public String getVersion() {
+        return VERSION;
+    }
 }

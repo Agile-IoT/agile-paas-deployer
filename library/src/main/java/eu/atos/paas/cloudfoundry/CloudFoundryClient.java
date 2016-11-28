@@ -18,7 +18,7 @@ import eu.atos.paas.credentials.Credentials;
  */
 public class CloudFoundryClient implements PaasClient
 {
-
+    public static String VERSION = "v2";
 
     @Override
     public PaasSession getSession(Credentials credentials)
@@ -64,5 +64,8 @@ public class CloudFoundryClient implements PaasClient
         }
     }
 
-
+    @Override
+    public String getVersion() {
+        return VERSION;
+    }
 }

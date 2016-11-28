@@ -9,7 +9,6 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.atos.paas.Module;
-import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasSession;
 import eu.atos.paas.ServiceApp;
 import eu.atos.paas.credentials.ApiKeyCredentials;
@@ -17,10 +16,9 @@ import eu.atos.paas.credentials.Credentials;
 import eu.atos.paas.credentials.UserPasswordCredentials;
 import eu.atos.paas.data.CredentialsMap;
 import eu.atos.paas.data.Provider;
-import eu.atos.paas.resources.Constants.Providers;
 
 
-public class HerokuResource extends PaaSResource
+public class HerokuResource extends PaasResource
 {
     private static Logger log = LoggerFactory.getLogger(HerokuResource.class);
 
@@ -29,9 +27,9 @@ public class HerokuResource extends PaaSResource
      * 
      * @param client
      */
-    public HerokuResource(PaasClient client)
+    public HerokuResource(Provider provider, ClientMap clientMap)
     {
-        super(client, new Provider(Providers.HEROKU, "https://api.heroku.com/"));
+        super(provider, clientMap);
     }
     
     

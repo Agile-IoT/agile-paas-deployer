@@ -8,7 +8,7 @@ import eu.atos.paas.credentials.UserPasswordCredentials;
 
 
 public class HerokuClient implements PaasClient {
-
+    public static final String VERSION = "v3";
     
     @Override
     public PaasSession getSession(Credentials credentials) {
@@ -46,5 +46,8 @@ public class HerokuClient implements PaasClient {
         return session;
     }
     
-    
+    @Override
+    public  String getVersion() {
+        return VERSION;
+    }
 }

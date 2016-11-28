@@ -17,7 +17,7 @@ import eu.atos.paas.data.Application;
 import eu.atos.paas.data.ApplicationToCreate;
 import eu.atos.paas.data.CredentialsMap;
 
-import static eu.atos.paas.credentials.UserPasswordCredentials.*;
+import static eu.atos.paas.credentials.ApiUserPasswordCredentials.*;
 import static org.testng.AssertJUnit.*;
 
 @Test(groups = Groups.OPENSHIFT2)
@@ -32,6 +32,7 @@ public class RestClientOpenShift2IT {
             
             client = new RestClient(TestConstants.SERVER_URL);
             CredentialsMap credentials = CredentialsMap.builder()
+                    .item(API, TestConfigProperties.getInstance().getOp_api())
                     .item(USER, TestConfigProperties.getInstance().getOp_user())
                     .item(PASSWORD, TestConfigProperties.getInstance().getOp_password())
                     .build();

@@ -3,7 +3,7 @@ package eu.atos.paas.serviceloader;
 import java.util.ServiceLoader;
 import java.util.Set;
 
-import eu.atos.paas.resources.PaaSResource;
+import eu.atos.paas.resources.PaasResource;
 
 /**
  * Defines an interface to allow pluggable PaasResources using {@link ServiceLoader}.
@@ -17,16 +17,16 @@ public interface ResourceSet {
     
     public static class ResourceDescriptor {
         private String path;
-        private PaaSResource resource;
+        private PaasResource resource;
         
-        public ResourceDescriptor(String path, PaaSResource resource) {
+        public ResourceDescriptor(String path, PaasResource resource) {
             this.path = path;
             this.resource = resource;
         }
         public String getPath() {
             return path;
         }
-        public PaaSResource getResource() {
+        public PaasResource getResource() {
             return resource;
         }
     }

@@ -7,32 +7,26 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
-import eu.atos.paas.data.Application;
 import eu.atos.paas.data.CredentialsMap;
+import eu.atos.paas.credentials.ApiUserPasswordCredentials;
 import eu.atos.paas.credentials.Credentials;
-import eu.atos.paas.credentials.UserPasswordCredentials;
 import eu.atos.paas.data.Provider;
 import eu.atos.paas.Module;
-import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasSession;
 import eu.atos.paas.ServiceApp;
-import eu.atos.paas.openshift2.DeployParameters;
-import eu.atos.paas.resources.Constants.Providers;
 
 
-public class Openshift2Resource extends PaaSResource
+public class OpenShiftResource extends PaasResource
 {
-    private static Logger log = LoggerFactory.getLogger(Openshift2Resource.class);
+    private static Logger log = LoggerFactory.getLogger(OpenShiftResource.class);
 
     
     /**
@@ -40,9 +34,9 @@ public class Openshift2Resource extends PaaSResource
      * Constructor
      * @param client
      */
-    public Openshift2Resource(PaasClient client)
+    public OpenShiftResource(Provider provider, ClientMap clientMap)
     {
-        super(client, new Provider(Providers.OPENSHIFT2, "http://api.openshift.com"));
+        super(provider, clientMap);
     }
     
     
@@ -119,7 +113,7 @@ public class Openshift2Resource extends PaaSResource
     protected Credentials buildCredentialsFromFieldsMap(CredentialsMap credentialsMap)
             throws IllegalArgumentException {
         
-        return new UserPasswordCredentials(credentialsMap);
+        return new ApiUserPasswordCredentials(credentialsMap);
     }
 
 }

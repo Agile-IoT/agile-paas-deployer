@@ -16,7 +16,7 @@ import eu.atos.paas.resources.exceptions.ResourceException;
 /**
  * Proxy that converts any library exception into a REST exception. 
  * 
- * @see PaaSResource to check the correspondency between library exceptions and REST exceptions.
+ * @see PaasResource to check the correspondency between library exceptions and REST exceptions.
  *
  */
 /*

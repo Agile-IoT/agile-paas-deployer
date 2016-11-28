@@ -33,6 +33,7 @@ public class TestConfigProperties
     private String cf_space = "";
     private boolean cf_trustSelfSignedCerts = true;
     // OPENSHIFT
+    private String op_api = "";
     private String op_user = "";
     private String op_password = "";
     
@@ -65,6 +66,7 @@ public class TestConfigProperties
         cf_space = props.getProperty("cf_space", "");
         cf_api = props.getProperty("cf_api", "");
         
+        op_api = props.getProperty("op_api", "");
         op_user = props.getProperty("op_user", "");
         op_password = props.getProperty("op_password", "");
         
@@ -174,7 +176,10 @@ public class TestConfigProperties
         return cf_trustSelfSignedCerts;
     }
     
-    
+    public String getOp_api()
+    {
+        return op_api;
+    }
     /**
      * @return the op_user
      */

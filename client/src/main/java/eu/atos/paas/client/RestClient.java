@@ -41,14 +41,32 @@ public class RestClient {
                 .register(MultiPartFeature.class)
                 .register(JacksonFeature.class);
     }
-    
+
+    /**
+     * Gets a Provider resource, which will use the default provider version for the operations.
+     * @param provider provider subpath from root (e.g. "cloudfoundry")
+     * @param credentials CredentialsMap with the credentials to connect to the specified provider. The content of
+     * the credentials depends on the provider
+     */
     public ProviderClient getProvider(String provider, CredentialsMap credentials) {
-        return new ProviderClient(provider, credentials);
+        return new ProviderClient(provider, "", credentials);
+    }
+
+    /**
+     * Gets a Provider resource, specifying a provider version for the operations.
+     * @param provider provider subpath from root (e.g. "cloudfoundry")
+     * @param apiVersion version to use to connect to provider. Available versions are returned in provider description.
+     * @param credentials CredentialsMap with the credentials to connect to the specified provider. The content of
+     * the credentials depends on the provider
+     */
+    public ProviderClient getProvider(String provider, String apiVersion, CredentialsMap credentials) {
+        return new ProviderClient(provider, apiVersion, credentials);
     }
     
     public class ProviderClient {
         
         private String provider;
+        private String apiVersion;
         private CredentialsMap credentials;
         private PlainTransformer transformer;
         /*
@@ -57,8 +75,9 @@ public class RestClient {
         private WebTarget rootTarget;
         private WebTarget appsTarget;
         
-        public ProviderClient(String provider, CredentialsMap credentials) {
+        public ProviderClient(String provider, String apiVersion, CredentialsMap credentials) {
             this.credentials = credentials;
+            this.apiVersion = apiVersion;
             this.provider = provider;
             this.rootTarget = client.target(root.toString()).path(this.provider);
             this.appsTarget = rootTarget.path("applications");
@@ -74,6 +93,7 @@ public class RestClient {
         public List<Application> getApplications() {
             Response response = appsTarget.request(MediaType.APPLICATION_JSON)
                 .header(Constants.Headers.CREDENTIALS, transformer.serialize(credentials))
+                .header(Constants.Headers.PROVIDER_VERSION, apiVersion)
                 .get();
             List<Application> applications = responseHandler.readEntity(response, APPLICATION_LIST_TYPE);
             return applications;
@@ -83,6 +103,7 @@ public class RestClient {
             WebTarget appTarget = appsTarget.path(name);
             Response response = appTarget.request(MediaType.APPLICATION_JSON)
                 .header(Constants.Headers.CREDENTIALS, transformer.serialize(credentials))
+                .header(Constants.Headers.PROVIDER_VERSION, apiVersion)
                 .get();
             Application application = responseHandler.readEntity(response, Application.class);
             return application;
@@ -107,6 +128,7 @@ public class RestClient {
                 Response response = appsTarget.request()
                         .accept(MediaType.APPLICATION_JSON_TYPE)
                         .header(Constants.Headers.CREDENTIALS, transformer.serialize(credentials))
+                        .header(Constants.Headers.PROVIDER_VERSION, apiVersion)
                         .post(Entity.entity(multipart, multipart.getMediaType()));
 
                 Application createdApplication = responseHandler.readEntity(response, Application.class);

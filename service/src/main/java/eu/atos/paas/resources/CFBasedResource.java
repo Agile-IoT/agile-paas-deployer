@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.atos.paas.Module;
-import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasSession;
 import eu.atos.paas.ServiceApp;
 import eu.atos.paas.credentials.ApiUserPasswordOrgSpaceCredentials;
@@ -20,7 +19,7 @@ import eu.atos.paas.data.CredentialsMap;
 import eu.atos.paas.data.Provider;
 
 
-public class CFBasedResource extends PaaSResource
+public class CFBasedResource extends PaasResource
 {
     private static Logger log = LoggerFactory.getLogger(CFBasedResource.class);
 
@@ -28,9 +27,9 @@ public class CFBasedResource extends PaaSResource
      * 
      * @param client
      */
-    public CFBasedResource(PaasClient client, Provider provider)
+    public CFBasedResource(Provider provider, ClientMap clientMap)
     {
-        super(client, provider);
+        super(provider, clientMap);
     }
 
     @PUT

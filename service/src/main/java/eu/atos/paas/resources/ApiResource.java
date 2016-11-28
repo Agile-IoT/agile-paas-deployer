@@ -1,8 +1,10 @@
 package eu.atos.paas.resources;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -12,6 +14,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
+import eu.atos.paas.data.Provider;
 import eu.atos.paas.dummy.DummyClient;
 
 
@@ -19,21 +22,27 @@ import eu.atos.paas.dummy.DummyClient;
 public class ApiResource {
 
     private static final String DUMMY_PATH = "dummy";
-    private Map<String, PaaSResource> map;
-    DummyResource dummyResource;
-    public ApiResource(Map<String, PaaSResource> subResourceMap) {
+    private Map<String, PaasResource> map;
+    private DummyResource dummyResource;
+    
+    public ApiResource(Map<String, PaasResource> subResourceMap) {
         this.map = new HashMap<>(subResourceMap);
-        this.dummyResource = new DummyResource(new DummyClient());
+        DummyClient dummyClient = new DummyClient();
+        this.dummyResource = new DummyResource(dummyClient);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Set<String> getProvidersSet() {
-        return map.keySet();
+    public Collection<Provider> getProvidersSet() {
+        List<Provider> providers = new ArrayList<>();
+        for (PaasResource resource : map.values()) {
+            providers.add(resource.getProvider());
+        }
+        return providers;
     }
     
     @Path("{provider}")
-    public PaaSResource getProvider(@PathParam("provider") String provider) {
+    public PaasResource getProvider(@PathParam("provider") String provider) {
         if (DUMMY_PATH.equals(provider)) {
             return dummyResource;
         }

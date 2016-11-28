@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -65,13 +66,13 @@ import io.swagger.annotations.ApiOperation;
  * Wrong input should be detected in validation and return 400.
  *
  */
-public abstract class PaaSResource
+public abstract class PaasResource
 {
-    private static Logger log = LoggerFactory.getLogger(PaaSResource.class);
+    private static Logger log = LoggerFactory.getLogger(PaasResource.class);
     private static PlainTransformer plainTransformer = new PlainTransformer();
     private static Base64Transformer base64Transformer = new Base64Transformer(plainTransformer);
-    private PaasClient client;
-    protected Provider provider;
+    private final ClientMap clientMap;
+    protected final Provider provider;
 
     public enum OperationResult
     {
@@ -85,10 +86,20 @@ public abstract class PaaSResource
      * 
      * @param client
      */
-    public PaaSResource(PaasClient client, Provider provider)
+    public PaasResource(Provider provider, ClientMap clientMap)
     {
-        this.client = Objects.requireNonNull(client);
+        this.clientMap = Objects.requireNonNull(clientMap);
         this.provider = Objects.requireNonNull(provider);
+        
+        /*
+         * Check provider.defaultVersion has a client
+         */
+        if (clientMap.get(provider.getDefaultVersion()) == null) {
+            throw new IllegalArgumentException(
+                    "Trying to construct a PaasResource where provider default version [" + 
+                    provider.getDefaultVersion() + "] do not have a client in clientMap");
+            
+        }
     }
 
     
@@ -476,8 +487,15 @@ public abstract class PaaSResource
      */
     protected PaasSessionProxy getSession(HttpHeaders headers) {
         Credentials credentials = extractCredentials(headers);
+        String version = getVersionOrDefault(headers, provider);
         PaasSessionProxy sessionProxy;
         try {
+            if (!clientMap.containsKey(version)) {
+                throw new ValidationException(
+                        "Version '" + version + "' is not valid for provider '" + provider.getName() +
+                        "'. Valid versions are " + Arrays.toString(provider.getVersions().toArray()));
+            }
+            PaasClient client = clientMap.get(version);
             PaasSession session = client.getSession(credentials);
             sessionProxy = new PaasSessionProxy(session);
         } catch (eu.atos.paas.AuthenticationException e) {
@@ -486,4 +504,16 @@ public abstract class PaaSResource
         return sessionProxy;
     }
 
+    /** 
+     * Extract from headers the ProviderVersion if specified; if not, the default version for the provider. 
+     * In case of multiple ProviderVersion headers, the first one is picked. 
+     * If the header is empty, the default version is returned.
+     */
+    private String getVersionOrDefault(HttpHeaders headers, Provider provider) {
+        List<String> versions = headers.getRequestHeader(Constants.Headers.PROVIDER_VERSION);
+        if (versions == null || versions.size() == 0 || versions.get(0).isEmpty()) {
+            return provider.getDefaultVersion();
+        }
+        return versions.get(0);
+    }
 }

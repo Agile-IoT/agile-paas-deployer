@@ -8,13 +8,10 @@ import eu.atos.paas.credentials.Credentials;
 
 /**
  * 
- *
- * @author ATOS
- * @date 18/2/2016-14:26:32
  */
 public class Openshift3Client implements PaasClient
 {
-    
+    public static final String VERSION = "v3";
 
     @Override
     public PaasSession getSession(Credentials credentials) throws PaasException
@@ -22,5 +19,8 @@ public class Openshift3Client implements PaasClient
         throw new UnsupportedOperationException("Openshift3 client not implemented");
     }
 
-    
+    @Override
+    public String getVersion() {
+        return VERSION;
+    }
 }

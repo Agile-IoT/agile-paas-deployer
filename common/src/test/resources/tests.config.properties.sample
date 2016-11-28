@@ -20,5 +20,6 @@ cf_trustSelfSignedCerts=
 #  		PRIVATE_CF = ""
 
 # OPENSHIFT
+op_api=
 op_user=
 op_password=

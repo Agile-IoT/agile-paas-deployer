@@ -14,4 +14,5 @@ public interface PaasClient {
      */
     PaasSession getSession(Credentials credentials) throws AuthenticationException, PaasProviderException;
     
+    String getVersion();
 }

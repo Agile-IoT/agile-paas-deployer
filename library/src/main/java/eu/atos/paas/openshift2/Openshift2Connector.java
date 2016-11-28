@@ -1,6 +1,7 @@
 package eu.atos.paas.openshift2;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,12 +39,12 @@ public class Openshift2Connector
      * @param login
      * @param passwd
      */
-    public Openshift2Connector(String login, String passwd)
+    public Openshift2Connector(URL serverUrl, String login, String passwd)
     {
         logger.info(">> Connecting to Openshift2 ...");
         try
         {
-            _of2client = new ConnectionBuilder().credentials(login, passwd).create();
+            _of2client = new ConnectionBuilder(serverUrl.toString()).credentials(login, passwd).create();
         }
         catch (OpenShiftException e)
         {

@@ -26,12 +26,13 @@ public class RestClientIT {
     
     RestClient client;
     ProviderClient provider;
+    CredentialsMap credentials;
     
     @BeforeClass
     public void beforeClass() throws MalformedURLException {
         
         client = new RestClient(TestConstants.SERVER_URL);
-        CredentialsMap credentials = CredentialsMap.builder()
+        credentials = CredentialsMap.builder()
                 .item(UserPasswordCredentials.USER, "user")
                 .item(UserPasswordCredentials.PASSWORD, "password")
                 .build();
@@ -62,6 +63,26 @@ public class RestClientIT {
         }
     }
     
+    @Test(priority = 5)
+    public void testSetWrongApiVersion() {
+        
+        try {
+            
+            ProviderClient provider = client.getProvider("dummy", "donotexists", credentials);
+            provider.getApplications();
+        }
+        catch (RestClientException e) {
+            assertEquals(Status.BAD_REQUEST.getStatusCode(), e.getError().getCode());
+            return;
+        }
+        
+    }
+
+    @Test(priority = 5)
+    public void testSetApiVersion() {
+        ProviderClient provider = client.getProvider("dummy", "v1", credentials);
+        provider.getApplications();
+    }
     
     @Test(priority = 10)
     public void getProviderDescription() {

@@ -15,12 +15,19 @@ import eu.atos.paas.credentials.UserPasswordCredentials;
 import eu.atos.paas.data.CredentialsMap;
 import eu.atos.paas.data.Provider;
 
-public class DummyResource extends PaaSResource {
+public class DummyResource extends PaasResource {
 
-    public DummyResource(PaasClient client) {
-        super(client, new Provider(Constants.Providers.DUMMY, "http://www.example.com"));
+    public DummyResource(Provider provider, ClientMap clientMap) {
+        super(provider, clientMap);
     }
 
+    public DummyResource(PaasClient dummyClient) {
+        super(
+            new Provider(Constants.Providers.DUMMY, "http://www.example.com", dummyClient.getVersion()),
+            ClientMap.builder().client(dummyClient).build()
+        );
+    }
+    
     @PUT
     @Path("/applications/{name}/bind/{service}")
     @Override

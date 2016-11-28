@@ -10,6 +10,7 @@ import eu.atos.paas.AuthenticationException;
 import eu.atos.paas.Groups;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.TestConfigProperties;
+import eu.atos.paas.credentials.ApiUserPasswordCredentials;
 import eu.atos.paas.credentials.UserPasswordCredentials;
 import eu.atos.paas.openshift2.Openshift2Client;
 
@@ -29,7 +30,8 @@ public class OpenShift2AuthenticationIT {
     
     @Test
     public void testRightAuthentication() {
-        client.getSession(new UserPasswordCredentials(
+        client.getSession(new ApiUserPasswordCredentials(
+                TestConfigProperties.getInstance().getOp_api(),
                 TestConfigProperties.getInstance().getOp_user(), 
                 TestConfigProperties.getInstance().getOp_password()));
 
@@ -39,7 +41,8 @@ public class OpenShift2AuthenticationIT {
     public void testWrongAuthentication() {
         
         try {
-            client.getSession(new UserPasswordCredentials("wrong-user", "wrong-password"));
+            client.getSession(new ApiUserPasswordCredentials(
+                    TestConfigProperties.getInstance().getOp_api(), "wrong-user", "wrong-password"));
             fail("Did not throw exception");
             
         } catch (AuthenticationException e) {
@@ -49,4 +52,17 @@ public class OpenShift2AuthenticationIT {
         }
     }
     
+    @Test
+    public void testWrongApi() {
+        
+        try {
+            
+            client.getSession(new ApiUserPasswordCredentials("", "user", "password"));
+            fail("Did not throw exception");
+            
+        } catch (AuthenticationException e) {
+            
+            assertTrue(true);
+        }
+    }
 }
