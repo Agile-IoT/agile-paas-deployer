@@ -112,7 +112,7 @@ public class RestClientIT {
         
         String appName = "test2";
         ApplicationToCreate appToCreate = 
-                new ApplicationToCreate(appName, new URL("https://github.com/octocat/Hello-World.git"), "");
+                new ApplicationToCreate(appName, new URL("https://github.com/octocat/Hello-World.git"), "Java");
         Application app1 = provider.createApplication(appToCreate);
         assertNotNull(app1);
         assertEquals(appName, app1.getName());

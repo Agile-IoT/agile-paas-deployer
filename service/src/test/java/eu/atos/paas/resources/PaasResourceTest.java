@@ -157,7 +157,7 @@ public class PaasResourceTest {
     public void testCreateApplicationWithGitUrl() throws IOException {
         
         ApplicationToCreate appToCreate = new ApplicationToCreate(
-                "other_app_name", new URL("https://github.com/octocat/Hello-World.git"), "");
+                "other_app_name", new URL("https://github.com/octocat/Hello-World.git"), "Java");
         
         Application createdApp = resource.createApplication(headers, appToCreate);
         

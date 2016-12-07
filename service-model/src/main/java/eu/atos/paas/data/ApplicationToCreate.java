@@ -13,9 +13,10 @@ public class ApplicationToCreate {
 
     private String name;
     private URL gitUrl;
-    private String cartridge;
     @JsonIgnore
     private InputStream artifact;
+
+    private String programmingLanguage;
 
     /**
      * Just for deserialization 
@@ -23,16 +24,16 @@ public class ApplicationToCreate {
     public ApplicationToCreate() {
     }
     
-    public ApplicationToCreate(String name, InputStream artifact, String cartridge) {
+    public ApplicationToCreate(String name, InputStream artifact, String programmingLanguage) {
         this.name = Objects.requireNonNull(name);
         this.artifact = Objects.requireNonNull(artifact);
-        this.cartridge = Objects.requireNonNull(cartridge);
+        this.programmingLanguage = Objects.requireNonNull(programmingLanguage);
     }
     
-    public ApplicationToCreate(String name, URL gitUrl, String cartridge) {
+    public ApplicationToCreate(String name, URL gitUrl, String programmingLanguage) {
         this.name = Objects.requireNonNull(name);
         this.gitUrl = Objects.requireNonNull(gitUrl);
-        this.cartridge = Objects.requireNonNull(cartridge);
+        this.programmingLanguage = Objects.requireNonNull(programmingLanguage);
     }
     
     /**
@@ -41,8 +42,8 @@ public class ApplicationToCreate {
     public ApplicationToCreate(ApplicationToCreate application, InputStream artifact) {
         this.name = application.getName();
         this.gitUrl = application.getGitUrl();
-        this.cartridge = application.getCartridge();
         this.artifact = artifact;
+        this.programmingLanguage = application.getProgrammingLanguage();
     }
     
     public String getName() {
@@ -57,8 +58,8 @@ public class ApplicationToCreate {
         return artifact;
     }
 
-    public String getCartridge() {
-        return cartridge;
+    public String getProgrammingLanguage() {
+        return programmingLanguage;
     }
     
     public void validate() {

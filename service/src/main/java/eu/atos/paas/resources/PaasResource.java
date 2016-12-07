@@ -31,6 +31,8 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.openshift.client.cartridge.IStandaloneCartridge;
+
 import eu.atos.paas.data.Application;
 import eu.atos.paas.data.ApplicationToCreate;
 import eu.atos.paas.data.CredentialsMap;
@@ -48,6 +50,7 @@ import eu.atos.paas.PaasSession.StartStopCommand;
 import eu.atos.paas.resources.exceptions.AuthenticationException;
 import eu.atos.paas.resources.exceptions.CredentialsParsingException;
 import eu.atos.paas.resources.exceptions.EntityNotFoundException;
+import eu.atos.paas.resources.exceptions.ResourceException;
 import eu.atos.paas.resources.exceptions.ValidationException;
 import io.swagger.annotations.ApiOperation;
 
@@ -60,7 +63,7 @@ import io.swagger.annotations.ApiOperation;
  * <li>AuthenticationException : 401
  * <li>NotFoundException : 404
  * <li>AlreadyExistsException : 409
- * <li>NotImplementedException : 501
+ * <li>UnsupportedOperationException : 501
  * <li>Any other runtime exception : 500
  * 
  * Wrong input should be detected in validation and return 400.
@@ -181,7 +184,33 @@ public abstract class PaasResource
                 params = new eu.atos.paas.heroku.DeployParameters(file.getAbsolutePath());
             }
             else {
-                params = new eu.atos.paas.openshift2.DeployParameters(application.getGitUrl(), application.getCartridge());
+                String cartridge;
+                switch (application.getProgrammingLanguage()) {
+                case "Java": 
+                    cartridge = IStandaloneCartridge.NAME_JBOSSEWS;
+                    break;
+                case "Python": 
+                    cartridge = IStandaloneCartridge.NAME_PYTHON;
+                    break;
+                case "PhP": 
+                    cartridge = IStandaloneCartridge.NAME_PHP;
+                    break;
+                case "Perl": 
+                    cartridge = IStandaloneCartridge.NAME_PERL;
+                    break;
+                case "Ruby": 
+                    cartridge = IStandaloneCartridge.NAME_RUBY;
+                    break;
+                case "Node.JS":
+                    cartridge = "nodejs-0.10";
+                    break;
+                default:
+                    throw new ResourceException(
+                        new ErrorEntity(
+                            Status.NOT_IMPLEMENTED,
+                            "Programming language not supported: " + application.getProgrammingLanguage()));
+                }
+                params = new eu.atos.paas.openshift2.DeployParameters(application.getGitUrl(), cartridge);
             }
 
             Module m = session.deploy(application.getName(), params);

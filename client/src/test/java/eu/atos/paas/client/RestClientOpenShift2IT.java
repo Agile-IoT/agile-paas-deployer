@@ -45,7 +45,7 @@ public class RestClientOpenShift2IT {
             ApplicationToCreate appToCreate = new ApplicationToCreate(
                     APP_NAME, 
                     new URL("https://github.com/OpenMEAP/openshift-openmeap-quickstart"),
-                    IStandaloneCartridge.NAME_JBOSSEWS);
+                    "Java");
             Application createdApp = provider.createApplication(appToCreate);
             assertNotNull(createdApp);
             Application app = provider.getApplication(APP_NAME);
