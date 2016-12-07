@@ -1,9 +1,6 @@
 package eu.atos.paas.resources;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.GET;
@@ -33,10 +30,10 @@ public class ApiResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<Provider> getProvidersSet() {
-        List<Provider> providers = new ArrayList<>();
-        for (PaasResource resource : map.values()) {
-            providers.add(resource.getProvider());
+    public Map<String, Provider> getProvidersSet() {
+        Map<String, Provider> providers = new HashMap<>();
+        for (Map.Entry<String, PaasResource>entry : map.entrySet()) {
+            providers.put(entry.getKey(), entry.getValue().getProvider());
         }
         return providers;
     }

@@ -54,7 +54,7 @@ public class ServiceImpl implements ResourceSet {
         final OpenShiftResource openshiftOnline = newOpenShiftResource(
                 new Provider(
                         Providers.OPENSHIFT_ONLINE, 
-                        "http://api.openshift.com",
+                        "https://openshift.redhat.com",
                         new String[] { Openshift2Client.VERSION, Openshift3Client.VERSION },
                         Openshift2Client.VERSION
                 )

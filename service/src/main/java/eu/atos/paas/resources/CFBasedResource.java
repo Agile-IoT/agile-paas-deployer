@@ -101,10 +101,10 @@ public class CFBasedResource extends PaasResource
         throws IllegalArgumentException {
         
         /*
-         * Remove API field if present in case using a specific CloudFoundry provider
+         * Set API field to provider URL in case using a specific CloudFoundry provider
          */
         if (!this.getProvider().getName().equals(Constants.Providers.CLOUDFOUNDRY)) {
-            credentialsMap.remove(ApiUserPasswordOrgSpaceCredentials.API);
+            credentialsMap.put(ApiUserPasswordOrgSpaceCredentials.API, provider.getUrl().toString());
         }
         
         return new ApiUserPasswordOrgSpaceCredentials(credentialsMap);

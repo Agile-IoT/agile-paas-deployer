@@ -146,7 +146,7 @@ public class PaasSessionProxy implements PaasSession {
     private RuntimeException handle(RuntimeException e) {
 
         if (e instanceof PaasProviderException) {
-            return new ResourceException(new ErrorEntity(Status.BAD_GATEWAY, e.getMessage()));
+            return new ResourceException(new ErrorEntity(Status.BAD_GATEWAY, e.getMessage()), e);
         } else if (e instanceof NotFoundException) {
             return new ResourceException(new ErrorEntity(Status.NOT_FOUND, e.getMessage()));
         } else if (e instanceof AlreadyExistsException) {

@@ -113,6 +113,12 @@ public class OpenShiftResource extends PaasResource
     protected Credentials buildCredentialsFromFieldsMap(CredentialsMap credentialsMap)
             throws IllegalArgumentException {
         
+        /*
+         * Set API field to provider URL in case using a specific OpenShift provider
+         */
+        if (!this.getProvider().getName().equals(Constants.Providers.OPENSHIFT)) {
+            credentialsMap.put(ApiUserPasswordCredentials.API, provider.getUrl().toString());
+        }
         return new ApiUserPasswordCredentials(credentialsMap);
     }
 
