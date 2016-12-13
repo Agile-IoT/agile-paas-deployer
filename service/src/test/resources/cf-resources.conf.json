@@ -1,0 +1,32 @@
+{
+    "cloudfoundry":{
+        "provider":{
+            "name":"CloudFoundry",
+            "url":"https://www.example.com",
+            "versions":["v2"],
+            "defaultVersion":"v2"
+        },
+        "resourceClass":"eu.atos.paas.resources.CFBasedResource",
+        "clients":["eu.atos.paas.cloudfoundry.CloudFoundryClient"]
+    },
+    "pivotal":{
+        "provider":{
+            "name":"Pivotal",
+            "url":"https://api.run.pivotal.io",
+            "versions":["v2"],
+            "defaultVersion":"v2"
+        },
+        "resourceClass":"eu.atos.paas.resources.CFBasedResource",
+        "clients":["eu.atos.paas.cloudfoundry.CloudFoundryClient"]
+    },
+    "bluemix":{
+        "provider":{
+            "name":"Bluemix",
+            "url":"https://api.ng.bluemix.net",
+            "versions":["v2"],
+            "defaultVersion":"v2"
+        },
+        "resourceClass":"eu.atos.paas.resources.CFBasedResource",
+        "clients":["eu.atos.paas.cloudfoundry.CloudFoundryClient"]
+    }
+}
