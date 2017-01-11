@@ -37,6 +37,7 @@ import eu.atos.paas.data.Application;
 import eu.atos.paas.data.ApplicationToCreate;
 import eu.atos.paas.data.CredentialsMap;
 import eu.atos.paas.credentials.Credentials;
+import eu.atos.paas.credentials.CredentialsUtils;
 import eu.atos.paas.data.Provider;
 import eu.atos.paas.data.CredentialsMap.Base64Transformer;
 import eu.atos.paas.data.CredentialsMap.PlainTransformer;
@@ -182,6 +183,9 @@ public abstract class PaasResource
                 file = File.createTempFile("up-tmp-file", ".tmp");
                 saveToFile(application.getArtifact(), file);
                 params = new eu.atos.paas.heroku.DeployParameters(file.getAbsolutePath());
+            } 
+            else if (Constants.Providers.HEROKU.equals(this.provider.getName())) {
+                params = new eu.atos.paas.heroku.DeployParameters(application.getGitUrl());
             }
             else {
                 String cartridge;
@@ -426,7 +430,7 @@ public abstract class PaasResource
         
         if (crs != null && !crs.isEmpty() && crs.size() == 1) {
             String header = crs.get(0);
-            log.debug("Credentials header: {}", header);
+            log.debug("Credentials header: {}", CredentialsUtils.shadowJsonCredentials(header));
             try {
                 if (header.trim().startsWith("{")) {
                     credentialsMap = plainTransformer.deserialize(header);

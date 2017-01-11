@@ -38,7 +38,13 @@ public class HerokuSession implements PaasSession {
     public Module createApplication(String moduleName, DeployParameters params)
             throws PaasProviderException, AlreadyExistsException {
         
-        throw new UnsupportedOperationException("Not implemented yet");
+        App app = connector.createApp(moduleName);
+        
+        if (app == null) {
+            throw new PaasException("Application not created");
+        }
+        
+        return getModule(moduleName);
     }
     
 
@@ -46,7 +52,23 @@ public class HerokuSession implements PaasSession {
     public Module updateApplication(String moduleName, DeployParameters params)
             throws NotFoundException, PaasProviderException {
 
-        throw new UnsupportedOperationException("Not implemented yet");
+        boolean deployed;
+        
+        if (params.getGitUrl() != null) {
+            
+            deployed = connector.deployApp(moduleName, params.getGitUrl());
+        }
+        else if (params.getPath() != null && !params.getPath().isEmpty()) {
+
+            deployed = connector.deployJavaWebApp(moduleName, params.getPath());
+        }
+        else {
+            throw new UnsupportedOperationException("Not implemented yet");
+        }
+        if (!deployed) {
+            throw new PaasException("Application not deployed");
+        }
+        return getModule(moduleName);
     }
     
     
@@ -54,18 +76,14 @@ public class HerokuSession implements PaasSession {
     public Module deploy(String moduleName, PaasSession.DeployParameters params) throws PaasException {
         logger.info("DEPLOY({})", moduleName);
         
-        App app = connector.createJavaWebApp(moduleName);
+        App app = connector.createApp(moduleName);
         
         if (app == null) {
             throw new PaasException("Application not created");
         }
+        Module result = updateApplication(moduleName, params);
         
-        boolean deployed = connector.deployJavaWebApp(moduleName, params.getPath());
-        
-        if (!deployed) {
-            throw new PaasException("Application not deployed");
-        }
-        return getModule(moduleName);
+        return result;
     }
 
     

@@ -1,12 +1,16 @@
 package eu.atos.paas.heroku;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.heroku.api.Heroku;
@@ -16,6 +20,10 @@ import com.heroku.api.App;
 import com.heroku.api.HerokuAPI;
 import com.heroku.api.exception.RequestFailedException;
 import com.heroku.sdk.deploy.DeployWar;
+
+import eu.atos.paas.git.Clone;
+import eu.atos.paas.git.Push;
+import eu.atos.paas.git.Repository;
 
 
 /**
@@ -44,7 +52,7 @@ public class HerokuConnector
     // DEFAULT / GLOBAL PROPERTIES
     public static String DEFAULT_WEBAPP_RUNNER_VERSION = "8.0.23.0";
     public static String WEBAPP_RUNNER_URL_FORMAT = "http://central.maven.org/maven2/com/github/jsimone/webapp-runner/%s/webapp-runner-%s.jar";
-    public static String DEFAULT_STACK = Heroku.Stack.Cedar.name();
+    public static String DEFAULT_STACK = Heroku.Stack.Cedar14.name();
     public static String DEFAULT_SLUG_FILE_NAME = "slug.tgz";
     public static String PROPERTY_DEFAULT_JDK_VERSION = System.getProperty("heroku.jdkVersion", null);
     public static String PROPERTY_DEFAULT_JDK_URL = System.getProperty("heroku.jdkUrl", null);
@@ -127,7 +135,7 @@ public class HerokuConnector
      * @param applicationName
      * @return
      */
-    public App createJavaWebApp(String applicationName) 
+    public App createApp(String applicationName) 
     {
         logger.info(">> Creating a new java web application ['" + applicationName + "'] ...");
         App app = null;
@@ -137,7 +145,7 @@ public class HerokuConnector
             // create application
             try 
             {
-                app = _hApiClient.createApp(new App().on(Heroku.Stack.Cedar).named(applicationName));
+                app = _hApiClient.createApp(new App().named(applicationName));
             } 
             catch (Exception ex) 
             {
@@ -171,6 +179,29 @@ public class HerokuConnector
         }
     }
     
+    
+    public boolean deployApp(String applicationName, URL sourceGitUrl) {
+
+        try {
+            
+            Clone cloneCmd = new Clone(sourceGitUrl);
+            Repository repo = cloneCmd.call();
+            
+            String herokuGitUrl = _hApiClient.getApp(applicationName).getGitUrl();
+            Push pushCmd = new Push(repo);
+            pushCmd.call(herokuGitUrl, new UsernamePasswordCredentialsProvider("", apiKey));
+
+            repo.close();
+            
+        } catch (IOException | GitAPIException e) {
+            
+            /*
+             * This should not happen, unless disk space has run out, etc
+             */
+            throw new RuntimeException(e.getMessage(), e);
+        }
+        return true;
+    }
     
     /**
      * 
@@ -383,7 +414,7 @@ public class HerokuConnector
      */
     private boolean checkAppName(String applicationName)
     {
-        if ( (!appExists(applicationName)) && (createJavaWebApp(applicationName) == null))
+        if ( (!appExists(applicationName)) && (createApp(applicationName) == null))
         {
             return false;
         }
