@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 import eu.atos.paas.Groups;
 import eu.atos.paas.TestConfigProperties;
 
-@Test(groups = Groups.HEROKU, enabled = false)
+@Test(groups = "XXX", enabled = false)
 public class GitRepositoryIT {
 
     @Test

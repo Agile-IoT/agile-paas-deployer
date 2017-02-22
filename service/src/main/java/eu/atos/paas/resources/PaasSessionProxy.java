@@ -5,6 +5,7 @@ import java.util.Objects;
 import javax.ws.rs.core.Response.Status;
 
 import eu.atos.paas.AlreadyExistsException;
+import eu.atos.paas.ForbiddenException;
 import eu.atos.paas.Module;
 import eu.atos.paas.NotFoundException;
 import eu.atos.paas.PaasException;
@@ -147,15 +148,23 @@ public class PaasSessionProxy implements PaasSession {
 
         if (e instanceof PaasProviderException) {
             return new ResourceException(new ErrorEntity(Status.BAD_GATEWAY, e.getMessage()), e);
-        } else if (e instanceof NotFoundException) {
+        } 
+        else if (e instanceof NotFoundException) {
             return new ResourceException(new ErrorEntity(Status.NOT_FOUND, e.getMessage()));
-        } else if (e instanceof AlreadyExistsException) {
+        } 
+        else if (e instanceof AlreadyExistsException) {
             return new ResourceException(new ErrorEntity(Status.CONFLICT, e.getMessage()));
-        } else if (e instanceof UnsupportedOperationException) {
+        } 
+        else if (e instanceof UnsupportedOperationException) {
             return new ResourceException(new ErrorEntity(Status.NOT_IMPLEMENTED, e.getMessage()));
-        } else if (e instanceof IllegalArgumentException) {
+        } 
+        else if (e instanceof IllegalArgumentException) {
             return new ResourceException(new ErrorEntity(Status.BAD_REQUEST, e.getMessage()));
-        } else {
+        } 
+        else if (e instanceof ForbiddenException) {
+            return new ResourceException(new ErrorEntity(Status.FORBIDDEN, e.getMessage()));
+        } 
+        else {
             return e;
         }
     }

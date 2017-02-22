@@ -27,8 +27,8 @@ public abstract class AbstractProviderIT {
     private boolean initialized = false;
     protected PaasSession session;
     protected DeployParameters params;
-    protected static final String APP_NAME = "paastest";
-    protected static final String APP_NAME_NOT_EXISTS = "notexists";
+    protected static String APP_NAME = "paastest";
+    protected static String APP_NAME_NOT_EXISTS = "notexists";
     protected int waitSecondsAfterMethod = 0;
     
     protected void initialize() {

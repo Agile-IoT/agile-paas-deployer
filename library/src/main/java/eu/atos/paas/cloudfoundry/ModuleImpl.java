@@ -58,7 +58,6 @@ public class ModuleImpl implements Module {
             /*
              * app.getUris() do not return URIs!! Prefix "http://" if no protocol found.
              */
-            System.out.println(Arrays.toString(app.getUris().toArray()));
             String uri = app.getUris().get(0);
             if (!uri.contains("://")) {
                 uri = String.format("http://%s", uri);

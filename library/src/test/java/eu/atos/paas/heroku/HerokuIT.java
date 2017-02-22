@@ -1,215 +1,43 @@
 package eu.atos.paas.heroku;
 
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
-import static org.testng.AssertJUnit.assertTrue;
-import static org.testng.AssertJUnit.fail;
-import java.util.Map;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import eu.atos.paas.AbstractProviderIT;
 import eu.atos.paas.Groups;
 import eu.atos.paas.PaasClient;
-import eu.atos.paas.PaasClientFactory;
-import eu.atos.paas.PaasSession;
-import eu.atos.paas.ServiceApp;
 import eu.atos.paas.TestConfigProperties;
-import eu.atos.paas.credentials.ApiKeyCredentials;
-import eu.atos.paas.PaasSession.ScaleUpDownCommand;
-import eu.atos.paas.PaasSession.StartStopCommand;
-import eu.atos.paas.heroku.DeployParameters;
-
+import eu.atos.paas.credentials.UserPasswordCredentials;
 
 @Test(groups = Groups.HEROKU)
-public class HerokuIT
-{
-    
-    
-    // Application
-    private static final String APP_NAME = TestConfigProperties.getInstance().getApp_name();
+public class HerokuIT extends AbstractProviderIT {
 
-    // session
-    private PaasSession session;
-    
-    // log
-    private static Logger logger = LoggerFactory.getLogger(HerokuIT.class);
-
-    
-    @BeforeTest
-    public void initialize()
-    {
-        logger.info("### INTEGRATION TESTS > Heroku ...");
-        // login / connect to PaaS
-        PaasClientFactory factory = new PaasClientFactory();
-        PaasClient client = factory.getClient("heroku");
-        session = client.getSession(new ApiKeyCredentials(TestConfigProperties.getInstance().getHeroku_apiKey()));
-    }
-    
-
-    /**
-     * 
-     * @param m
-     * @param exeFunc
-     * @param operation
-     * @param expectedValue
-     * @param seconds
-     * @return
-     */
-    private boolean checkResult(eu.atos.paas.Module m, String exeFunc, String operation, int expectedValue, int seconds)
-    {
-        for (int i = 0; i < 10; i++)
-        {
-            try
-            {
-                logger.info(">> " + exeFunc + " >> " + operation + " == " + expectedValue + " ?");
-                Thread.sleep(seconds*1000);
-                m = session.getModule(APP_NAME);
-
-                if (("instances".equalsIgnoreCase(operation)) && (m.getRunningInstances() == expectedValue))
-                {
-                    logger.info(">> " + operation + " = " + expectedValue);
-                    return true;
-                }
-            }
-            catch (Exception e)
-            {
-                fail(e.getMessage());
-                break;
-            }
+    @BeforeClass
+    public void initialize() {
+        System.out.println("---" + this.getClass().getName() + "---");
+        /*
+         * Modify to get an unique APPNAME, because Heroku shares application names between all users.
+         */
+        AbstractProviderIT.APP_NAME = "paas-unified-library-test";
+        AbstractProviderIT.APP_NAME_NOT_EXISTS = "paas-unified-library-notexists";
+        super.initialize();
+        
+        PaasClient client = new HerokuClient();
+        
+        session = client.getSession(new UserPasswordCredentials(
+                TestConfigProperties.getInstance().getHeroku_user(),
+                TestConfigProperties.getInstance().getHeroku_password()));
+        
+        URL url;
+        try {
+            url = new URL("https://github.com/heroku/java-getting-started.git");
+            //url = new URL("https://github.com/efsavage/hello-world-war");
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException(e.getMessage(), e);
         }
-
-        return false;
+        this.params = new DeployParameters(url);
     }
-    
-
-    @Test
-    public void deploy() 
-    {
-        logger.info("### TEST > Heroku > deploy()");
-
-        String path = this.getClass().getResource("/SampleApp1.war").getFile();
-        eu.atos.paas.Module m = session.deploy(APP_NAME, new DeployParameters(path));
-
-        assertNotNull(m);
-        logger.info(">> " + String.format("name='%s',  url='%s'", m.getName(), m.getUrl()));
-        assertEquals(APP_NAME, m.getName());
-        
-        if (!checkResult(m, "deploying / starting application", "instances", 1, 10))
-            fail(APP_NAME + " not started");
-        else
-            assertTrue(true);
-    }
-    
-    
-    @Test (dependsOnMethods={"deploy"})
-    public void stop() 
-    {
-        logger.info("### TEST > Heroku > stop()");
-
-        eu.atos.paas.Module m = session.getModule(APP_NAME);
-        session.startStop(m, StartStopCommand.STOP);
-        
-        if (!checkResult(m, "stopping application", "instances", 0, 2))
-            fail(APP_NAME + " not stopped");
-        else
-            assertTrue(true);
-    }
-    
-    
-    @Test (dependsOnMethods={"stop"})
-    public void start() 
-    {
-        logger.info("### TEST > Heroku > start()");
-
-         eu.atos.paas.Module m = session.getModule(APP_NAME);
-         session.startStop(m, StartStopCommand.START);
-         
-         if (!checkResult(m, "starting application", "instances", 1, 5))
-            fail(APP_NAME + " not started");
-         else
-            assertTrue(true);
-    }
-    
-   
-    @Test (dependsOnMethods={"start"})
-    public void scaleUp() 
-    {
-        logger.info("### TEST > Heroku > scaleUp()");
-
-        eu.atos.paas.Module m = session.getModule(APP_NAME);
-        session.scaleUpDown(m, ScaleUpDownCommand.SCALE_UP_INSTANCES);
-        
-        if (!checkResult(m, "scaling application", "instances", 2, 5))
-            fail(APP_NAME + " not scaled up");
-        else
-            assertTrue(true);
-    }
-    
-    
-    @Test (dependsOnMethods={"scaleUp"})
-    public void scaleDown() 
-    {
-        logger.info("### TEST > Heroku > scaleDown()");
-
-        eu.atos.paas.Module m = session.getModule(APP_NAME);
-        session.scaleUpDown(m, ScaleUpDownCommand.SCALE_DOWN_INSTANCES);
-        
-        if (!checkResult(m, "scaling application", "instances", 1, 5))
-            fail(APP_NAME + " not scaled down");
-        else
-            assertTrue(true);
-    }
-    
-    
-    @Test (dependsOnMethods={"scaleDown"}) 
-    public void bindToService() 
-    {
-        logger.info("### TEST > Heroku > bindToService()");
-        eu.atos.paas.Module m = session.getModule(APP_NAME);
-        ServiceApp service = new ServiceApp("cleardb:ignite");
-        
-        session.bindToService(m, service);
-        
-        m = session.getModule(APP_NAME);
-        assertEquals(1, m.getServices().size());
-        
-        logger.info("### TEST > Heroku > bindToService() > environment values...");
-        for (Map.Entry<String, String> entry : m.getEnv().entrySet()) {
-            logger.info("### TEST > Heroku > bindToService() > " + entry.getKey() + " / " + entry.getValue().toString());
-        }
-    }
-
-    
-    @Test (dependsOnMethods={"bindToService"})
-    public void unbindFromService() 
-    {
-        logger.info("### TEST > Heroku > unbindFromService()");
-        eu.atos.paas.Module m = session.getModule(APP_NAME);
-        ServiceApp service = new ServiceApp("cleardb:ignite");
-        
-        session.unbindFromService(m, service);
-        
-        m = session.getModule(APP_NAME);
-        assertEquals(0, m.getServices().size());
-    }
-    
-    
-    @Test (dependsOnMethods={"unbindFromService"})
-    public void undeploy() 
-    {
-        logger.info("### TEST > Heroku > undeploy()");
-
-        session.undeploy(APP_NAME);
-        
-        eu.atos.paas.Module m = session.getModule(APP_NAME);
-        if (m != null) {
-            System.out.println("### TEST > Heroku > undeploy() > " + m.getName());
-            fail(APP_NAME + " still exists");
-        }
-    }
-
-    
 }

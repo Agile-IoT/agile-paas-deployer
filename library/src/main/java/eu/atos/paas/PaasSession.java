@@ -163,7 +163,8 @@ public interface PaasSession {
      * 
      * @param moduleName
      * @return Module if application with name <code>moduleName</code> exists; <code>null</code> otherwise.
-     * @throws PaasProviderException on unexpected exception from provider.
+     * @throws PaasProviderException on unexpected exception from provider; ForbiddenException if no permissions
+     * to access the module (e.g. in Heroku).
      */
     Module getModule(String moduleName) throws PaasException;
 

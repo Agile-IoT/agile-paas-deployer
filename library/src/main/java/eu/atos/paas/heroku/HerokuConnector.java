@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
@@ -18,7 +19,6 @@ import com.heroku.api.Addon;
 import com.heroku.api.AddonChange;
 import com.heroku.api.App;
 import com.heroku.api.HerokuAPI;
-import com.heroku.api.exception.RequestFailedException;
 import com.heroku.sdk.deploy.DeployWar;
 
 import eu.atos.paas.git.Clone;
@@ -41,8 +41,8 @@ public class HerokuConnector
     /**
      * API client
      */
-    private HerokuAPI _hApiClient;
-    private String apiKey;
+    private final HerokuAPI _hApiClient;
+    private final String apiKey;
     
     /**
      * HEROKU KEY - FROM ENVIRONMENT VALUES
@@ -64,9 +64,9 @@ public class HerokuConnector
      */
     public HerokuConnector()
     {
-        logger.info(">> Connecting to Heroku ...");
+        logger.debug(">> Connecting to Heroku ...");
         apiKey = System.getenv(ENV_HEROKU_API_KEY);
-        connect();
+        _hApiClient = connect();
     }
     
     
@@ -75,9 +75,9 @@ public class HerokuConnector
      * @param apiKey
      */
     public HerokuConnector(String apiKey) {
-        logger.info(">> Connecting to Heroku ...");
+        logger.debug(">> Connecting to Heroku ...");
         this.apiKey = apiKey;
-        connect();
+        _hApiClient = connect();
     }
     
     
@@ -88,35 +88,21 @@ public class HerokuConnector
      */
     public HerokuConnector(String login, String passwd)
     {
-        logger.info(">> Connecting to Heroku ...");
+        logger.debug(">> Connecting to Heroku ...");
         apiKey = HerokuAPI.obtainApiKey(login, passwd);
-        connect();
+        _hApiClient = connect();
     }
 
     
     /**
      * 
      */
-    private void connect() {
-        if ((apiKey != null) && (!apiKey.isEmpty()))
-        {
-            try 
-            {
-                _hApiClient = new HerokuAPI(apiKey);
-                logger.info(">> Connection established: " + _hApiClient.getUserInfo().getId());
-                return;
-            } 
-            catch (RequestFailedException e) 
-            {
-                logger.warn(">> Not connected to Heroku: " + e.getMessage());
-                throw new RuntimeException("Not connected to Heroku: " + e.getMessage(), e);
-            }
-        }
-        else
-        {
-            logger.warn(">> Not connected to Heroku: API key is null or empty");
-            throw new RuntimeException("Not connected to Heroku: API key is null or empty");
-        }
+    private HerokuAPI connect() {
+        Objects.requireNonNull(apiKey);
+        
+        HerokuAPI result = new HerokuAPI(apiKey);
+        logger.debug(">> Connection established: " + result.getUserInfo().getId());
+        return result;
     }
     
     
@@ -137,28 +123,8 @@ public class HerokuConnector
      */
     public App createApp(String applicationName) 
     {
-        logger.info(">> Creating a new java web application ['" + applicationName + "'] ...");
-        App app = null;
-        
-        if (_hApiClient != null)
-        {
-            // create application
-            try 
-            {
-                app = _hApiClient.createApp(new App().named(applicationName));
-            } 
-            catch (Exception ex) 
-            {
-                logger.error(">> Error when creating the application: " + ex.getMessage());
-            } 
-            if (app != null)
-            {
-                logger.info(">> Application '" + applicationName + "' was created");
-                return app;
-            }
-            
-            logger.warn(">> Couldn't create application '" + applicationName + "'");
-        }
+        logger.debug(">> Creating a new java web application ['" + applicationName + "'] ...");
+        App app = _hApiClient.createApp(new App().named(applicationName));
         
         return app;
     }
@@ -170,12 +136,12 @@ public class HerokuConnector
      */
     public void deleteApp(String applicationName) 
     {
-        logger.info(">> Deleting application '" + applicationName + "' ...");
+        logger.debug(">> Deleting application '" + applicationName + "' ...");
         
-        if ( (_hApiClient != null) && (appExists(applicationName)) )
+        if ( (_hApiClient != null) && (userAppExists(applicationName)) )
         {
             _hApiClient.destroyApp(applicationName);
-            logger.info(">> Application '" + applicationName + "' deleted");
+            logger.debug(">> Application '" + applicationName + "' deleted");
         }
     }
     
@@ -228,7 +194,7 @@ public class HerokuConnector
                 DeployWar deployWarApp = new DeployWar(applicationName, new File(warFile), new URL(webappRunnerUrl), apiKey);
                 deployWarApp.deploy(includes, new HashMap<String, String>(), jdkUrl == null ? jdkVersion : jdkUrl, stack, slugFileName);
                 
-                logger.info(">> Application deployed");
+                logger.debug(">> Application deployed");
                 return true;
             }
             
@@ -262,26 +228,30 @@ public class HerokuConnector
     
     
     /**
-     * 
-     * @param applicationName
-     * @return
+     * Check if app exists in user apps.
      */
-    public boolean appExists(String applicationName)
+    public boolean userAppExists(String applicationName)
     {
-        logger.info(">> Checking if application '" + applicationName + "' exists ...");
-        if (_hApiClient != null)
+        return getUserApp(applicationName) != null;
+    }
+
+    /**
+     * Gets App from user apps if it exists, or null otherwise. An application with the given name that belongs
+     * to other user returns null also (in this case, _hApiClient.getApp() will throw 403).
+     */
+    public App getUserApp(String applicationName) {
+        Objects.requireNonNull(applicationName);
+        
+        App result = null;
+        for (App ap : _hApiClient.listApps())
         {
-            for (App ap : _hApiClient.listApps())
+            if (applicationName.equals(ap.getName()))
             {
-                if (ap.getName().equals(applicationName))
-                {
-                    logger.info(">> Application exists");
-                    return true;
-                }
+                result = ap;
+                break;
             }
-            logger.info(">> Application doesn't exist");
         }
-        return false;
+        return result;
     }
     
     
@@ -292,7 +262,7 @@ public class HerokuConnector
      */
     public Addon getAddonByName(String addon_plan)
     {
-        logger.info(">> Looking for addon '" + addon_plan + "' ... ");
+        logger.debug(">> Looking for addon '" + addon_plan + "' ... ");
         if (_hApiClient != null)
         {
             List<Addon> lAddons = _hApiClient.listAllAddons();
@@ -329,21 +299,21 @@ public class HerokuConnector
     {
         if (_hApiClient != null)
         {
-            logger.info(">> Checking if addon is already installed ... ");
+            logger.debug(">> Checking if addon is already installed ... ");
             
             if (containsAddon(_hApiClient.listAppAddons(applicationName), addon_plan))
             {
-                logger.info(">> Addon already installed ... ");
+                logger.debug(">> Addon already installed ... ");
                 return true;
             }
             
-            logger.info(">> Installing addon ... ");
+            logger.debug(">> Installing addon ... ");
             
             Addon addon = getAddonByName(addon_plan);
             if (addon != null)
             {
                 AddonChange addChange = _hApiClient.addAddon(applicationName, addon_plan);
-                logger.info(">> Addon installed: " + addChange.getStatus());
+                logger.debug(">> Addon installed: " + addChange.getStatus());
                 return true;
             }
             else
@@ -366,14 +336,14 @@ public class HerokuConnector
     {
         if (_hApiClient != null)
         {
-            logger.info(">> looking for the environment value of key '" + env + "' ...");
+            logger.debug(">> looking for the environment value of key '" + env + "' ...");
             Map<String, String> envValues = _hApiClient.listConfig(applicationName);
             
             for (Map.Entry<String, String> entry : envValues.entrySet())
             {
                  if (env.equalsIgnoreCase(entry.getKey()))
                  {
-                     logger.info(" -> " + entry.getKey() + "/" + entry.getValue());
+                     logger.debug(" -> " + entry.getKey() + "/" + entry.getValue());
                      return entry.getValue();
                  }
             }
@@ -414,7 +384,7 @@ public class HerokuConnector
      */
     private boolean checkAppName(String applicationName)
     {
-        if ( (!appExists(applicationName)) && (createApp(applicationName) == null))
+        if ( (!userAppExists(applicationName)) && (createApp(applicationName) == null))
         {
             return false;
         }
