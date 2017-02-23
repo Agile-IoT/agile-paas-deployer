@@ -20,7 +20,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.atos.paas</groupId>
     <artifactId>unified-paas</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1.0</version>
     <modules>
         <module>common</module>
         <module>library</module>
