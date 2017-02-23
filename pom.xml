@@ -1,7 +1,7 @@
 <!--
 
     Copyright 2016 Atos
-    Contact: roman.sosa@atos.net
+    Contact: Atos <roman.sosa@atos.net>
 
        Licensed under the Apache License, Version 2.0 (the "License");
        you may not use this file except in compliance with the License.
@@ -68,6 +68,8 @@
         <maven-war-plugin.version>2.4</maven-war-plugin.version>
         <cobertura-maven-plugin.version>2.3</cobertura-maven-plugin.version>
         <dropwizard-launcher-plugin.version>1.0.1</dropwizard-launcher-plugin.version>
+        <apache-rat-plugin.version>0.12</apache-rat-plugin.version>
+
         
         <server-jar.path>service/target/unified-paas-service-0.0.1-SNAPSHOT.jar</server-jar.path>
         <server-conf.path>service/conf/config.yml</server-conf.path>
@@ -167,6 +169,30 @@
         </pluginManagement>
 
         <plugins>
+            <plugin>
+                <groupId>org.apache.rat</groupId>
+                <artifactId>apache-rat-plugin</artifactId>
+                <version>${apache-rat-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <includes>
+                        <include>src/**</include>
+                        <include>pom.xml</include>
+                    </includes>
+                    <excludes combine.children="append">
+                        <exclude>**/*.sample</exclude>
+                        <exclude>**/*.properties</exclude>
+                        <exclude>**/*.json</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

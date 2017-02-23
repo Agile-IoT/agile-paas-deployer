@@ -1,5 +1,5 @@
 # unified-paas
-SeaClouds Unified PaaS Library
+Unified PaaS Library
 
 ---
 ## Usage
