@@ -27,7 +27,6 @@ import eu.atos.paas.Groups;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.TestConfigProperties;
 import eu.atos.paas.credentials.ApiUserPasswordCredentials;
-import eu.atos.paas.credentials.UserPasswordCredentials;
 import eu.atos.paas.openshift2.Openshift2Client;
 
 @Test(groups = Groups.OPENSHIFT2)

@@ -54,6 +54,6 @@ public class HerokuIT extends AbstractProviderIT {
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException(e.getMessage(), e);
         }
-        this.params = new DeployParameters(url);
+        this.params = new DeployParameters(url, null);
     }
 }

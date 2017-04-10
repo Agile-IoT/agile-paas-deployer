@@ -34,11 +34,11 @@ import eu.atos.paas.data.Provider;
 public class DummyResource extends PaasResource {
 
     public DummyResource(Provider provider, ClientMap clientMap) {
-        super(provider, clientMap);
+        super(provider, clientMap, new ParametersTranslatorImpl());
     }
 
     public DummyResource(PaasClient dummyClient) {
-        super(
+        this(
             new Provider(Constants.Providers.DUMMY, "http://www.example.com", dummyClient.getVersion()),
             ClientMap.builder().client(dummyClient).build()
         );
@@ -66,4 +66,5 @@ public class DummyResource extends PaasResource {
     protected Credentials buildCredentialsFromFieldsMap(CredentialsMap credentialsMap) {
         return new UserPasswordCredentials(credentialsMap);
     }
+    
 }

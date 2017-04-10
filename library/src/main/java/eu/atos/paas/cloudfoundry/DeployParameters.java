@@ -16,10 +16,9 @@
  */
 package eu.atos.paas.cloudfoundry;
 
-import java.net.URL;
-import java.util.Objects;
+import java.util.Map;
 
-import eu.atos.paas.PaasSession;
+import eu.atos.paas.DeployParametersImpl;
 
 
 /**
@@ -28,46 +27,15 @@ import eu.atos.paas.PaasSession;
  * @author ATOS
  * @date 21/3/2016-14:03:16
  */
-public class DeployParameters implements PaasSession.DeployParameters
+public class DeployParameters extends DeployParametersImpl
 {
-    
-    private String path;
-    private String buildpack_url;
 
-    
-    public DeployParameters(String path) {
-        this.path = Objects.requireNonNull(path);
-        this.buildpack_url = "";
+    public DeployParameters(String path, Map<String, String> properties) {
+        super(path, null, properties);
     }
     
-    
-    public DeployParameters(String path, String buildpack_url) {
-        this.path = Objects.requireNonNull(path);
-        this.buildpack_url = Objects.requireNonNull(buildpack_url);
-    }
-    
-    
-    @Override
-    public String getPath() {
-        return path;
-    }
-    
-    
-    @Override
     public String getBuildpackUrl()
     {
-        return buildpack_url;
-    }
-
-
-    @Override
-    public String getCartridge()
-    {
-        return "";
-    }
-    
-    @Override
-    public URL getGitUrl() {
-        return null;
+        return properties.get("buildpack_url");
     }
 }

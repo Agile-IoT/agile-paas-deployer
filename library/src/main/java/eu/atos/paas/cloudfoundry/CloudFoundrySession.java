@@ -34,6 +34,7 @@ import eu.atos.paas.NotFoundException;
 import eu.atos.paas.PaasException;
 import eu.atos.paas.PaasProviderException;
 import eu.atos.paas.PaasSession;
+import eu.atos.paas.PaasSession.DeployParameters.Properties;
 import eu.atos.paas.ServiceApp;
 import eu.atos.paas.Module.State;
 
@@ -78,7 +79,8 @@ public class CloudFoundrySession implements PaasSession {
             if (getModule(moduleName) != null) {
                 throw new AlreadyExistsException(moduleName);
             }
-            CloudApplication app = connector.createApplication(moduleName, "", params.getBuildpackUrl());
+            CloudApplication app = connector.createApplication(
+                    moduleName, "", params.getProperty(Properties.BUILDPACK_URL));
             Module m = new ModuleImpl(app);
             
             return m;
@@ -130,7 +132,7 @@ public class CloudFoundrySession implements PaasSession {
     {
         logger.info("DEPLOY({})", moduleName);
         
-        if (!connector.deployApp(moduleName, params.getPath(), params.getBuildpackUrl()))
+        if (!connector.deployApp(moduleName, params.getPath(), params.getProperty(Properties.BUILDPACK_URL)))
         {
             throw new PaasException("Application not deployed");
         }

@@ -20,6 +20,8 @@ import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
 import static org.testng.AssertJUnit.assertTrue;
 import static org.testng.AssertJUnit.fail;
+
+import java.util.Collections;
 import java.util.Map;
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.slf4j.Logger;
@@ -108,7 +110,8 @@ public class CloudFoundryOldIT
         logger.info("### TEST > CloudFoundry > deploy()");
 
         String path = this.getClass().getResource("/SampleApp1.war").getFile();
-        eu.atos.paas.Module m = session.deploy(APP_NAME, new DeployParameters(path));
+        eu.atos.paas.Module m = session.deploy(
+                APP_NAME, new DeployParameters(path, Collections.<String, String>emptyMap()));
         assertNotNull(m);
         logger.info(">> " + String.format("name='%s',  url='%s'", m.getName(), m.getUrl()));
         assertEquals(APP_NAME, m.getName());

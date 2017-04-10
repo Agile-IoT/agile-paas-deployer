@@ -47,8 +47,6 @@ import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.openshift.client.cartridge.IStandaloneCartridge;
-
 import eu.atos.paas.data.Application;
 import eu.atos.paas.data.ApplicationToCreate;
 import eu.atos.paas.data.CredentialsMap;
@@ -67,7 +65,6 @@ import eu.atos.paas.PaasSession.StartStopCommand;
 import eu.atos.paas.resources.exceptions.AuthenticationException;
 import eu.atos.paas.resources.exceptions.CredentialsParsingException;
 import eu.atos.paas.resources.exceptions.EntityNotFoundException;
-import eu.atos.paas.resources.exceptions.ResourceException;
 import eu.atos.paas.resources.exceptions.ValidationException;
 import io.swagger.annotations.ApiOperation;
 
@@ -93,7 +90,8 @@ public abstract class PaasResource
     private static Base64Transformer base64Transformer = new Base64Transformer(plainTransformer);
     private final ClientMap clientMap;
     protected final Provider provider;
-
+    private ParametersTranslator parametersTranslator;
+    
     public enum OperationResult
     {
         OK,
@@ -106,10 +104,11 @@ public abstract class PaasResource
      * 
      * @param client
      */
-    public PaasResource(Provider provider, ClientMap clientMap)
+    public PaasResource(Provider provider, ClientMap clientMap, ParametersTranslator parametersTranslator)
     {
         this.clientMap = Objects.requireNonNull(clientMap);
         this.provider = Objects.requireNonNull(provider);
+        this.parametersTranslator = Objects.requireNonNull(parametersTranslator);
         
         /*
          * Check provider.defaultVersion has a client
@@ -160,13 +159,35 @@ public abstract class PaasResource
         }
         modelPart.setMediaType(MediaType.APPLICATION_JSON_TYPE);
         
-        ApplicationToCreate application = new ApplicationToCreate(
-                modelPart.getValueAs(ApplicationToCreate.class), 
-                filePart != null? filePart.getEntityAs(InputStream.class) : null);
-        application.validate();
+        File uploadedFile = null;
+        try {
         
-        log.info("createApplication({})", application.getName());
-        return createApplicationImpl(session, application);
+            /*
+             * Parse multiparts into a (ApplicationToCreate, File)
+             */
+            ApplicationToCreate application = modelPart.getValueAs(ApplicationToCreate.class);
+            if (filePart != null) {
+                /*
+                 * setArtifact() just for input validation
+                 */
+                application.setArtifact(filePart.getEntityAs(InputStream.class));
+                uploadedFile = saveToFile(application.getArtifact());
+            }
+            application.validate();
+            
+            log.info("createApplication({})", application.getName());
+            return createApplicationImpl(session, application, uploadedFile);
+        
+        } catch (IOException e)
+        {
+            throw new WebApplicationException(e);
+        }
+        finally
+        {
+            if (uploadedFile != null) {
+                uploadedFile.delete();
+            }
+        }
     }
 
     /**
@@ -178,76 +199,23 @@ public abstract class PaasResource
         PaasSession session = getSession(headers);
 
         application.validate();
-        return createApplicationImpl(session, application);
+        return createApplicationImpl(session, application, null);
     }
     
     /*
      * At this point, ApplicationToCreate is valid.
      */
     private Application createApplicationImpl(
-            PaasSession session, ApplicationToCreate application) {
+            PaasSession session, ApplicationToCreate application, File uploadedFile) {
         
-        File file = null;
         Application result;
-        try
-        {
-            /*
-             * TODO: Create the appropriate class
-             */
-            DeployParameters params;
-            if (application.getArtifact() != null) {
-                file = File.createTempFile("up-tmp-file", ".tmp");
-                saveToFile(application.getArtifact(), file);
-                params = new eu.atos.paas.heroku.DeployParameters(file.getAbsolutePath());
-            } 
-            else if (Constants.Providers.HEROKU.equals(this.provider.getName())) {
-                params = new eu.atos.paas.heroku.DeployParameters(application.getGitUrl());
-            }
-            else {
-                String cartridge;
-                switch (application.getProgrammingLanguage()) {
-                case "Java": 
-                    cartridge = IStandaloneCartridge.NAME_JBOSSEWS;
-                    break;
-                case "Python": 
-                    cartridge = IStandaloneCartridge.NAME_PYTHON;
-                    break;
-                case "PhP": 
-                    cartridge = IStandaloneCartridge.NAME_PHP;
-                    break;
-                case "Perl": 
-                    cartridge = IStandaloneCartridge.NAME_PERL;
-                    break;
-                case "Ruby": 
-                    cartridge = IStandaloneCartridge.NAME_RUBY;
-                    break;
-                case "Node.JS":
-                    cartridge = "nodejs-0.10";
-                    break;
-                default:
-                    throw new ResourceException(
-                        new ErrorEntity(
-                            Status.NOT_IMPLEMENTED,
-                            "Programming language not supported: " + application.getProgrammingLanguage()));
-                }
-                params = new eu.atos.paas.openshift2.DeployParameters(application.getGitUrl(), cartridge);
-            }
 
-            Module m = session.deploy(application.getName(), params);
+        DeployParameters params = parametersTranslator.translate(application, uploadedFile);
             
-            result = new Application(m.getName(), m.getUrl());
-        }
-        catch (IOException e)
-        {
-            throw new WebApplicationException(e);
-        }
-        finally
-        {
-            if (file != null)
-            {
-                file.delete();
-            }
-        }
+
+        Module m = session.deploy(application.getName(), params);
+        
+        result = new Application(m.getName(), m.getUrl());
         
         return result;
     }
@@ -471,29 +439,31 @@ public abstract class PaasResource
         }
     }
     
+    protected File saveToFile(InputStream is) throws FileNotFoundException, IOException {
+        File file = File.createTempFile("up-tmp-file", ".tmp");
+        saveToFile(is, file);
+        return file;
+    }
     
-    /**
-     * 
-     * @param is
-     * @param file
-     * @throws FileNotFoundException
-     * @throws IOException
-     */
     protected void saveToFile(InputStream is, File file) throws FileNotFoundException, IOException
     {
-        OutputStream os = new FileOutputStream(file);
-        int read = 0;
-        byte[] bytes = new byte[1024];
+        try (OutputStream os = new FileOutputStream(file)) {
+            int read = 0;
 
-        while ((read = is.read(bytes)) != -1)
-        {
-            os.write(bytes, 0, read);
+            byte[] bytes = new byte[1024];
+
+            while ((read = is.read(bytes)) != -1)
+            {
+                os.write(bytes, 0, read);
+            }
+            os.flush();
         }
-        os.flush();
-        os.close();
+        finally {
+            is.close();
+        }
     }
 
-    
+
     /**
      * 
      * @param status

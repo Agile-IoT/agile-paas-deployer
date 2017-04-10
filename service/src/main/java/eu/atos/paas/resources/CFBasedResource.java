@@ -45,7 +45,7 @@ public class CFBasedResource extends PaasResource
      */
     public CFBasedResource(Provider provider, ClientMap clientMap)
     {
-        super(provider, clientMap);
+        super(provider, clientMap, new ParametersTranslatorImpl());
     }
 
     @PUT
@@ -125,4 +125,5 @@ public class CFBasedResource extends PaasResource
         
         return new ApiUserPasswordOrgSpaceCredentials(credentialsMap);
     }
+    
 }

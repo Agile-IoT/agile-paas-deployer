@@ -23,8 +23,6 @@ import java.net.URL;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.openshift.client.cartridge.IStandaloneCartridge;
-
 import eu.atos.paas.Groups;
 import eu.atos.paas.TestConfigProperties;
 import eu.atos.paas.TestConstants;

@@ -17,7 +17,9 @@
 package eu.atos.paas.heroku;
 
 import java.net.URL;
+import java.util.Collections;
 
+import eu.atos.paas.DeployParametersImpl;
 import eu.atos.paas.PaasSession;
 
 
@@ -27,52 +29,19 @@ import eu.atos.paas.PaasSession;
  * @author ATOS
  * @date 21/3/2016-14:03:24
  */
-public class DeployParameters implements PaasSession.DeployParameters {
+public class DeployParameters extends DeployParametersImpl implements PaasSession.DeployParameters {
 
     
-    private String path;
-    private String buildpack_url;
-    private URL gitUrl;
-    
-    public DeployParameters(String path) {
-        this.path = path;
-        this.buildpack_url = "";
+    public DeployParameters(URL gitUrl, String buildPackUrl) {
+        super(null, gitUrl, Collections.singletonMap(Properties.BUILDPACK_URL, buildPackUrl));
     }
-    
-    
-    public DeployParameters(String path, String buildpack_url) {
-        this.path = path;
-        this.buildpack_url = buildpack_url;
+
+    public DeployParameters(String path, String buildPackUrl) {
+        super(path, null, Collections.singletonMap(Properties.BUILDPACK_URL, buildPackUrl));
     }
-    
-    public DeployParameters(URL gitUrl) {
-        this.gitUrl = gitUrl;
-    }
-    
-    @Override
-    public String getPath() {
-        return path;
-    }
-    
-    
-    @Override
+
     public String getBuildpackUrl()
     {
-        return buildpack_url;
+        return getProperty(Properties.BUILDPACK_URL);
     }
-
-
-    @Override
-    public String getCartridge()
-    {
-        return null;
-    }
-
-
-    @Override
-    public URL getGitUrl() {
-        return gitUrl;
-    }
-    
-    
 }

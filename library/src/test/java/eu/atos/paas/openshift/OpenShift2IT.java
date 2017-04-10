@@ -28,7 +28,7 @@ import eu.atos.paas.AbstractProviderIT;
 import eu.atos.paas.Groups;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.TestConfigProperties;
-import eu.atos.paas.credentials.UserPasswordCredentials;
+import eu.atos.paas.credentials.ApiUserPasswordCredentials;
 import eu.atos.paas.openshift2.DeployParameters;
 import eu.atos.paas.openshift2.Openshift2Client;
 
@@ -51,7 +51,8 @@ public class OpenShift2IT extends AbstractProviderIT {
         
         PaasClient client = new Openshift2Client();
         
-        super.session = client.getSession(new UserPasswordCredentials(
+        super.session = client.getSession(new ApiUserPasswordCredentials(
+                TestConfigProperties.getInstance().getOp_api(),
                 TestConfigProperties.getInstance().getOp_user(),
                 TestConfigProperties.getInstance().getOp_password()));
         

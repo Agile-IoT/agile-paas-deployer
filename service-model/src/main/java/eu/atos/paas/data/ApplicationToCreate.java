@@ -52,16 +52,6 @@ public class ApplicationToCreate {
         this.programmingLanguage = Objects.requireNonNull(programmingLanguage);
     }
     
-    /**
-     * Constructor to be used to construct an instance from REST parameters. Call {@link #validate()} later.
-     */
-    public ApplicationToCreate(ApplicationToCreate application, InputStream artifact) {
-        this.name = application.getName();
-        this.gitUrl = application.getGitUrl();
-        this.artifact = artifact;
-        this.programmingLanguage = application.getProgrammingLanguage();
-    }
-    
     public String getName() {
         return name;
     }
@@ -73,7 +63,11 @@ public class ApplicationToCreate {
     public InputStream getArtifact() {
         return artifact;
     }
-
+    
+    public void setArtifact(InputStream artifact) {
+        this.artifact = artifact;
+    }
+    
     public String getProgrammingLanguage() {
         return programmingLanguage;
     }

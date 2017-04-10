@@ -37,7 +37,7 @@ import eu.atos.paas.data.Application;
 import eu.atos.paas.data.ApplicationToCreate;
 import eu.atos.paas.data.CredentialsMap;
 
-@Test(groups = Groups.HEROKU)
+@Test(groups = Groups.HEROKU, enabled = false)
 public class InvoiceNinjaIT {
 
     private static final String APP_NAME = "daniel-invoiceninja";

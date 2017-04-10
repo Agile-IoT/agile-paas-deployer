@@ -45,7 +45,7 @@ public class HerokuResource extends PaasResource
      */
     public HerokuResource(Provider provider, ClientMap clientMap)
     {
-        super(provider, clientMap);
+        super(provider, clientMap, new ParametersTranslatorImpl());
     }
     
     

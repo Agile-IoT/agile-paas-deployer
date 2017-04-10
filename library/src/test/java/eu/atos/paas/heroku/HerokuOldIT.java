@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import eu.atos.paas.Groups;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasClientFactory;
 import eu.atos.paas.PaasSession;
@@ -107,7 +106,7 @@ public class HerokuOldIT
         logger.info("### TEST > Heroku > deploy()");
 
         String path = this.getClass().getResource("/SampleApp1.war").getFile();
-        eu.atos.paas.Module m = session.deploy(APP_NAME, new DeployParameters(path));
+        eu.atos.paas.Module m = session.deploy(APP_NAME, new DeployParameters(path, null));
 
         assertNotNull(m);
         logger.info(">> " + String.format("name='%s',  url='%s'", m.getName(), m.getUrl()));

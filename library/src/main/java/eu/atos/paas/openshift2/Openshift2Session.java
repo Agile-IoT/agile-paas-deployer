@@ -31,6 +31,7 @@ import eu.atos.paas.PaasException;
 import eu.atos.paas.PaasProviderException;
 import eu.atos.paas.PaasSession;
 import eu.atos.paas.ServiceApp;
+import eu.atos.paas.PaasSession.DeployParameters.Properties;
 
 
 /**
@@ -73,8 +74,8 @@ public class Openshift2Session implements PaasSession
             if (getModule(moduleName) != null) {
                 throw new AlreadyExistsException(moduleName);
             }
-            eu.atos.paas.openshift2.DeployParameters p = (eu.atos.paas.openshift2.DeployParameters) params;
-            IApplication app = connector.deployAppFromGit(moduleName, p.getGitUrl().toString(), p.getCartridge());
+            IApplication app = connector.deployAppFromGit(
+                    moduleName, params.getGitUrl().toString(), params.getProperty(Properties.CARTRIDGE));
             
             return new ModuleImpl(app);
 
@@ -114,7 +115,7 @@ public class Openshift2Session implements PaasSession
         
         try {
             String url = params.getGitUrl().toString();
-            IApplication app = connector.deployAppFromGit(moduleName, url, params.getCartridge());
+            IApplication app = connector.deployAppFromGit(moduleName, url, params.getProperty(Properties.CARTRIDGE));
             return new ModuleImpl(app);
         
         } catch (OpenShiftException e) {

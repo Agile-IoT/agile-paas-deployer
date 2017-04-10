@@ -16,6 +16,10 @@
  */
 package eu.atos.paas.resources;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -27,16 +31,22 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
+import eu.atos.paas.data.ApplicationToCreate;
 import eu.atos.paas.data.CredentialsMap;
 import eu.atos.paas.credentials.ApiUserPasswordCredentials;
 import eu.atos.paas.credentials.Credentials;
 import eu.atos.paas.data.Provider;
+import eu.atos.paas.resources.exceptions.ResourceException;
+import eu.atos.paas.DeployParametersImpl;
 import eu.atos.paas.Module;
 import eu.atos.paas.PaasSession;
+import eu.atos.paas.PaasSession.DeployParameters;
 import eu.atos.paas.ServiceApp;
 
 
@@ -52,7 +62,7 @@ public class OpenShiftResource extends PaasResource
      */
     public OpenShiftResource(Provider provider, ClientMap clientMap)
     {
-        super(provider, clientMap);
+        super(provider, clientMap, new OpenShiftParametersTranslator());
     }
     
     
@@ -138,4 +148,47 @@ public class OpenShiftResource extends PaasResource
         return new ApiUserPasswordCredentials(credentialsMap);
     }
 
+    public static class OpenShiftParametersTranslator implements ParametersTranslator {
+
+        @Override
+        public DeployParameters translate(ApplicationToCreate application, File uploadedFile) {
+            String cartridge;
+            switch (application.getProgrammingLanguage()) {
+            case "Java": 
+                cartridge = IStandaloneCartridge.NAME_JBOSSEWS;
+                break;
+            case "Python": 
+                cartridge = IStandaloneCartridge.NAME_PYTHON;
+                break;
+            case "PhP": 
+                cartridge = IStandaloneCartridge.NAME_PHP;
+                break;
+            case "Perl": 
+                cartridge = IStandaloneCartridge.NAME_PERL;
+                break;
+            case "Ruby": 
+                cartridge = IStandaloneCartridge.NAME_RUBY;
+                break;
+            case "Node.JS":
+                cartridge = "nodejs-0.10";
+                break;
+            default:
+                throw new ResourceException(
+                        new ErrorEntity(
+                                Status.NOT_IMPLEMENTED,
+                                "Programming language not supported: " + application.getProgrammingLanguage()));
+            }
+            
+            Map<String, String> properties = new HashMap<String, String>();
+            properties.put(DeployParameters.Properties.CARTRIDGE, cartridge);
+            
+            String path = uploadedFile != null?
+                    uploadedFile.getAbsolutePath() : null;
+                    
+            DeployParameters params = new DeployParametersImpl(path, application.getGitUrl(), properties);
+            
+            return params;
+        }
+        
+    }
 }

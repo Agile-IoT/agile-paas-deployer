@@ -16,6 +16,8 @@
  */
 package eu.atos.paas.cloudfoundry;
 
+import java.util.Collections;
+
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -45,7 +47,7 @@ public class CloudFoundryIT extends AbstractProviderIT {
                 TestConfigProperties.getInstance().isCf_trustSelfSignedCerts()));
         
         String path = this.getClass().getResource("/SampleApp1.war").getFile();
-        this.params = new DeployParameters(path);
+        this.params = new DeployParameters(path, Collections.<String, String>emptyMap());
     }
     
     /*

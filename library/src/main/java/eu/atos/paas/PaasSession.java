@@ -36,9 +36,14 @@ public interface PaasSession {
     
     public interface DeployParameters {
         String getPath();
-        String getBuildpackUrl();
-        String getCartridge();
         URL getGitUrl();
+        String getProperty(String propertyName);
+        
+        public static class Properties {
+            public static final String CARTRIDGE = "cartridge";
+            public static final String BUILDPACK_URL = "buildpack_url";
+        }
+
     }
 
     

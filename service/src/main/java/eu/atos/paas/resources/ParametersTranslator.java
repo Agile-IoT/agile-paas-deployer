@@ -1,5 +1,5 @@
-/**
- * Copyright 2016 Atos
+/*******************************************************************************
+ * Copyright 2017 Atos
  * Contact: Atos <roman.sosa@atos.net>
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,27 +13,15 @@
  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
- */
-package eu.atos.paas.openshift3;
+ *******************************************************************************/
+package eu.atos.paas.resources;
 
-import java.net.URL;
-import java.util.Map;
+import java.io.File;
 
-import eu.atos.paas.DeployParametersImpl;
-import eu.atos.paas.PaasSession;
+import eu.atos.paas.PaasSession.DeployParameters;
+import eu.atos.paas.data.ApplicationToCreate;
 
+public interface ParametersTranslator {
 
-/**
- * 
- *
- * @author ATOS
- * @date 21/3/2016-14:06:34
- */
-public class DeployParameters extends DeployParametersImpl implements PaasSession.DeployParameters
-{
-
-    public DeployParameters(String path, URL gitUrl, Map<String, String> properties) {
-        super(path, gitUrl, properties);
-    }
-
+    DeployParameters translate(ApplicationToCreate applicationToCreate, File uploadedFile);
 }

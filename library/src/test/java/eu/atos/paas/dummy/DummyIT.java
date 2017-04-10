@@ -51,13 +51,8 @@ public class DummyIT extends AbstractProviderIT {
             }
             
             @Override
-            public String getCartridge() {
-                return "";
-            }
-            
-            @Override
-            public String getBuildpackUrl() {
-                return "";
+            public String getProperty(String propertyName) {
+                return null;
             }
         };
     }

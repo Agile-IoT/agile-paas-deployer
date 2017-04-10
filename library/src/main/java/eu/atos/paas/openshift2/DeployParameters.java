@@ -17,7 +17,9 @@
 package eu.atos.paas.openshift2;
 
 import java.net.URL;
+import java.util.Collections;
 
+import eu.atos.paas.DeployParametersImpl;
 import eu.atos.paas.PaasSession;
 
 
@@ -27,41 +29,19 @@ import eu.atos.paas.PaasSession;
  * @author ATOS
  * @date 21/3/2016-13:49:55
  */
-public class DeployParameters implements PaasSession.DeployParameters {
+public class DeployParameters extends DeployParametersImpl implements PaasSession.DeployParameters {
 
-    
-    private String path;
-    private String cartridge;
-    private URL gitUrl;
+    public DeployParameters(String path, String cartridge) {
+        super(path, null, Collections.singletonMap(Properties.CARTRIDGE, cartridge));
+    }
 
-    
     public DeployParameters(URL gitUrl, String cartridge) {
-        this.cartridge = cartridge;
-        this.gitUrl = gitUrl;
-    }
-    
-    
-    @Override
-    public String getPath() {
-        return path;
+        super(null, gitUrl, Collections.singletonMap(Properties.CARTRIDGE, cartridge));
     }
 
-
-    @Override
     public String getCartridge()
     {
-        return cartridge;
+        return getProperty(Properties.CARTRIDGE);
     }
 
-
-    @Override
-    public String getBuildpackUrl()
-    {
-        return null;
-    }
-    
-    @Override
-    public URL getGitUrl() {
-        return gitUrl;
-    }
 }
