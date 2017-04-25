@@ -1,0 +1,40 @@
+language: java
+
+sudo: required
+
+services:
+  - docker
+
+cache:
+  directories:
+    - $HOME/docker-cache/
+
+env:
+  global:
+    - COMPONENT=agile-paas-deployer
+    - DOCKER_CACHE_FILE=/home/travis/docker-cache/cache.tar.gz
+  matrix:
+    - IMAGE=agileiot/$COMPONENT-armv7l
+    - IMAGE=agileiot/$COMPONENT-x86_64
+      BASEIMAGE=resin/nuc-openjdk:openjdk-8-jdk
+
+before_install:
+  - docker run --rm --privileged multiarch/qemu-user-static:register
+  - if [ "$BASEIMAGE" ] ; then sed -i "s|^FROM .*|FROM $BASEIMAGE|" Dockerfile ; fi
+
+script:
+  - mvn install
+  - if [[ ${TRAVIS_PULL_REQUEST} != "false" ]]; then
+      export DOCKER_TAG=$TRAVIS_BRANCH-pr-$TRAVIS_PULL_REQUEST;
+    else
+      export DOCKER_TAG=$(sed -e"s|/|-|g" <<<"$TRAVIS_BRANCH");
+    fi
+  - docker build -t $IMAGE:$DOCKER_TAG .
+
+after_success:
+  - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+  - docker push $IMAGE:$DOCKER_TAG;
+  - if [ "$DOCKER_TAG" == "master" ]; then
+      docker tag $IMAGE:$DOCKER_TAG $IMAGE;
+      docker push $IMAGE;
+    fi

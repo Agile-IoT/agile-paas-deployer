@@ -1,10 +1,4 @@
-FROM maven:3.3.3-jdk-8
-
-# Install wget and curl
-RUN apt-get clean && apt-get update && apt-get install -y \
-  wget \
-  curl \
-  && apt-get clean && rm -rf /var/lib/apt/lists/*
+FROM resin/raspberrypi3-openjdk:openjdk-8-jdk-20170217
 
 ENV src_jar service/target/unified-paas-service.jar
 ENV src_config service/conf/config.yml
