@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
 set -u
+set -e
+
+SKIP_INSTALL=""
+SKIP_TESTS=""
+if [ ${1:-""} = "skip-install" ]; then
+    SKIP_INSTALL=1
+elif [ ${1:-""} = "skip-tests" ]; then
+    SKIP_TESTS="-Dmaven.test.skip"
+fi
+
 
 DIR=$(cd "$(dirname "$0")/.." && pwd)
 
@@ -15,11 +25,11 @@ mkdir -p target/etc
 
 # Compiles core
 cd $DIR/..
-mvn -Dmaven.test.skip clean install
+[ $SKIP_INSTALL ] || mvn $SKIP_TESTS clean install
 
 # Copy core files
 cd $DIR
-cp ../service/target/unified-paas-service-0.0.1-SNAPSHOT.jar target/bin/
+cp ../service/target/unified-paas-service.jar target/bin/
 cp ../service/conf/config.yml target/etc/
 
 # Create zip
