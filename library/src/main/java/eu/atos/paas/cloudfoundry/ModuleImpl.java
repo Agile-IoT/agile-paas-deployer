@@ -109,7 +109,8 @@ public class ModuleImpl implements Module {
             result = State.UNDEPLOYED;
         }
         else {
-            result = stateMap.getOrDefault(app.getState(), State.UNKNOWN);
+            result = stateMap.containsKey(app.getState())?
+                stateMap.get(app.getState()) : State.UNKNOWN;
         }
         return result;
     }

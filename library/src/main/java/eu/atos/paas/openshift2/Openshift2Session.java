@@ -66,8 +66,8 @@ public class Openshift2Session implements PaasSession
     @Override
     public Module createApplication(String moduleName, DeployParameters params)
             throws PaasProviderException, AlreadyExistsException {
-        Objects.nonNull(moduleName);
-        Objects.nonNull(params);
+        Objects.requireNonNull(moduleName);
+        Objects.requireNonNull(params);
         
         try {
             
@@ -90,8 +90,8 @@ public class Openshift2Session implements PaasSession
     public Module updateApplication(String moduleName, DeployParameters params)
             throws NotFoundException, PaasProviderException {
 
-        Objects.nonNull(moduleName);
-        Objects.nonNull(params);
+        Objects.requireNonNull(moduleName);
+        Objects.requireNonNull(params);
         
         if (getModule(moduleName) == null) {
             throw new NotFoundException(moduleName);
@@ -108,8 +108,8 @@ public class Openshift2Session implements PaasSession
     @Override
     public Module deploy(String moduleName, DeployParameters params) throws PaasException
     {
-        Objects.nonNull(moduleName);
-        Objects.nonNull(params);
+        Objects.requireNonNull(moduleName);
+        Objects.requireNonNull(params);
         
         logger.info("DEPLOY({})", moduleName);
         
@@ -128,7 +128,7 @@ public class Openshift2Session implements PaasSession
     @Override
     public void undeploy(String moduleName) throws PaasException
     {
-        Objects.nonNull(moduleName);
+        Objects.requireNonNull(moduleName);
 
         logger.info("UNDEPLOY({})", moduleName);
         if (getModule(moduleName) == null) {
@@ -149,8 +149,8 @@ public class Openshift2Session implements PaasSession
     @Override
     public void startStop(Module module, StartStopCommand command) throws PaasException, UnsupportedOperationException
     {
-        Objects.nonNull(module);
-        Objects.nonNull(command);
+        Objects.requireNonNull(module);
+        Objects.requireNonNull(command);
         
         logger.info(command.name() + "({})", module.getName());
         
