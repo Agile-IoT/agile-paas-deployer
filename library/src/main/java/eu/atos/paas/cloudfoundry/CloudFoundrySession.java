@@ -162,8 +162,8 @@ public class CloudFoundrySession implements PaasSession {
     public void startStop(Module module, StartStopCommand command) 
             throws PaasException, NotFoundException, UnsupportedOperationException
     {
-        Objects.nonNull(module);
-        Objects.nonNull(command);
+        Objects.requireNonNull(module);
+        Objects.requireNonNull(command);
 
         try {
             logger.info(command.name() + "({})", module.getName());
