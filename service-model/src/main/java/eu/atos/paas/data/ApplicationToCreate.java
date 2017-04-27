@@ -27,12 +27,19 @@ import eu.atos.paas.resources.exceptions.ValidationException;
 
 public class ApplicationToCreate {
 
+    public enum ArtifactType {
+        SOURCE, TARGET
+    }
+    
     private String name;
     private URL gitUrl;
+    
     @JsonIgnore
     private InputStream artifact;
-
+    private ArtifactType artifactType = ArtifactType.TARGET;
+    
     private String programmingLanguage;
+    
 
     /**
      * Just for deserialization 
@@ -43,6 +50,15 @@ public class ApplicationToCreate {
     public ApplicationToCreate(String name, InputStream artifact, String programmingLanguage) {
         this.name = Objects.requireNonNull(name);
         this.artifact = Objects.requireNonNull(artifact);
+        this.programmingLanguage = Objects.requireNonNull(programmingLanguage);
+    }
+    
+    public ApplicationToCreate(
+            String name, InputStream artifact, ArtifactType artifactType, String programmingLanguage) {
+        
+        this.name = Objects.requireNonNull(name);
+        this.artifact = Objects.requireNonNull(artifact);
+        this.artifactType = Objects.requireNonNull(artifactType);
         this.programmingLanguage = Objects.requireNonNull(programmingLanguage);
     }
     
@@ -72,6 +88,10 @@ public class ApplicationToCreate {
         return programmingLanguage;
     }
     
+    public ArtifactType getArtifactType() {
+        return artifactType;
+    }
+    
     public void validate() {
         
         if (name == null || name.isEmpty()) {
@@ -84,7 +104,8 @@ public class ApplicationToCreate {
 
     @Override
     public String toString() {
-        return String.format("ApplicationToCreate [name=%s, gitUrl=%s, artifact=%s]", name, gitUrl, artifact != null);
+        return String.format("ApplicationToCreate [name=%s, gitUrl=%s, artifact=%s, artifactType=%s]", 
+                name, gitUrl, artifact != null, artifactType);
     }
     
     
