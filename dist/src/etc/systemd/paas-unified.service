@@ -1,0 +1,22 @@
+#
+# paas-unified Service Unit 
+# 
+# ExecStart line must be modified to point to run-paas-unified.sh script
+#
+# systemctl [status|start|stop] paas-unified
+# systemctl --system daemon-reload : reload config
+# journalctl -u paas-unified : view logs
+#
+[Unit]
+Description=paas-unified service
+Requires=network.target
+After=multi-user.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+Type=simple
+ExecStart=run-paas-unified.sh
+
+[Install]
+WantedBy=multi-user.target
