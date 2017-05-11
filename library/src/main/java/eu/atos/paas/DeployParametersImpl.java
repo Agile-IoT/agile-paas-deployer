@@ -53,12 +53,6 @@ public class DeployParametersImpl implements DeployParameters {
     }
 
 //    @Override
-//    public String getBuildpackUrl() {
-//        // TODO Auto-generated method stub
-//        return null;
-//    }
-//
-//    @Override
 //    public String getCartridge() {
 //        // TODO Auto-generated method stub
 //        return null;

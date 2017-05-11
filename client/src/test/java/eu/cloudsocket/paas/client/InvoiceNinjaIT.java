@@ -24,6 +24,8 @@ import static org.testng.AssertJUnit.assertNotNull;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
+import java.util.Map;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -40,6 +42,7 @@ import eu.atos.paas.data.CredentialsMap;
 @Test(groups = Groups.HEROKU, enabled = false)
 public class InvoiceNinjaIT {
 
+    private static final Map<String, String> EMPTY_PROPERTIES = Collections.<String, String>emptyMap();
     private static final String APP_NAME = "daniel-invoiceninja";
     RestClient client;
     ProviderClient provider;
@@ -61,7 +64,8 @@ public class InvoiceNinjaIT {
         ApplicationToCreate appToCreate = new ApplicationToCreate(
                 APP_NAME, 
                 new URL("https://github.com/seybi87/cs-invoice-ninja-source"),
-                "PhP");
+                "PhP",
+                EMPTY_PROPERTIES);
         Application createdApp = provider.createApplication(appToCreate);
         assertNotNull(createdApp);
         Application app = provider.getApplication(APP_NAME);

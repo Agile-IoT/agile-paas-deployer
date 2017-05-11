@@ -31,6 +31,8 @@ import eu.atos.paas.resources.Constants;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
+import java.util.Map;
 
 import javax.ws.rs.core.Response.Status;
 
@@ -39,6 +41,8 @@ import static org.testng.AssertJUnit.*;
 
 @Test(groups = Groups.DUMMY)
 public class RestClientIT {
+    
+    private static final Map<String, String> EMPTY_PROPERTIES = Collections.<String, String>emptyMap();
     
     RestClient client;
     ProviderClient provider;
@@ -111,8 +115,8 @@ public class RestClientIT {
     public void createApplicationWithArtifact() throws IOException {
         
         String appName = "test";
-        ApplicationToCreate appToCreate = 
-                new ApplicationToCreate(appName, RestClient.class.getResourceAsStream("/SampleApp1.war"), "");
+        ApplicationToCreate appToCreate = new ApplicationToCreate(
+                appName, RestClient.class.getResourceAsStream("/SampleApp1.war"), "", EMPTY_PROPERTIES);
         Application app1 = provider.createApplication(appToCreate);
         assertNotNull(app1);
         assertEquals(appName, app1.getName());
@@ -127,8 +131,8 @@ public class RestClientIT {
     public void createApplicationWithGitUrl() throws IOException {
         
         String appName = "test2";
-        ApplicationToCreate appToCreate = 
-                new ApplicationToCreate(appName, new URL("https://github.com/octocat/Hello-World.git"), "Java");
+        ApplicationToCreate appToCreate = new ApplicationToCreate(
+                appName, new URL("https://github.com/octocat/Hello-World.git"), "Java", EMPTY_PROPERTIES);
         Application app1 = provider.createApplication(appToCreate);
         assertNotNull(app1);
         assertEquals(appName, app1.getName());

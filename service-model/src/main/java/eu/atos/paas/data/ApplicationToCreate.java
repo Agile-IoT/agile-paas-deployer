@@ -18,6 +18,9 @@ package eu.atos.paas.data;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -40,6 +43,7 @@ public class ApplicationToCreate {
     
     private String programmingLanguage;
     
+    private Map<String, String> properties;
 
     /**
      * Just for deserialization 
@@ -47,25 +51,32 @@ public class ApplicationToCreate {
     public ApplicationToCreate() {
     }
     
-    public ApplicationToCreate(String name, InputStream artifact, String programmingLanguage) {
+    public ApplicationToCreate(String name, InputStream artifact, String programmingLanguage, 
+            Map<String, String> additionalProperties) {
+        
         this.name = Objects.requireNonNull(name);
         this.artifact = Objects.requireNonNull(artifact);
         this.programmingLanguage = Objects.requireNonNull(programmingLanguage);
+        this.properties = new HashMap<String, String>(additionalProperties);
     }
     
-    public ApplicationToCreate(
-            String name, InputStream artifact, ArtifactType artifactType, String programmingLanguage) {
+    public ApplicationToCreate(String name, InputStream artifact, ArtifactType artifactType, String programmingLanguage,
+            Map<String, String> additionalProperties) {
         
         this.name = Objects.requireNonNull(name);
         this.artifact = Objects.requireNonNull(artifact);
         this.artifactType = Objects.requireNonNull(artifactType);
         this.programmingLanguage = Objects.requireNonNull(programmingLanguage);
+        this.properties = new HashMap<String, String>(additionalProperties);
     }
     
-    public ApplicationToCreate(String name, URL gitUrl, String programmingLanguage) {
+    public ApplicationToCreate(String name, URL gitUrl, String programmingLanguage, 
+            Map<String, String> additionalProperties) {
+        
         this.name = Objects.requireNonNull(name);
         this.gitUrl = Objects.requireNonNull(gitUrl);
         this.programmingLanguage = Objects.requireNonNull(programmingLanguage);
+        this.properties = new HashMap<String, String>(additionalProperties);
     }
     
     public String getName() {
@@ -90,6 +101,14 @@ public class ApplicationToCreate {
     
     public ArtifactType getArtifactType() {
         return artifactType;
+    }
+    
+    public Map<String, String> getProperties() {
+        return Collections.unmodifiableMap(properties);
+    }
+    
+    public String getProperty(String propertyName) {
+        return properties.get(propertyName);
     }
     
     public void validate() {
