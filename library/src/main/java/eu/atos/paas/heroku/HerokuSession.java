@@ -110,7 +110,7 @@ public class HerokuSession implements PaasSession {
             }
             else if (params.getPath() != null && !params.getPath().isEmpty()) {
 
-                deployed = connector.deployJavaWebApp(moduleName, params.getPath());
+                deployed = connector.deployApp(moduleName, params.getPath());
             }
             else {
                 throw new UnsupportedOperationException("Not implemented yet");

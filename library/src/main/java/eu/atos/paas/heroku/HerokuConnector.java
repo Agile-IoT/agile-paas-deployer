@@ -19,6 +19,8 @@ package eu.atos.paas.heroku;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -40,6 +42,7 @@ import com.heroku.sdk.deploy.DeployWar;
 import eu.atos.paas.git.Clone;
 import eu.atos.paas.git.Push;
 import eu.atos.paas.git.Repository;
+import eu.atos.zip.Zip;
 
 
 /**
@@ -168,11 +171,8 @@ public class HerokuConnector
             
             Clone cloneCmd = new Clone(sourceGitUrl);
             Repository repo = cloneCmd.call();
-            
-            String herokuGitUrl = _hApiClient.getApp(applicationName).getGitUrl();
-            Push pushCmd = new Push(repo);
-            pushCmd.call(herokuGitUrl, new UsernamePasswordCredentialsProvider("", apiKey));
 
+            deployApp(applicationName, repo);
             repo.close();
             
         } catch (IOException | GitAPIException e) {
@@ -185,6 +185,38 @@ public class HerokuConnector
         return true;
     }
     
+    public boolean deployApp(String applicationName, String zippedSourcePath) {
+        
+        try {
+            Path src = new File(zippedSourcePath).toPath();
+            Path target = Files.createTempDirectory("zip");
+            Zip.unzip(src, target);
+            
+            Repository repo = Repository.init(target.toFile());
+            repo.add(".");
+            repo.commit("Initial import");
+            deployApp(applicationName, repo);
+            repo.close();
+            
+        } catch (IOException | GitAPIException e) {
+            
+            /*
+             * This should not happen, unless disk space has run out, etc
+             */
+            throw new RuntimeException(e.getMessage(), e);
+        }
+        return true;
+    }
+    
+    private void deployApp(String application, Repository repo) throws IOException, GitAPIException {
+        
+        String herokuGitUrl = _hApiClient.getApp(application).getGitUrl();
+        Push pushCmd = new Push(repo);
+        pushCmd.call(herokuGitUrl, new UsernamePasswordCredentialsProvider("", apiKey));
+        
+        return;
+    }
+
     /**
      * 
      * @param applicationName
