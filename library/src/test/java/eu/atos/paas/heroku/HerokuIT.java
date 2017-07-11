@@ -26,7 +26,7 @@ import eu.atos.paas.AbstractProviderIT;
 import eu.atos.paas.Groups;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.TestConfigProperties;
-import eu.atos.paas.credentials.UserPasswordCredentials;
+import eu.atos.paas.credentials.ApiKeyCredentials;
 
 @Test(groups = Groups.HEROKU)
 public class HerokuIT extends AbstractProviderIT {
@@ -43,9 +43,7 @@ public class HerokuIT extends AbstractProviderIT {
         
         PaasClient client = new HerokuClient();
         
-        session = client.getSession(new UserPasswordCredentials(
-                TestConfigProperties.getInstance().getHeroku_user(),
-                TestConfigProperties.getInstance().getHeroku_password()));
+        session = client.getSession(new ApiKeyCredentials(TestConfigProperties.getInstance().getHeroku_apiKey()));
         
         URL url;
         try {

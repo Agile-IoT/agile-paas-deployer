@@ -36,6 +36,7 @@ import com.heroku.api.Heroku;
 import com.heroku.api.Addon;
 import com.heroku.api.AddonChange;
 import com.heroku.api.App;
+import com.heroku.api.Formation;
 import com.heroku.api.HerokuAPI;
 import com.heroku.sdk.deploy.DeployWar;
 
@@ -107,9 +108,7 @@ public class HerokuConnector
      */
     public HerokuConnector(String login, String passwd)
     {
-        logger.debug(">> Connecting to Heroku ...");
-        apiKey = HerokuAPI.obtainApiKey(login, passwd);
-        _hApiClient = connect();
+        throw new UnsupportedOperationException("You must login using apikey");
     }
 
     
@@ -361,7 +360,7 @@ public class HerokuConnector
             if (addon != null)
             {
                 AddonChange addChange = _hApiClient.addAddon(applicationName, addon_plan);
-                logger.debug(">> Addon installed: " + addChange.getStatus());
+                logger.debug(">> Addon installed: " + addChange.getState());
                 return true;
             }
             else
@@ -402,6 +401,17 @@ public class HerokuConnector
         return null;
     }
     
+    public void addConfig(String applicationName, String key, String value) {
+        Map<String, String> envValues = _hApiClient.listConfig(applicationName);
+        envValues.put(key, value);
+        _hApiClient.updateConfig(applicationName, envValues);
+    }
+    
+    public void removeConfig(String applicationName, String key) {
+        Map<String, String> envValues = _hApiClient.listConfig(applicationName);
+        envValues.put(key, null);
+        _hApiClient.updateConfig(applicationName, envValues);
+    }
     
     /**
      * 
@@ -424,6 +434,11 @@ public class HerokuConnector
         return false;
     }
     
+    public void scaleProcess(String applicationName, String applicationType, int n) {
+        
+        @SuppressWarnings("unused")
+        Formation f = getHerokuAPIClient().scale(applicationName, applicationType, n);
+    }
     
     /**
      * 

@@ -16,8 +16,7 @@
  */
 package eu.cloudsocket.paas.client;
 
-import static eu.atos.paas.credentials.ApiUserPasswordCredentials.PASSWORD;
-import static eu.atos.paas.credentials.ApiUserPasswordCredentials.USER;
+import static eu.atos.paas.credentials.ApiKeyCredentials.API_KEY;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
 
@@ -52,13 +51,11 @@ public class InvoiceNinjaIT {
         
         client = new RestClient(TestConstants.SERVER_URL);
         CredentialsMap credentials = CredentialsMap.builder()
-                .item(USER, TestConfigProperties.getInstance().getHeroku_user())
-                .item(PASSWORD, TestConfigProperties.getInstance().getHeroku_password())
+                .item(API_KEY, TestConfigProperties.getInstance().getHeroku_apiKey())
                 .build();
         provider = client.getProvider("heroku", credentials);
     }
     
-    @Test
     public void createApplication() throws IOException {
         
         ApplicationToCreate appToCreate = new ApplicationToCreate(
