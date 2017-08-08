@@ -26,4 +26,8 @@ public class AuthenticationException extends ResourceException {
     public AuthenticationException() {
         super(new ErrorEntity(Status.UNAUTHORIZED, "Authentication error"));
     }
+    
+    public AuthenticationException(String message) {
+        super(new ErrorEntity(Status.UNAUTHORIZED, message));
+    }
 }

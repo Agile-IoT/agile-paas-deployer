@@ -519,6 +519,8 @@ public abstract class PaasResource
             sessionProxy = new PaasSessionProxy(session);
         } catch (eu.atos.paas.AuthenticationException e) {
             throw new AuthenticationException();
+        } catch (UnsupportedOperationException e) {
+            throw new AuthenticationException(e.getMessage());
         }
         return sessionProxy;
     }
