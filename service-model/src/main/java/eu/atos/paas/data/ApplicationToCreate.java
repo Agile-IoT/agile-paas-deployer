@@ -41,9 +41,9 @@ public class ApplicationToCreate {
     private InputStream artifact;
     private ArtifactType artifactType = ArtifactType.TARGET;
     
-    private String programmingLanguage;
+    private String programmingLanguage = "";
     
-    private Map<String, String> properties;
+    private Map<String, String> properties = Collections.emptyMap();
 
     /**
      * Just for deserialization 
