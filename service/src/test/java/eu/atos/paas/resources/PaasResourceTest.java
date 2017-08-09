@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -58,6 +59,7 @@ import eu.atos.paas.resources.exceptions.CredentialsParsingException;
  */
 public class PaasResourceTest {
 
+    private static final Map<String, String> EMPTY_PROPERTIES = Collections.<String, String>emptyMap();
     private static final String APP_NAME = "APP_NAME";
     private DummyResource resource;
     private DummyHttpHeaders headers;
@@ -161,7 +163,7 @@ public class PaasResourceTest {
     public void testCreateApplicationWithArtifact() throws IOException {
         
         InputStream is = new ByteArrayInputStream(new byte[] {});
-        ApplicationToCreate appToCreate = new ApplicationToCreate(APP_NAME, is, "");
+        ApplicationToCreate appToCreate = new ApplicationToCreate(APP_NAME, is, "", EMPTY_PROPERTIES);
             
         Application createdApp = resource.createApplication(headers, appToCreate);
         
@@ -173,7 +175,10 @@ public class PaasResourceTest {
     public void testCreateApplicationWithGitUrl() throws IOException {
         
         ApplicationToCreate appToCreate = new ApplicationToCreate(
-                "other_app_name", new URL("https://github.com/octocat/Hello-World.git"), "Java");
+                "other_app_name", 
+                new URL("https://github.com/octocat/Hello-World.git"), 
+                "Java", 
+                EMPTY_PROPERTIES);
         
         Application createdApp = resource.createApplication(headers, appToCreate);
         

@@ -17,7 +17,6 @@
 package eu.atos.paas.resources;
 
 import java.io.File;
-import java.util.Collections;
 
 import eu.atos.paas.DeployParametersImpl;
 import eu.atos.paas.PaasSession.DeployParameters;
@@ -33,7 +32,7 @@ public class ParametersTranslatorImpl implements ParametersTranslator {
         DeployParametersImpl result = new DeployParametersImpl(
                 path,
                 application.getGitUrl(), 
-                Collections.<String, String>emptyMap());
+                application.getProperties());
         return result;
     }
 

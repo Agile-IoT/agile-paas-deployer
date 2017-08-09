@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 Atos
+ * Copyright 2017 Atos
  * Contact: Atos <roman.sosa@atos.net>
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,20 +14,24 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package eu.atos.paas.resources.exceptions;
+package eu.atos.zip;
 
-import javax.ws.rs.core.Response.Status;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import eu.atos.paas.resources.ErrorEntity;
+import org.testng.annotations.Test;
 
-public class AuthenticationException extends ResourceException {
-    private static final long serialVersionUID = 1L;
+public class ZipTest {
 
-    public AuthenticationException() {
-        super(new ErrorEntity(Status.UNAUTHORIZED, "Authentication error"));
-    }
-    
-    public AuthenticationException(String message) {
-        super(new ErrorEntity(Status.UNAUTHORIZED, message));
+    @Test
+    public void unzip() throws IOException {
+
+        Path from = new File(ZipTest.class.getResource("/samplezip.zip").getFile()).toPath();
+        Path to = Files.createTempDirectory("pul");
+        
+        System.out.println("unzipping to " + to);
+        Zip.unzip(from, to);
     }
 }

@@ -29,31 +29,19 @@ public class HerokuClient implements PaasClient {
     @Override
     public PaasSession getSession(Credentials credentials) {
         PaasSession session = null;
-        if (credentials instanceof UserPasswordCredentials) {
-            
-            session = getSession((UserPasswordCredentials)credentials);
-        }
-        else if (credentials instanceof ApiKeyCredentials) {
+
+        if (credentials instanceof ApiKeyCredentials) {
 
             session = getSession((ApiKeyCredentials)credentials);
             
         } else {
             
-            throw new UnsupportedOperationException("Credentials of class " + credentials.getClass().getName() + " not supported (Heroku)");
+            throw new UnsupportedOperationException("Please, login with apikey");
         }
         
         return session;
     }
 
-    
-    private PaasSession getSession(UserPasswordCredentials credentials) {
-        HerokuConnector connector = new HerokuConnector(credentials.getUser(), credentials.getPassword());
-        PaasSession session = new HerokuSession(connector);
-        
-        return session;
-    }
-    
-    
     private PaasSession getSession(ApiKeyCredentials credentials) {
         HerokuConnector connector = new HerokuConnector(credentials.getApiKey());
         

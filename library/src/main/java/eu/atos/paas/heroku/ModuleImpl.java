@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import com.heroku.api.Addon;
 import com.heroku.api.App;
+import com.heroku.api.Formation;
 
 import eu.atos.paas.Module;
 
@@ -35,30 +36,33 @@ import eu.atos.paas.Module;
  *
  */
 public class ModuleImpl implements Module {
-
     
-    private App app;
-    private List<String> lServices;
-    private Map<String, String> mEnv;
-    private URL url;
-    private URL gitUrl;
-    private State state;
+    private static final Formation EMPTY_FORMATION = new Formation();
+    static {
+        EMPTY_FORMATION.setQuantity(0);
+        EMPTY_FORMATION.setType("");
+    }
     
+    private final App app;
+    private final List<String> lServices;
+    private final Map<String, String> mEnv;
+    private final URL url;
+    private final URL gitUrl;
+    private final State state;
+    private final Formation formation;
     
     /**
      * 
      * @param app
      */
-    public ModuleImpl(App app) {
-        this(app, Collections.<Addon>emptyList(), Collections.<String, String>emptyMap());
-        this.app = app;
-        lServices = new ArrayList<String>(0);
+    public ModuleImpl(App app, List<Formation> formations) {
+        this(app, Collections.<Addon>emptyList(), Collections.<String, String>emptyMap(), formations);
     }
     
     
-    public ModuleImpl(App app, List<Addon> serviceList, Map<String, String> env) {
+    public ModuleImpl(App app, List<Addon> serviceList, Map<String, String> env, List<Formation> formations) {
         this.app = app;
-        
+        this.formation = findFormation(formations);
         this.url = urlFromString(app.getWebUrl());
         this.gitUrl = urlFromString(app.getGitUrl());
         
@@ -77,7 +81,7 @@ public class ModuleImpl implements Module {
             this.state = State.UNDEPLOYED;
         }
         else {
-            this.state = app.getDynos() > 0? State.STARTED : State.STOPPED;
+            this.state = formation.getQuantity() > 0? State.STARTED : State.STOPPED;
         }
     }
 
@@ -102,14 +106,14 @@ public class ModuleImpl implements Module {
     
     @Override
     public String getAppType() {
-        return "web";
+        return formation.getType();
     }
 
 
     @Override
     public int getRunningInstances()
     {
-        return app.getDynos();
+        return formation.getQuantity();
     }
 
     
@@ -150,5 +154,18 @@ public class ModuleImpl implements Module {
              */
             throw new IllegalArgumentException("Error in URL=" + urlStr + " from provider ", e);
         }
+    }
+    
+    private Formation findFormation(List<Formation> formations) {
+        if (formations.size() == 0) {
+            return EMPTY_FORMATION;
+        }
+        else if (formations.size() == 1) {
+            return formations.get(0);
+        }
+        /*
+         * XXX Unsure of the case where an application has two different formations 
+         */
+        throw new IllegalStateException("formations.size = " + formations.size() + " for application " + app.getName());
     }
 }

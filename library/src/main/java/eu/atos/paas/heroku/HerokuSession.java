@@ -16,7 +16,6 @@
  */
 package eu.atos.paas.heroku;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,6 +26,7 @@ import org.springframework.http.HttpStatus;
 
 import com.heroku.api.Addon;
 import com.heroku.api.App;
+import com.heroku.api.Formation;
 import com.heroku.api.exception.HerokuAPIException;
 import com.heroku.api.exception.RequestFailedException;
 
@@ -81,7 +81,7 @@ public class HerokuSession implements PaasSession {
                 throw new AlreadyExistsException(moduleName);
             }
             connector.createApp(moduleName);
-            connector.getHerokuAPIClient().addConfig(moduleName, Collections.singletonMap(UNDEPLOYED_FLAG, "1"));
+            connector.addConfig(moduleName, UNDEPLOYED_FLAG, "1");
             
             return getModule(moduleName);
 
@@ -110,7 +110,7 @@ public class HerokuSession implements PaasSession {
             }
             else if (params.getPath() != null && !params.getPath().isEmpty()) {
 
-                deployed = connector.deployJavaWebApp(moduleName, params.getPath());
+                deployed = connector.deployApp(moduleName, params.getPath());
             }
             else {
                 throw new UnsupportedOperationException("Not implemented yet");
@@ -118,7 +118,7 @@ public class HerokuSession implements PaasSession {
             if (!deployed) {
                 throw new PaasException("Application not deployed");
             }
-            connector.getHerokuAPIClient().removeConfig(moduleName, UNDEPLOYED_FLAG);
+            connector.removeConfig(moduleName, UNDEPLOYED_FLAG);
             return getModule(moduleName);
             
         } catch (HerokuAPIException e) {
@@ -185,11 +185,11 @@ public class HerokuSession implements PaasSession {
             switch (command)
             {
                 case START:
-                    connector.getHerokuAPIClient().scaleProcess(module.getName(), module.getAppType(), 1);
+                    connector.scaleProcess(module.getName(), module.getAppType(), 1);
                     break;
                     
                 case STOP:
-                    connector.getHerokuAPIClient().scaleProcess(module.getName(), module.getAppType(), 0);
+                    connector.scaleProcess(module.getName(), module.getAppType(), 0);
                     break;
                     
                 default:
@@ -210,12 +210,12 @@ public class HerokuSession implements PaasSession {
         switch (command)
         {
             case SCALE_UP_INSTANCES:
-                connector.getHerokuAPIClient().scaleProcess(module.getName(), module.getAppType(), module.getRunningInstances() + 1);
+                connector.scaleProcess(module.getName(), module.getAppType(), module.getRunningInstances() + 1);
                 break;
                 
             case SCALE_DOWN_INSTANCES:
                 if (module.getRunningInstances() > 1) {
-                    connector.getHerokuAPIClient().scaleProcess(module.getName(), module.getAppType(), module.getRunningInstances() - 1);
+                    connector.scaleProcess(module.getName(), module.getAppType(), module.getRunningInstances() - 1);
                 }
                 break;
                 
@@ -234,7 +234,7 @@ public class HerokuSession implements PaasSession {
         switch (command)
         {
             case SCALE_INSTANCES:
-                connector.getHerokuAPIClient().scaleProcess(module.getName(), module.getAppType(), scale_value);
+                connector.scaleProcess(module.getName(), module.getAppType(), scale_value);
                 break;
                 
             case SCALE_MEMORY:
@@ -273,7 +273,8 @@ public class HerokuSession implements PaasSession {
             app = connector.getHerokuAPIClient().getApp(moduleName);
             List<Addon> l = connector.getHerokuAPIClient().listAppAddons(moduleName);
             Map<String, String> m = connector.getHerokuAPIClient().listConfig(moduleName);
-            return new ModuleImpl(app, l, m);
+            List<Formation> formations = connector.getHerokuAPIClient().listFormation(moduleName);
+            return new ModuleImpl(app, l, m, formations);
         
         } catch (RequestFailedException e) {
             
