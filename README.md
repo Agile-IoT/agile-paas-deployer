@@ -1,6 +1,8 @@
 # unified-paas
 Unified PaaS Library
 
+Maintainer: [Román SG](https://github.com/rosogon)
+
 ---
 ## Usage
 1. Compile project
