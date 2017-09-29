@@ -65,11 +65,20 @@
             <groupId>com.heroku.api</groupId>
             <artifactId>heroku-http-apache</artifactId>
         </dependency>
+
         <!-- CLOUD FOUNDRY -->
         <dependency>
             <groupId>org.cloudfoundry</groupId>
             <artifactId>cloudfoundry-client-lib</artifactId>
         </dependency>
+
+        <!-- OPENSHIFT 3 -->
+        <dependency>
+            <groupId>com.openshift</groupId>
+            <artifactId>openshift-restclient-java</artifactId>
+            <version>5.9.2.Final</version>
+        </dependency>
+        
         <!-- OPENSHIFT 2 -->
         <dependency>
             <groupId>com.openshift</groupId>
@@ -85,14 +94,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- OPENSHIFT 3 -->
-        <!--
-        <dependency>
-            <groupId>com.openshift</groupId>
-            <artifactId>openshift-restclient-java</artifactId>
-            <version>3.0.1.Final</version>
-        </dependency>
-        -->
         
         <!-- TESTS -->
         <dependency>

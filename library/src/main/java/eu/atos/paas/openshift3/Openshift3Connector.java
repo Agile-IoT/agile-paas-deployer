@@ -16,6 +16,7 @@
  */
 package eu.atos.paas.openshift3;
 
+import com.openshift.restclient.IClient;
 
 /**
  * 
@@ -26,20 +27,14 @@ package eu.atos.paas.openshift3;
 public class Openshift3Connector
 {
     
+    private IClient osClient;
     
-    /**
-     * 
-     * Constructor
-     * @param url
-     * @param login
-     * @param passwd
-     */
-    public Openshift3Connector(String url, String login, String passwd)
+    public Openshift3Connector(IClient osClient)
     {
         //IClient client = new ClientFactory().create(url, new NoopSSLCertificateCallback());
         //client.setAuthorizationStrategy(new BasicAuthorizationStrategy(login, passwd, ""));
-        
-        throw new UnsupportedOperationException("Openshift3 connector not implemented");
+    
+        this.osClient = osClient;
     }
     
     
