@@ -17,6 +17,7 @@
 package eu.atos.paas;
 
 import java.net.URL;
+import java.util.Map;
 
 /**
  * Defines the operations to be implemented by a provider session.
@@ -39,15 +40,29 @@ public interface PaasSession {
     public interface DeployParameters {
         String getPath();
         URL getGitUrl();
-        String getProperty(String propertyName);
+        String getImageName();
+        String getProperty(String propertyName, String defaultValue);
+        int getPropertyAsInt(String propertyName, int defaultValue);
+        Map<String, String> getProperties();
+        String getEnv(String envName);
+        Map<String, String> getEnvs();
         
         public static class Properties {
             public static final String CARTRIDGE = "cartridge";
             public static final String BUILDPACK_URL = "buildpack_url";
+            public static final String INSTANCES = "instances";
+            public static final String PORT = "port";
+            public static final String APPLICATION_TYPE = "application-type";
         }
 
     }
 
+    
+    public static class ApplicationType {
+        public static String WEB = "web";
+        public static String SERVICE = "service";
+    }
+    
     
     public enum StartStopCommand {
         START,

@@ -53,6 +53,11 @@ public class TestConfigProperties
     private String op_user = "";
     private String op_password = "";
     
+    // OPENSHIFT3
+    private String op3_api = "";
+    private String op3_user = "";
+    private String op3_password = "";
+    private String op3_token = "";
     
     /**
      * 
@@ -86,6 +91,10 @@ public class TestConfigProperties
         op_user = props.getProperty("op_user", "");
         op_password = props.getProperty("op_password", "");
         
+        op3_api = props.getProperty("op3_api", "");
+        op3_user = props.getProperty("op3_user", "");
+        op3_password = props.getProperty("op3_password", "");
+        op3_token = props.getProperty("op3_token", "");
         cf_trustSelfSignedCerts = true;
     }
     
@@ -213,5 +222,19 @@ public class TestConfigProperties
         return op_password;
     }
     
+    public String getOp3_api() {
+        return op3_api;
+    }
     
+    public String getOp3_user() {
+        return op3_user;
+    }
+    
+    public String getOp3_password() {
+        return op3_password;
+    }
+    
+    public String getOp3_token() {
+        return op3_token;
+    }
 }

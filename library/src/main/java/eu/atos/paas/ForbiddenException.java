@@ -27,7 +27,7 @@ public class ForbiddenException extends PaasException {
     private final String resourceName;
     
     public ForbiddenException(String resourceName, Throwable e) {
-        
+        super("Access forbidden to " + resourceName, e);
         this.resourceName = resourceName;
     }
     

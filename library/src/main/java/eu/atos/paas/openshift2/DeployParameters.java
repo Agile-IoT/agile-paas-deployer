@@ -41,7 +41,7 @@ public class DeployParameters extends DeployParametersImpl implements PaasSessio
 
     public String getCartridge()
     {
-        return getProperty(Properties.CARTRIDGE);
+        return getProperty(Properties.CARTRIDGE, null);
     }
 
 }

@@ -179,13 +179,9 @@ public class OpenShiftResource extends PaasResource
                                 "Programming language not supported: " + application.getProgrammingLanguage()));
             }
             
-            Map<String, String> properties = new HashMap<String, String>();
-            properties.put(DeployParameters.Properties.CARTRIDGE, cartridge);
-            
-            String path = uploadedFile != null?
-                    uploadedFile.getAbsolutePath() : null;
-                    
-            DeployParameters params = new DeployParametersImpl(path, application.getGitUrl(), properties);
+            DeployParameters params = ParametersTranslatorImpl.getBuilder(application, uploadedFile)
+                    .property(DeployParameters.Properties.CARTRIDGE, cartridge)
+                    .build();
             
             return params;
         }

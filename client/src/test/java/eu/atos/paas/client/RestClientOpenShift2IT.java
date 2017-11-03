@@ -19,8 +19,6 @@ package eu.atos.paas.client;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.Map;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -39,7 +37,6 @@ import static org.testng.AssertJUnit.*;
 @Test(groups = Groups.OPENSHIFT2)
 public class RestClientOpenShift2IT {
 
-        private static final Map<String, String> EMPTY_PROPERTIES = Collections.<String, String>emptyMap();
         private static final String APP_NAME = "paaslibraryexample";
         RestClient client;
         ProviderClient provider;
@@ -59,11 +56,11 @@ public class RestClientOpenShift2IT {
         @Test
         public void createApplication() throws IOException {
             
-            ApplicationToCreate appToCreate = new ApplicationToCreate(
-                    APP_NAME, 
-                    new URL("https://github.com/OpenMEAP/openshift-openmeap-quickstart"),
-                    "Java",
-                    EMPTY_PROPERTIES);
+            ApplicationToCreate appToCreate = new ApplicationToCreate.Builder(
+                        APP_NAME, new URL("https://github.com/OpenMEAP/openshift-openmeap-quickstart"))
+                    .programmingLanguage("Java")
+                    .build();
+            
             Application createdApp = provider.createApplication(appToCreate);
             assertNotNull(createdApp);
             Application app = provider.getApplication(APP_NAME);

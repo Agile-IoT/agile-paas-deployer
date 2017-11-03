@@ -199,7 +199,24 @@ public abstract class PaasResource
         PaasSession session = getSession(headers);
 
         application.validate();
-        return createApplicationImpl(session, application, null);
+        
+        File uploadedFile = null;
+        try {
+            if (application.getArtifact() != null) {
+                
+                uploadedFile = saveToFile(application.getArtifact());
+            }
+            return createApplicationImpl(session, application, uploadedFile);
+        } catch (IOException e)
+        {
+            throw new WebApplicationException(e);
+        }
+        finally
+        {
+            if (uploadedFile != null) {
+                uploadedFile.delete();
+            }
+        }
     }
     
     /*

@@ -34,7 +34,7 @@ import eu.atos.paas.cloudfoundry.CloudFoundryClient;
 import eu.atos.paas.data.Provider;
 import eu.atos.paas.heroku.HerokuClient;
 import eu.atos.paas.openshift2.Openshift2Client;
-import eu.atos.paas.openshift3.Openshift3Client;
+import eu.atos.paas.openshift3.OpenShift3Client;
 import eu.atos.paas.resources.CFBasedResource;
 import eu.atos.paas.resources.HerokuResource;
 import eu.atos.paas.resources.OpenShiftResource;
@@ -91,10 +91,10 @@ public class GenericServiceImplTest {
                         new Provider(
                                 Providers.OPENSHIFT, 
                                 "http://www.example.com",
-                                new String[] { Openshift2Client.VERSION, Openshift3Client.VERSION },
+                                new String[] { Openshift2Client.VERSION, OpenShift3Client.VERSION },
                                 Openshift2Client.VERSION
                         ),
-                        new String[] { Openshift2Client.class.getName(), Openshift3Client.class.getName() }
+                        new String[] { Openshift2Client.class.getName(), OpenShift3Client.class.getName() }
                 )
         );
         map.put(
@@ -104,10 +104,10 @@ public class GenericServiceImplTest {
                         new Provider(
                                 Providers.OPENSHIFT_ONLINE, 
                                 "https://openshift.redhat.com",
-                                new String[] { Openshift2Client.VERSION, Openshift3Client.VERSION },
+                                new String[] { Openshift2Client.VERSION, OpenShift3Client.VERSION },
                                 Openshift2Client.VERSION
                         ),
-                        new String[] { Openshift2Client.class.getName(), Openshift3Client.class.getName() }
+                        new String[] { Openshift2Client.class.getName(), OpenShift3Client.class.getName() }
                 )
         );
         ObjectMapper mapper = new ObjectMapper();

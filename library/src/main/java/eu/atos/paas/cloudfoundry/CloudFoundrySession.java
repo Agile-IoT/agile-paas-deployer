@@ -80,7 +80,7 @@ public class CloudFoundrySession implements PaasSession {
                 throw new AlreadyExistsException(moduleName);
             }
             CloudApplication app = connector.createApplication(
-                    moduleName, "", params.getProperty(Properties.BUILDPACK_URL));
+                    moduleName, "", params.getProperty(Properties.BUILDPACK_URL, null));
             Module m = new ModuleImpl(app);
             
             return m;
@@ -132,7 +132,7 @@ public class CloudFoundrySession implements PaasSession {
     {
         logger.info("DEPLOY({})", moduleName);
         
-        if (!connector.deployApp(moduleName, params.getPath(), params.getProperty(Properties.BUILDPACK_URL)))
+        if (!connector.deployApp(moduleName, params.getPath(), params.getProperty(Properties.BUILDPACK_URL, null)))
         {
             throw new PaasException("Application not deployed");
         }

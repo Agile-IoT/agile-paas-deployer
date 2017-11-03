@@ -24,7 +24,7 @@ import eu.atos.paas.cloudfoundry.CloudFoundryClient;
 import eu.atos.paas.data.Provider;
 import eu.atos.paas.heroku.HerokuClient;
 import eu.atos.paas.openshift2.Openshift2Client;
-import eu.atos.paas.openshift3.Openshift3Client;
+import eu.atos.paas.openshift3.OpenShift3Client;
 import eu.atos.paas.resources.CFBasedResource;
 import eu.atos.paas.resources.ClientMap;
 import eu.atos.paas.resources.HerokuResource;
@@ -62,7 +62,7 @@ public class ServiceImpl implements ResourceSet {
                 new Provider(
                         Providers.OPENSHIFT, 
                         "http://www.example.com",
-                        new String[] { Openshift2Client.VERSION, Openshift3Client.VERSION },
+                        new String[] { Openshift2Client.VERSION, OpenShift3Client.VERSION },
                         Openshift2Client.VERSION
                 )
         );
@@ -71,7 +71,7 @@ public class ServiceImpl implements ResourceSet {
                 new Provider(
                         Providers.OPENSHIFT_ONLINE, 
                         "https://openshift.redhat.com",
-                        new String[] { Openshift2Client.VERSION, Openshift3Client.VERSION },
+                        new String[] { Openshift2Client.VERSION, OpenShift3Client.VERSION },
                         Openshift2Client.VERSION
                 )
         );
@@ -94,7 +94,7 @@ public class ServiceImpl implements ResourceSet {
                 provider,
                 ClientMap.builder()
                     .client(new Openshift2Client())
-                    .client(new Openshift3Client())
+                    .client(new OpenShift3Client())
                     .build()
         );
     }

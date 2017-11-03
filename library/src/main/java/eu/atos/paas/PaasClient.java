@@ -26,9 +26,11 @@ public interface PaasClient {
      * @param credentials Credential to connect to the provider.
      * @return A connected session
      * @throws AuthenticationException if the authentication fails.
+     * @throws UnsupportedOperationException on wrong credential type.
      * @throws PaasProviderException on any other unexpected error from the provider.
      */
-    PaasSession getSession(Credentials credentials) throws AuthenticationException, PaasProviderException;
+    PaasSession getSession(Credentials credentials) 
+            throws AuthenticationException, UnsupportedOperationException, PaasProviderException;
     
     String getVersion();
 }

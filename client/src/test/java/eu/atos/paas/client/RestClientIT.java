@@ -26,13 +26,12 @@ import eu.atos.paas.data.Application;
 import eu.atos.paas.data.ApplicationToCreate;
 import eu.atos.paas.data.CredentialsMap;
 import eu.atos.paas.data.Provider;
+import eu.atos.paas.data.ApplicationToCreate.ArtifactType;
 import eu.atos.paas.resources.Constants;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.Map;
 
 import javax.ws.rs.core.Response.Status;
 
@@ -41,8 +40,6 @@ import static org.testng.AssertJUnit.*;
 
 @Test(groups = Groups.DUMMY)
 public class RestClientIT {
-    
-    private static final Map<String, String> EMPTY_PROPERTIES = Collections.<String, String>emptyMap();
     
     RestClient client;
     ProviderClient provider;
@@ -115,8 +112,9 @@ public class RestClientIT {
     public void createApplicationWithArtifact() throws IOException {
         
         String appName = "test";
-        ApplicationToCreate appToCreate = new ApplicationToCreate(
-                appName, RestClient.class.getResourceAsStream("/SampleApp1.war"), "", EMPTY_PROPERTIES);
+        ApplicationToCreate appToCreate = new ApplicationToCreate.Builder(
+                    appName, RestClient.class.getResourceAsStream("/SampleApp1.war"), ArtifactType.TARGET)
+                .build();
         Application app1 = provider.createApplication(appToCreate);
         assertNotNull(app1);
         assertEquals(appName, app1.getName());
@@ -131,8 +129,31 @@ public class RestClientIT {
     public void createApplicationWithGitUrl() throws IOException {
         
         String appName = "test2";
-        ApplicationToCreate appToCreate = new ApplicationToCreate(
-                appName, new URL("https://github.com/octocat/Hello-World.git"), "Java", EMPTY_PROPERTIES);
+        ApplicationToCreate appToCreate = new ApplicationToCreate.Builder(
+                    appName, new URL("https://github.com/octocat/Hello-World.git"))
+                .programmingLanguage("Java")
+                .build();
+        Application app1 = provider.createApplication(appToCreate);
+        assertNotNull(app1);
+        assertEquals(appName, app1.getName());
+        Application app2 = provider.getApplication(appName);
+        assertEquals(appName, app2.getName());
+        
+        assertTrue(!app1.getUrl().toString().isEmpty());
+        assertEquals(app1.getUrl(), app2.getUrl());
+    }
+
+    @Test(priority = 22)
+    public void createApplicationWithImageName() throws IOException {
+        
+        String appName = "test3";
+        ApplicationToCreate appToCreate = new ApplicationToCreate.Builder(
+                    appName, "centos/mongodb-26-centos7")
+                .programmingLanguage("Java")
+                .env("MONGODB_USER", "admin")
+                .env("MONGODB_PASSWORD", "secret")
+                .property("PORT", "27017")
+                .build();
         Application app1 = provider.createApplication(appToCreate);
         assertNotNull(app1);
         assertEquals(appName, app1.getName());

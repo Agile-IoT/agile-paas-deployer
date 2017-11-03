@@ -42,6 +42,6 @@ public class DeployParameters extends DeployParametersImpl implements PaasSessio
 
     public String getBuildpackUrl()
     {
-        return getProperty(Properties.BUILDPACK_URL);
+        return getProperty(Properties.BUILDPACK_URL, null);
     }
 }
