@@ -16,6 +16,10 @@
  */
 package eu.atos.paas;
 
+/**
+ * A PaasException encapsulates exceptions raised by provider clients or other expected errors (authentication error,
+ *     create an application with an existing name, delete a non existing application...)
+ */
 public class PaasException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 

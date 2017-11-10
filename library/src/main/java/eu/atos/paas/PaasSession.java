@@ -22,8 +22,10 @@ import java.net.URL;
  * Defines the operations to be implemented by a provider session.
  * 
  * This is the exception handling to be used by each implementation:
- * <li>PaasException encapsulates exceptions raised by provider clients or other expected errors (authentication error,
+ * <li>{@link PaasException} encapsulates exceptions raised by provider clients or other expected errors (authentication error,
  *     create an application with an existing name, delete a non existing application...)
+ *     A special case of PaasException is {@link PaasProviderException}, which encloses an unexpected exception 
+ *     thrown by the provider.
  * <li>Normal runtime exceptions that indicate a bug. For example, NullPointerException or 
  *     IllegalArgumentException in case of wrong 
  *     parameters (they can occur because of a bug in the library implementation or a bug 

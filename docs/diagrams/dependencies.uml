@@ -1,0 +1,32 @@
+@startuml
+[client]
+[service] #LightBlue
+[library]
+[common]
+[service-model]  
+
+[client] --> [service]
+[client] ..> [service-model]
+[client] ..> [common]
+
+[service] --> [library]
+[service] ..> [service-model]
+[service] ..> [common]
+
+[library] ..> [common]
+cloud {
+  [OpenShift]
+  [CloudFoundry]
+  [Heroku]
+}
+
+library --> OpenShift
+library --> Heroku
+library --> CloudFoundry
+
+legend right
+ - -> compile use
+ ---> runtime use
+endlegend
+
+@enduml

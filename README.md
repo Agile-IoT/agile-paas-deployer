@@ -1,14 +1,33 @@
 # unified-paas
 Unified PaaS Library
 
+The Unified PaaS Library provides a uniform API to manage applications on PaaS providers. 
+
+Depending on the supported provider, it accepts deploying applications by:
+
+* uploading a binary or source code artifact (e.g., a zip containing the code of a NodeJS app or a WAR);
+* specifying the GIT URL of the code to deploy;
+* specifying the name of a Docker image.
+
 ---
 ## Usage
 1. Compile project
-2. Start server: `cd service; bin/runserver.sh`
-3. Deploy an application: 
-    `curl http://localhost:8080/api/heroku/applications -X POST -F file=@"<warfile>" -F model='{"name":"samplewar"}' -H"Content-Type: multipart/form-data" -H'X-PaaS-Credentials:{"api-key":"<heroku-api-key>"}'`
 
-### API Overview
+    $ mvn install
+    
+2. Start server
+ 
+    $ cd service; bin/runserver.sh
+    
+3. Deploy an application
+ 
+    $ curl http://localhost:8002/api/heroku/applications -X POST \
+         -F file=@"<warfile>" \
+         -F model='{"name":"samplewar"}' \
+         -H"Content-Type: multipart/form-data" \
+         -H'X-PaaS-Credentials:{"api-key":"<heroku-api-key>"}'
+
+## API Overview
 
 Each supported PaaS is a resource on /api. For example, Heroku is on /api/heroku.
 
@@ -17,52 +36,80 @@ See below for specific instructions per provider.
 
 These are the supported operations:
 
-#### GET /api
+### GET /api
 
 Return a list of the supported subpaths.
 
-Example:
-`curl localhost:8080/api`
+    $ curl localhost:8002/api
+    {
+      "openshift.com":{
+        "name":"OpenShift Online",
+        "url":"https://openshift.redhat.com",
+        "versions":["v2","v3"],
+        "defaultVersion":"v2"
+      },
+      "pivotal":{
+        ...
+      }
+      ...
+    }
 
-`["heroku","cloudfoundry","pivotal","bluemix","openshift2"]`
-
-#### GET /api/{paas}
+### GET /api/{paas}
 
 Return a description of the provider.
 
-#### POST /api/{paas}/applications
+    $ curl localhost:8002/api/heroku
+    {"name":"Heroku","url":"https://api.heroku.com/","versions":["v3"],"defaultVersion":"v3"}
+    
+### POST /api/{paas}/applications
 
-Creates an application and deploy its artifact. A multipart request with two fields:
-* model: contains information about the application. The name of the application is here, and is used to refer to the application in the rest of operations.
-* file: the bytes of the artifact
+Creates an application and deploy its artifact. The request is a multipart request with two fields:
+
+* model: contains information about the application, modelled by the ApplicationToCreate class (see below). 
+  The name of the application is here, and is used to refer to the application in the rest of operations.
+* file: the bytes of the artifact, in case we are uploading an artifact.
 
 Examples:
 
-`curl http://localhost:8080/api/heroku/applications -X POST -F file=@"<FILE>" -F model='{"name":"<APP_NAME>"'} -H"Content-Type: multipart/form-data" `
+    $ curl http://localhost:8080/api/heroku/applications -X POST -F file=@"<FILE>" \
+    -F model='{"name":"<APP_NAME>"}' \
+    -H"Content-Type: multipart/form-data"
 
-`curl http://localhost:8080/api/pivotal/applications -X POST -F file=@"<FILE>" -F model='{"name":"<APP_NAME>"}' -H"Content-Type: multipart/form-data" `
+    $ curl http://localhost:8080/api/pivotal/applications -X POST -F file=@"<FILE>" \
+    -F model='{"name":"<APP_NAME>", "properties": { "buildpack_url": "https://github.com/cloudfoundry/nodejs-buildpack.git#v1.3.4" }'} \
+    -H"Content-Type: multipart/form-data"
 
-#### GET /api/{paas}/applications/{name}
+### GET /api/{paas}/applications/{name}
 
-Returns the status of an application.
+Returns the status of an application. See Application class.
 
-#### DELETE /api/{paas}/applications/{name}
+TODO: example
+
+### DELETE /api/{paas}/applications/{name}
 
 Removes an application
 
-#### PUT /api/{paas}/applications/{name}/start
+TODO: example
+
+### PUT /api/{paas}/applications/{name}/start
 
 Starts an application
 
-#### PUT /api/{paas}/applications/{name}/stop
+TODO: example
+
+### PUT /api/{paas}/applications/{name}/stop
 
 Stops an application
 
-#### PUT /api/{paas}/applications/{name}/scale/{updown}
+TODO: example
+
+### PUT /api/{paas}/applications/{name}/scale/{updown}
 
 Scales up/down an application adding or removing an instance. Updown have value `up` or `down`
 
-#### PUT /api/{paas}/applications/{name}/scale/{type}/{value}")
+TODO: example
+
+### PUT /api/{paas}/applications/{name}/scale/{type}/{value}")
 
 Scales the resource 'type' an application by setting 'value' units.
 
@@ -74,16 +121,18 @@ Supported types:
 
 (TO BE COMPLETED)
 
-### Credentials
+TODO: example
+
+## Credentials
 
 Each invocation to the API must contain the credentials in the X-PaaS-Credentials header in the request.
 The credentials are serialized in json format, optionally encoded in base64. The fields to be filled in the 
 json for each provider are shown below.
 
-#### Heroku
+### Heroku
 * `api-key`
 
-#### CloudFoundry
+### CloudFoundry
 
 * `api`
 * `user`
@@ -91,19 +140,19 @@ json for each provider are shown below.
 * `org`
 * `space`
 
-#### Pivotal, BlueMix
+### Pivotal, BlueMix
 
 * `user`
 * `password`
 * `org`
 * `space`
 
-#### OpenShift2
+### OpenShift3
 
 * `user`
 * `password`
 
-### Integration tests
+## Integration tests
 
 Integration tests are run in `integration-test` profile. Each integration test 
 have a group according to the PaaS provider being tested. By default, the 
@@ -115,12 +164,12 @@ Ex:
 `mvn verify -P integration-test -Dintegration.groups=openshift2,cloudfoundry`
 
 
-##### Configuration
+### Configuration
 
 * Set values in /library/src/test/resources/tests.config.properties
 * Start instance of service: `cd service && bin/runserver.sh`
 
-##### Integration Tests
+### Integration Tests
 
 * Execute tests: `mvn clean verify -P integration-test [-Dintegration.groups=...]`
 
@@ -128,7 +177,7 @@ Ex:
 ## Java Client Libraries
 Java client libraries used in the project:
 
-#### Cloud Foundry
+### Cloud Foundry
 + **Cloud Foundry**:  [Cloud Foundry Java Client](https://github.com/cloudfoundry/cf-java-client)
 <dl>
   <dt>Description</dt>
@@ -157,7 +206,7 @@ Java client libraries used in the project:
 </dl>
  
 ---
-#### Heroku
+### Heroku
 + **Heroku**:  [Heroku JAR](https://github.com/heroku/heroku.jar) & [heroku-maven-plugin](https://github.com/heroku/heroku-maven-plugin)
 <dl>
   <dt>Description</dt>
@@ -178,7 +227,7 @@ Java client libraries used in the project:
 | ------------- ||
 | :heavy_minus_sign: |
 ---
-#### OpenShift
+### OpenShift
 + **OpenShift v2**:  [OpenShift Java Client](https://github.com/openshift/openshift-java-client) (used by Openshift Online / only for Version 2)
 <dl>
   <dt>Description</dt>
@@ -218,4 +267,3 @@ Java client libraries used in the project:
 | :new: Openshift v3  | :heavy_minus_sign:       | :heavy_minus_sign:       | :heavy_minus_sign:       |
 
 
-** heroku-maven-plugin

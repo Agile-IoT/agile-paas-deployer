@@ -1,0 +1,27 @@
+@startuml
+
+frame "PUL server" {
+  [service]
+
+  frame library {
+    [openshift driver]
+    [cloudfoundry driver]
+    [heroku driver]
+  }
+}
+
+cloud {
+  [OpenShift]
+  [CloudFoundry]
+  [Heroku]
+}
+
+[client] --> [service] : /{heroku,openshift,cloudfoundry}
+[service] --> [openshift driver]
+[service] --> [cloudfoundry driver]
+[service] --> [heroku driver]
+[openshift driver] --> [OpenShift]
+[cloudfoundry driver] --> [CloudFoundry]
+[heroku driver] --> [Heroku]
+
+@enduml
