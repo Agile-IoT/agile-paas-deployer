@@ -16,8 +16,8 @@
  */
 package eu.atos.paas.cloudfoundry;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +50,7 @@ public class ModuleImpl implements Module {
     private CloudApplication app;
     private List<String> lServices;
     private Map<String, String> mEnv;
-    private URL url;
+    private URI url;
     private State state;
     
     
@@ -77,8 +77,8 @@ public class ModuleImpl implements Module {
             if (!uri.contains("://")) {
                 uri = String.format("http://%s", uri);
             }
-            this.url = new URL(uri);
-        } catch (MalformedURLException e) {
+            this.url = new URI(uri);
+        } catch (URISyntaxException e) {
             
             /*
              * this should not happen
@@ -124,7 +124,7 @@ public class ModuleImpl implements Module {
 
     
     @Override
-    public URL getUrl()
+    public URI getUrl()
     {
         return url;
     }

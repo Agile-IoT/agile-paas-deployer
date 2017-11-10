@@ -16,7 +16,7 @@
  */
 package eu.atos.paas.dummy;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,14 +26,14 @@ import java.util.Map;
 public class ModuleImpl implements eu.atos.paas.Module {
 
     private String name;
-    private URL url;
+    private URI url;
     private String type;
     private List<String> services;
     private Map<String, String> env;
     private int instances;
     private State state;
     
-    public ModuleImpl(String name, URL url, String type, int instances, boolean started) {
+    public ModuleImpl(String name, URI url, String type, int instances, boolean started) {
         this.name = name;
         this.url = url;
         this.type = type;
@@ -77,7 +77,7 @@ public class ModuleImpl implements eu.atos.paas.Module {
     }
 
     @Override
-    public URL getUrl() {
+    public URI getUrl() {
         return url;
     }
 

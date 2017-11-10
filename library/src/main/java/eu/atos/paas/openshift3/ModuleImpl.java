@@ -16,8 +16,8 @@
  */
 package eu.atos.paas.openshift3;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -51,16 +51,19 @@ public class ModuleImpl implements Module
     }
 
     @Override
-    public URL getUrl() {
+    public URI getUrl() {
         try {
             if (route != null) {
-                return new URL(route.getURL());
+                return new URI(route.getURL());
             }
             else {
-                return new URL(String.format("%s://%s:%s", "http", service.getClusterIP(), service.getPort()));
+                return new URI(null, null, service.getClusterIP(), service.getPort(), null, null, null);
             }
-        } catch (MalformedURLException e) {
-            return null;
+        } catch (URISyntaxException e) {
+            /*
+             * this should not happen
+             */
+            throw new IllegalArgumentException("Error in URL=" + route.getURL() + " from provider ", e);
         }
     }
 

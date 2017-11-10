@@ -16,7 +16,7 @@
  */
 package eu.atos.paas.data;
 
-import java.net.URL;
+import java.net.URI;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -26,7 +26,7 @@ public class Application {
     private String name;
     
     @JsonProperty
-    private URL url;
+    private URI url;
 
     public Application() {
         this("", null);
@@ -36,7 +36,7 @@ public class Application {
         this(name, null);
     }
     
-    public Application(String name, URL url) {
+    public Application(String name, URI url) {
         this.name = name;
         this.url = url;
     }
@@ -45,7 +45,7 @@ public class Application {
         return name;
     }
 
-    public URL getUrl() {
+    public URI getUrl() {
         return url;
     }
 

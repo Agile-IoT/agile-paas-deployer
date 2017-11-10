@@ -26,7 +26,7 @@ import eu.atos.paas.PaasSession.StartStopCommand;
 
 import static org.testng.AssertJUnit.*;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -270,7 +270,7 @@ public abstract class AbstractProviderIT {
     
     private static final class NonExistentModule implements Module {
         @Override
-        public URL getUrl() {
+        public URI getUrl() {
             return null;
         }
 

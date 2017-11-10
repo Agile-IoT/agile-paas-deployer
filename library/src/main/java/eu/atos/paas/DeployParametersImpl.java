@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import eu.atos.paas.PaasSession.DeployParameters;
-import eu.atos.paas.PaasSession.DeployParameters.Properties;
 
 public class DeployParametersImpl implements DeployParameters {
 

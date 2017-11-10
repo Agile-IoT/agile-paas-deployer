@@ -20,7 +20,6 @@ import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasSession;
 import eu.atos.paas.credentials.ApiKeyCredentials;
 import eu.atos.paas.credentials.Credentials;
-import eu.atos.paas.credentials.UserPasswordCredentials;
 
 
 public class HerokuClient implements PaasClient {

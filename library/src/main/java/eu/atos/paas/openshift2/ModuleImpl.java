@@ -17,6 +17,8 @@
 package eu.atos.paas.openshift2;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -73,9 +75,18 @@ public class ModuleImpl implements eu.atos.paas.Module
 
     
     @Override
-    public URL getUrl()
+    public URI getUrl()
     {
-        return url;
+        try {
+            
+            return url.toURI();
+            
+        } catch (URISyntaxException e) {
+            /*
+             * this should not happen
+             */
+            throw new IllegalArgumentException("Error in URL=" + url + " from provider ", e);
+        }
     }
 
     
