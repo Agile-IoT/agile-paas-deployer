@@ -14,6 +14,11 @@ RUN mkdir -p ${dest}
 COPY ${src_jar} ${dest}/unified-paas-service.jar
 COPY ${src_config} ${dest}/config.yml
 
+RUN groupadd -r user && useradd --no-log-init -r -g user user
+WORKDIR /tmp
+USER user
+EXPOSE 8002
+
 ENTRYPOINT [ \
   "java", "-jar", \
   "/opt/unified-paas/unified-paas-service.jar", \
