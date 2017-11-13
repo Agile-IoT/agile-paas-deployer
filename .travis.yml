@@ -15,7 +15,7 @@ env:
     - DOCKER_CACHE_FILE=/home/travis/docker-cache/cache.tar.gz
   matrix:
     - DOCKER_IMAGE=agileiot/$COMPONENT-x86_64
-      VERSIONIST=false
+      VERSIONIST=true
       BASEIMAGE=agileiot\\/intel-nuc-zulujdk:8-jdk-maven
 
 before_install:
