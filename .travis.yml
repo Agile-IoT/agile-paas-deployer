@@ -19,10 +19,16 @@ env:
   matrix:
     - DOCKER_IMAGE=agileiot/$COMPONENT-x86_64
       VERSIONIST=true
-      BASEIMAGE=agileiot\\/intel-nuc-zulujdk:8-jdk-maven
+      BASEIMAGE_BUILD=agileiot/intel-nuc-zulujdk:8-jdk-maven
+      BASEIMAGE_DEPLOY=agileiot/intel-nuc-zulujdk:8-jre
+    - DOCKER_IMAGE=agileiot/$COMPONENT-armv7l
+      VERSIONIST=true
+      BASEIMAGE_BUILD=agileiot/intel-nuc-zulujdk:8-jdk-maven
+      BASEIMAGE_DEPLOY=agileiot/raspberry-pi3-zulujdk:8-jre
 
 before_install:
   - source <(curl -s https://raw.githubusercontent.com/Agile-IoT/agile-ci-scripts/master/agile-ci-functions.sh)
+  - docker_upgrade
   - cache_load
   - bootstrap
   - echo "Tagging the build with tag - $DOCKER_TAG"

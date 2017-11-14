@@ -1,20 +1,24 @@
-FROM resin/raspberry-pi3-openjdk:openjdk-8-jdk-20170426
+ARG BASEIMAGE_BUILD=agileiot/intel-nuc-zulujdk:8-jdk-maven
+ARG BASEIMAGE_DEPLOY=agileiot/intel-nuc-zulujdk:8-jre
+#ARG BASEIMAGE_DEPLOY=agileiot/raspberry-pi3-zulujdk:8-jre
+FROM $BASEIMAGE_BUILD
 
-RUN apt-get update && apt-get install --no-install-recommends -y \
-    maven\
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+ENV BUILD_PATH /usr/local/src
 
-COPY . /usr/local/src/
+WORKDIR $BUILD_PATH
+COPY . $BUILD_PATH
 
-WORKDIR /usr/local/src
 RUN mvn package
 
-ENV src_jar service/target/unified-paas-service.jar
-ENV src_config service/conf/config.yml
-ENV dest /opt/unified-paas
 
-RUN mkdir -p ${dest}
-RUN cp ${src_jar} ${src_config} ${dest}
+FROM $BASEIMAGE_DEPLOY
+
+ENV BUILD_PATH /usr/local/src
+ENV DEPLOY_PATH /opt/unified-paas
+WORKDIR $DEPLOY_PATH
+
+COPY --from=0 $BUILD_PATH/service/target/unified-paas-service.jar  unified-paas-service.jar
+COPY --from=0 $BUILD_PATH/service/conf/config.yml config.yml
 
 ENTRYPOINT [ \
   "java", "-jar", \
