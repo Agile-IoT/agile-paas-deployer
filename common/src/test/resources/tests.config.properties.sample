@@ -29,3 +29,8 @@ op3_api=
 op3_user=
 op3_password=
 op3_token=
+
+# OPENWHISK
+ow_api=
+ow_user=
+ow_password=

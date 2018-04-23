@@ -262,7 +262,7 @@ public abstract class AbstractProviderIT {
      * Manually called by each test method
      * Tried to use @BeforeMethod, but it brings lots of problems
      */
-    private void beforeMethod() {
+    protected void beforeMethod() {
         if (!initialized) { 
             throw new SkipException("Not initialized");
         }

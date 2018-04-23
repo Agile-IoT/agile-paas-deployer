@@ -27,6 +27,7 @@ public class DeployParametersImpl implements DeployParameters {
 
     private String path = "";
     private URL gitUrl;
+    private String code = "";
     private String imageName = "";
     protected Map<String, String> properties = Collections.emptyMap();
     protected Map<String, String> envs = Collections.emptyMap();
@@ -53,6 +54,11 @@ public class DeployParametersImpl implements DeployParameters {
     @Override
     public String getImageName() {
         return imageName;
+    }
+
+    @Override
+    public String getCode() {
+        return code;
     }
 
     @Override
@@ -103,7 +109,13 @@ public class DeployParametersImpl implements DeployParameters {
             b.o.gitUrl = gitUrl;
             return b;
         }
-        
+
+        public static Builder fromCode(String code) {
+            Builder b = new Builder();
+            b.o.code= code;
+            return b;
+        }
+
         public static Builder fromImageName(String imageName) {
             Builder b = new Builder();
             b.o.imageName = imageName;

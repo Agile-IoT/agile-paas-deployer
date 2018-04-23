@@ -1,6 +1,6 @@
 /**
- * Copyright 2016 Atos
- * Contact: Atos <roman.sosa@atos.net>
+ * Copyright 2018 Atos
+ * Contact: Atos <elena.garrido@atos.net>
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,13 +14,26 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package eu.atos.paas;
+package eu.atos.deployer.faas.openwhisk;
 
-public class Groups {
-    public static final String DUMMY = "dummy";
-    public static final String CLOUDFOUNDRY = "cloudfoundry";
-    public static final String HEROKU = "heroku";
-    public static final String OPENSHIFT2 = "openshift2";
-    public static final String OPENSHIFT3 = "openshift3";
-    public static final String OPENWHISK = "openwhisk";
+import java.net.URL;
+import java.util.Map;
+
+import eu.atos.paas.DeployParametersImpl;
+import eu.atos.paas.PaasSession;
+
+
+/**
+ * 
+ *
+ * @author ATOS
+ * @date 21/3/2016-14:06:34
+ */
+public class DeployParameters extends DeployParametersImpl implements PaasSession.DeployParameters
+{
+
+    public DeployParameters(String path, URL gitUrl, Map<String, String> properties) {
+        super(path, gitUrl, properties);
+    }
+
 }

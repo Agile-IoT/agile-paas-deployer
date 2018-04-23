@@ -41,6 +41,7 @@ public interface PaasSession {
         String getPath();
         URL getGitUrl();
         String getImageName();
+        String getCode();
         String getProperty(String propertyName, String defaultValue);
         int getPropertyAsInt(String propertyName, int defaultValue);
         Map<String, String> getProperties();
@@ -53,8 +54,9 @@ public interface PaasSession {
             public static final String INSTANCES = "instances";
             public static final String PORT = "port";
             public static final String APPLICATION_TYPE = "application-type";
+            public static final String MAIN = "main";
+            public static final String LANGUAGE = "language";
         }
-
     }
 
     
