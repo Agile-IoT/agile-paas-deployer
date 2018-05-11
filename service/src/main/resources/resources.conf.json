@@ -59,9 +59,9 @@
         "resourceClass":"eu.atos.paas.resources.OpenShiftResource",
         "clients":["eu.atos.paas.openshift2.Openshift2Client","eu.atos.paas.openshift3.OpenShift3Client"]
     },
-    "openwhisk.com":{
+    "openwhisk":{
         "provider":{
-            "name":"Openwhisk Online",
+            "name":"Openwhisk",
             "url":"https://openwhisk.apache.org/",
             "versions":["v1"],
             "defaultVersion":"v1"
