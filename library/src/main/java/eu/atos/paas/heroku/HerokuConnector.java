@@ -320,12 +320,12 @@ public class HerokuConnector
                     if (ad.getName().equalsIgnoreCase(addon_plan))
                     {
                         logger.debug(">> '" + addon_plan + "': ");
-                        logger.debug(">> 		beta: " + ad.getBeta());
-                        logger.debug(">> 		desc: " + ad.getDescription());
-                        logger.debug(">> 		id:   " + ad.getId());
-                        logger.debug(">> 		conf: " + ad.getConfigured());
-                        logger.debug(">> 		url:  " + ad.getUrl());
-                        logger.debug(">> 		str:  " + ad.toString());
+                        logger.debug(">> \t\tbeta: " + ad.getBeta());
+                        logger.debug(">> \t\tdesc: " + ad.getDescription());
+                        logger.debug(">> \t\tid:   " + ad.getId());
+                        logger.debug(">> \t\tconf: " + ad.getConfigured());
+                        logger.debug(">> \t\turl:  " + ad.getUrl());
+                        logger.debug(">> \t\tstr:  " + ad.toString());
                         return ad;
                     }
                 }

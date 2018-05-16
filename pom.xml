@@ -69,6 +69,7 @@
         <cobertura-maven-plugin.version>2.3</cobertura-maven-plugin.version>
         <dropwizard-launcher-plugin.version>1.0.1</dropwizard-launcher-plugin.version>
         <apache-rat-plugin.version>0.12</apache-rat-plugin.version>
+        <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
 
         
         <server-jar.path>service/target/unified-paas-service-0.0.1-SNAPSHOT.jar</server-jar.path>
@@ -191,6 +192,37 @@
                         <exclude>**/*.properties</exclude>
                         <exclude>**/*.json</exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven-checkstyle-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>verify-style</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <logViolationsToConsole>true</logViolationsToConsole>
+                    <checkstyleRules>
+                        <module name="Checker">
+                            <!-- Checks for whitespace                               -->
+                            <!-- See http://checkstyle.sf.net/config_whitespace.html -->
+                            <module name="FileTabCharacter">
+                                <property name="eachLine" value="true" />
+                            </module>
+                            <module name="TreeWalker">
+                                <module name="IllegalImport">
+                                    <property name="illegalPkgs" value="com.google.api.client.repackaged" />
+                                </module>
+                            </module>
+                        </module>
+                    </checkstyleRules>
                 </configuration>
             </plugin>
         </plugins>

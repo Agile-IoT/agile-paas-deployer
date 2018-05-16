@@ -125,8 +125,8 @@ public class CloudFoundryConnector
      * 3. Start application
      * 
      * -push command examples (CLI): 
-     * 		cf push ehealthgui -p ./apps/WebGUI_v3.war -d 62.14.219.157.xip.io -b https://github.com/rsucasas/java-buildpack.git
-     * 			-m 512MB -i 1 cf push softcare-ws -p ./apps/softcare-ws.war -b https://github.com/rsucasas/java-buildpack.git -m 512MB -i 1
+     *   cf push ehealthgui -p ./apps/WebGUI_v3.war -d 62.14.219.157.xip.io -b https://github.com/rsucasas/java-buildpack.git
+     *     -m 512MB -i 1 cf push softcare-ws -p ./apps/softcare-ws.war -b https://github.com/rsucasas/java-buildpack.git -m 512MB -i 1
      *
      * @param applicationName Application name
      * @param domainName

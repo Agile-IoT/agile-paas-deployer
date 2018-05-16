@@ -134,9 +134,9 @@ public abstract class PaasResource
      * 
      * Examples:
      *  HEROKU: 
-     *  	curl http://localhost:8080/heroku/applications -X POST -F file=@"<FILE>" -F model={\"name\":\"<APP_NAME>\"} -H"Content-Type: multipart/form-data" -H"apikey:<API_KEY>"
+     *      curl http://localhost:8080/heroku/applications -X POST -F file=@"<FILE>" -F model={\"name\":\"<APP_NAME>\"} -H"Content-Type: multipart/form-data" -H"apikey:<API_KEY>"
      *  CLOUD FOUNDRY:
-     *  	curl http://localhost:8080/pivotal/applications -X POST -F file=@"<FILE>" -F model={\"name\":\"<APP_NAME>\"} -H"Content-Type: multipart/form-data"  -H"credentials:<API_URL>" -H"credentials:<USER>" -H"credentials:<PASSWORD>" -H"credentials:<ORG>" -H"credentials:<SPACE>"  -H"credentials:<TRUE_FALSE>"
+     *      curl http://localhost:8080/pivotal/applications -X POST -F file=@"<FILE>" -F model={\"name\":\"<APP_NAME>\"} -H"Content-Type: multipart/form-data"  -H"credentials:<API_URL>" -H"credentials:<USER>" -H"credentials:<PASSWORD>" -H"credentials:<ORG>" -H"credentials:<SPACE>"  -H"credentials:<TRUE_FALSE>"
      *  
      * @param headers
      * @param form
@@ -391,8 +391,8 @@ public abstract class PaasResource
     /**
      * 
      * Examples for service parameter:
-     * 		HEROKU: cleardb:ignite
-     * 		CLOUD FOUNDRY:cleardb:mycleardb:spark
+     *     HEROKU: cleardb:ignite
+     *     CLOUD FOUNDRY:cleardb:mycleardb:spark
      * @param name
      * @param service
      * @param headers
