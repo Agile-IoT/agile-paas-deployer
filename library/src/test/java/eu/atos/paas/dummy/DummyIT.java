@@ -58,6 +58,11 @@ public class DummyIT extends AbstractProviderIT {
             }
 
             @Override
+            public String getCode() {
+                return null;
+            }
+
+            @Override
             public String getProperty(String propertyName, String defaultValue) {
                 return null;
             }

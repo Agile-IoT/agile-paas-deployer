@@ -34,6 +34,7 @@ public class Constants {
         public static final String PIVOTAL = "Pivotal";
         public static final String BLUEMIX = "Bluemix";
         public static final String OPENSHIFT_ONLINE = "OpenShift Online";
+        public static final String OPENWHISK = "Openwhisk";
     }
     
     public static final class MultiPartFields {

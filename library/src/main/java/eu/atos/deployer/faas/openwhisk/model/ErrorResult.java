@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 Atos
+ * Copyright 2018 Atos
  * Contact: Atos <roman.sosa@atos.net>
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +14,33 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package eu.atos.paas;
+package eu.atos.deployer.faas.openwhisk.model;
 
-public class Groups {
-    public static final String DUMMY = "dummy";
-    public static final String CLOUDFOUNDRY = "cloudfoundry";
-    public static final String HEROKU = "heroku";
-    public static final String OPENSHIFT2 = "openshift2";
-    public static final String OPENSHIFT3 = "openshift3";
-    public static final String OPENWHISK = "openwhisk";
+import java.io.Serializable;
+
+public class ErrorResult implements Serializable {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 2739069098400374155L;
+    /**
+     * 
+     */
+    private String error;
+    private String code;
+
+    public String getError() {
+        return error;
+    }
+    public void setError(String error) {
+        this.error = error;
+    }
+    public String getCode() {
+        return code;
+    }
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+
 }

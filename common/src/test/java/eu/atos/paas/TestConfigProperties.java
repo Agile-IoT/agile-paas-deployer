@@ -58,7 +58,13 @@ public class TestConfigProperties
     private String op3_user = "";
     private String op3_password = "";
     private String op3_token = "";
+
     
+    // OPENWHISK
+    private String ow_api = "";
+    private String ow_user = "";
+    private String ow_password = "";
+
     /**
      * 
      * Constructor
@@ -95,6 +101,12 @@ public class TestConfigProperties
         op3_user = props.getProperty("op3_user", "");
         op3_password = props.getProperty("op3_password", "");
         op3_token = props.getProperty("op3_token", "");
+        
+        
+        ow_api = props.getProperty("ow_api", "");
+        ow_user = props.getProperty("ow_user", "");
+        ow_password = props.getProperty("ow_password", "");
+        
         cf_trustSelfSignedCerts = true;
     }
     
@@ -237,4 +249,21 @@ public class TestConfigProperties
     public String getOp3_token() {
         return op3_token;
     }
+
+
+    public String getOw_api() {
+        return ow_api;
+    }
+
+
+    public String getOw_user() {
+        return ow_user;
+    }
+
+
+    public String getOw_password() {
+        return ow_password;
+    }
+    
+    
 }

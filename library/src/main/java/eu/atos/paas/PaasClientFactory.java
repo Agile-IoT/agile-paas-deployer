@@ -16,6 +16,7 @@
  */
 package eu.atos.paas;
 
+import eu.atos.deployer.faas.openwhisk.OpenwhiskClient;
 import eu.atos.paas.cloudfoundry.CloudFoundryClient;
 import eu.atos.paas.dummy.DummyClient;
 import eu.atos.paas.heroku.HerokuClient;
@@ -45,6 +46,8 @@ public class PaasClientFactory {
                 return new DummyClient();
             case "openshift3":
                 return new OpenShift3Client();
+            case "openwhisk":
+                return new OpenwhiskClient();
             default:
                 throw new IllegalArgumentException("Provider " + provider + " not supported");
         }

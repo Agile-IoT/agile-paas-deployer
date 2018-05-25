@@ -58,5 +58,16 @@
         },
         "resourceClass":"eu.atos.paas.resources.OpenShiftResource",
         "clients":["eu.atos.paas.openshift2.Openshift2Client","eu.atos.paas.openshift3.OpenShift3Client"]
+    },
+    "openwhisk":{
+        "provider":{
+            "name":"Openwhisk",
+            "url":"https://openwhisk.apache.org/",
+            "versions":["v1"],
+            "defaultVersion":"v1"
+        },
+        "resourceClass":"eu.atos.paas.resources.OpenwhiskResource",
+        "clients":["eu.atos.deployer.faas.openwhisk.OpenwhiskClient"]
     }
+    
 }
