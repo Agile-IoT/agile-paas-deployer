@@ -1,19 +1,13 @@
 <!--
 
-    Copyright 2016 Atos
-    Contact: Atos <roman.sosa@atos.net>
+     Copyright (c) 2017 Atos, and others
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License 2.0
+     which accompanies this distribution, and is available at
+     https://www.eclipse.org/legal/epl-2.0/
 
-       Licensed under the Apache License, Version 2.0 (the "License");
-       you may not use this file except in compliance with the License.
-       You may obtain a copy of the License at
-
-           http://www.apache.org/licenses/LICENSE-2.0
-
-       Unless required by applicable law or agreed to in writing, software
-       distributed under the License is distributed on an "AS IS" BASIS,
-       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-       See the License for the specific language governing permissions and
-       limitations under the License.
+     Contributors:
+     Atos - initial implementation
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -68,7 +62,7 @@
         <maven-war-plugin.version>2.4</maven-war-plugin.version>
         <cobertura-maven-plugin.version>2.3</cobertura-maven-plugin.version>
         <dropwizard-launcher-plugin.version>1.0.1</dropwizard-launcher-plugin.version>
-        <apache-rat-plugin.version>0.12</apache-rat-plugin.version>
+        <mycila-plugin.version>3.0</mycila-plugin.version>
         <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
 
         
@@ -171,29 +165,41 @@
 
         <plugins>
             <plugin>
-                <groupId>org.apache.rat</groupId>
-                <artifactId>apache-rat-plugin</artifactId>
-                <version>${apache-rat-plugin.version}</version>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>${mycila-plugin.version}</version>
+                <configuration>
+                    <header>LICENSE-header.txt</header>
+                    <skipExistingHeaders>true</skipExistingHeaders>
+                    <properties>
+                        <year>2018</year>
+                    </properties>
+                    <excludes>
+                        <exclude>**/*.sample</exclude>
+                        <exclude>**/*.properties</exclude>
+                        <exclude>**/*.json</exclude>
+                        <exclude>LICENSE.txt</exclude>
+                        <exclude>LICENSE-header.txt</exclude>
+                        <!--
+                        <exclude>**/README.md</exclude>
+                        <exclude>src/test/resources/**</exclude>
+                        <exclude>src/main/resources/**</exclude>
+                        <exclude>LICENSE.txt</exclude>
+                        <exclude>LICENSE-header.txt</exclude>
+                        <exclude>**/*.uml</exclude>
+                        <exclude>**/*.sh</exclude>
+                        -->
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
-                        <phase>verify</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <includes>
-                        <include>src/**</include>
-                        <include>pom.xml</include>
-                    </includes>
-                    <excludes combine.children="append">
-                        <exclude>**/*.sample</exclude>
-                        <exclude>**/*.properties</exclude>
-                        <exclude>**/*.json</exclude>
-                    </excludes>
-                </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
