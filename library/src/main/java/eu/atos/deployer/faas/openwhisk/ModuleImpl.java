@@ -45,7 +45,12 @@ public class ModuleImpl implements Module
     @Override
     public URI getUrl() {
         try{
-            return new URI(actionInformation.getUrl());
+            String url = actionInformation.getUrl();
+            if (url == null) {
+                // sanity check
+                url = String.format("/%s/%s", actionInformation.getNamespace(), actionInformation.getName());
+            }
+            return new URI(url);
         } catch (URISyntaxException e) {
             /*
              * this should not happen

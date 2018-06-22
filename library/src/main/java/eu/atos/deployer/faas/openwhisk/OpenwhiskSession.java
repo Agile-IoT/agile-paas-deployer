@@ -16,7 +16,11 @@
  */
 package eu.atos.deployer.faas.openwhisk;
 
+import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 
@@ -88,12 +92,21 @@ public class OpenwhiskSession implements PaasSession, FaasSession {
                 if (Constants.Kind.NODEJS.equals(language) || Constants.Kind.NODEJS6.equals(language)
                         || Constants.Kind.NODEJS8.equals(language) || Constants.Kind.DEFAULT.equals(language)) {
 
-                    actionInformation = connector.deployActionFromCode(namespace, actionname, params.getCode(),
+                    String code;
+                    
+                    if (!params.getCode().isEmpty()) {
+                        code = params.getCode();
+                    } else if (!params.getPath().isEmpty()) {
+                        code = readFromFile(params.getPath(), params.getProperty("encoding", StandardCharsets.UTF_8.name())); 
+                    } else {
+                        throw new IllegalArgumentException("Code have not been supplied in DeployParameters"); 
+                    }
+                    actionInformation = connector.deployActionFromCode(namespace, actionname, code,
                             language, override);
                 } else {
                     String languages = String.format("%s, %s, %s, %s, %s", Constants.Kind.JAVA, Constants.Kind.NODEJS,
                             Constants.Kind.NODEJS6, Constants.Kind.NODEJS8, Constants.Kind.DEFAULT);
-                    throw new PaasProviderException("Only " + languages + " are accepted");
+                    throw new IllegalArgumentException("Only " + languages + " are accepted");
                 }
             }
             module = new ModuleImpl(actionInformation);
@@ -103,6 +116,17 @@ public class OpenwhiskSession implements PaasSession, FaasSession {
             throw new PaasProviderException("Error deploying code", ex);
         }
         return module;
+    }
+    
+    private String readFromFile(String path, String encoding) {
+        byte[] content;
+        Charset charset = Charset.forName(encoding);
+        try {
+            content = Files.readAllBytes(Paths.get(path));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Could not read from file " + path, e);
+        }
+        return new String(content, charset);
     }
 
     @Override

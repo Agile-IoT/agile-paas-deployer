@@ -29,15 +29,12 @@ import javax.ws.rs.core.Response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.openshift.client.cartridge.IStandaloneCartridge;
-
 import eu.atos.paas.PaasSession.DeployParameters;
 import eu.atos.paas.credentials.ApiUserPasswordCredentials;
 import eu.atos.paas.credentials.Credentials;
 import eu.atos.paas.data.ApplicationToCreate;
 import eu.atos.paas.data.CredentialsMap;
 import eu.atos.paas.data.Provider;
-import eu.atos.paas.resources.OpenShiftResource.OpenShiftParametersTranslator;
 import eu.atos.paas.resources.exceptions.ResourceException;
 import static eu.atos.deployer.faas.openwhisk.Constants.Kind;
 
@@ -53,7 +50,7 @@ public class OpenwhiskResource extends PaasResource
      */
     public OpenwhiskResource(Provider provider, ClientMap clientMap)
     {
-        super(provider, clientMap, new OpenShiftParametersTranslator());
+        super(provider, clientMap, new OpenwhiskParametersTranslator());
     }
 
 
@@ -110,7 +107,7 @@ public class OpenwhiskResource extends PaasResource
                 language = Kind.SWIFT;
                 break;
             case "Node.JS":
-                language = Kind.NODEJS;
+                language = Kind.DEFAULT;
                 break;
             default:
                 throw new ResourceException(

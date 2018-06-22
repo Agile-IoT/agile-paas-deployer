@@ -71,12 +71,25 @@ Creates an application and deploy its artifact. The request is a multipart reque
 
 Examples:
 
+#### Heroku
+
     $ curl http://localhost:8080/api/heroku/applications -X POST -F file=@"<FILE>" \
     -F model='{"name":"<APP_NAME>"}' \
     -H"Content-Type: multipart/form-data"
 
+#### CloudFoundry
+
     $ curl http://localhost:8080/api/pivotal/applications -X POST -F file=@"<FILE>" \
     -F model='{"name":"<APP_NAME>", "properties": { "buildpack_url": "https://github.com/cloudfoundry/nodejs-buildpack.git#v1.3.4" }'} \
+    -H"Content-Type: multipart/form-data"
+
+#### OpenWhisk
+
+Currently, only single-file nodeJS deployments are supported.
+
+    $ curl http://localhost:8080/api/openwhisk/applications -X POST \ 
+    -F file=@"library/src/test/resources/demo-function.js" \
+    -F model='{"name":"function", "programmingLanguage":"Node.JS"}' \
     -H"Content-Type: multipart/form-data"
 
 ### GET /api/{paas}/applications/{name}
@@ -149,6 +162,12 @@ json for each provider are shown below.
 
 ### OpenShift3
 
+* `user`
+* `password`
+
+### OpenWhisk
+
+* `api`
 * `user`
 * `password`
 

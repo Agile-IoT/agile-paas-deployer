@@ -155,4 +155,32 @@ public class OpenwhiskIT extends AbstractProviderIT {
         assertEquals(executionResult.getResult(), "{\"payload\":\"Hello undefined\"}");
     }
 
+    @Test(priority = 72, groups = "default")
+    public void executeTestNodeJSFromFile() {
+        FaasSession faasSession = (FaasSession)session;
+        String actionName = NODEJS_TEST_ACTION_NAME + "_";
+        
+        String path = this.getClass().getResource("/demo-function.js").getFile();
+        /*
+         * HACK: The initial "/" in windows avoids finding the file
+         */
+        if (path.startsWith("/C:")) {
+            path = path.substring(1);
+        }
+        this.params = DeployParametersImpl.Builder.fromPath(path)
+                .property(Properties.LANGUAGE, Constants.Kind.DEFAULT)
+                .build();
+        session.deploy(actionName, params);
+        
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("name", "Will");
+        HashMap<String, Object> extraParams = new HashMap<String, Object>();
+        extraParams.put(ExecutionParameters.Properties.SYNCHRONOUS, true);
+        extraParams.put(ExecutionParameters.Properties.RESULT, true);
+        ExecutionResponse executionResult = (ExecutionResponse)faasSession.execute(actionName, params, extraParams);
+        assertNotNull(executionResult);
+        assertNotNull(executionResult.getResult());
+        assertEquals(executionResult.getResult(),"{\"payload\":\"Hello Will\"}" );
+        session.undeploy(actionName);
+    }    
 }
