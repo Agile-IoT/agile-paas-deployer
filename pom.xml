@@ -62,7 +62,8 @@
         <maven-war-plugin.version>2.4</maven-war-plugin.version>
         <cobertura-maven-plugin.version>2.3</cobertura-maven-plugin.version>
         <dropwizard-launcher-plugin.version>1.0.1</dropwizard-launcher-plugin.version>
-        <apache-rat-plugin.version>0.12</apache-rat-plugin.version>
+        <mycila-plugin.version>3.0</mycila-plugin.version>
+        <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
 
         
         <server-jar.path>service/target/unified-paas-service-0.0.1-SNAPSHOT.jar</server-jar.path>
@@ -164,27 +165,70 @@
 
         <plugins>
             <plugin>
-                <groupId>org.apache.rat</groupId>
-                <artifactId>apache-rat-plugin</artifactId>
-                <version>${apache-rat-plugin.version}</version>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>${mycila-plugin.version}</version>
+                <configuration>
+                    <header>LICENSE-header.txt</header>
+                    <skipExistingHeaders>true</skipExistingHeaders>
+                    <properties>
+                        <year>2018</year>
+                    </properties>
+                    <excludes>
+                        <exclude>**/*.sample</exclude>
+                        <exclude>**/*.properties</exclude>
+                        <exclude>**/*.json</exclude>
+                        <exclude>LICENSE.txt</exclude>
+                        <exclude>LICENSE-header.txt</exclude>
+                        <!--
+                        <exclude>**/README.md</exclude>
+                        <exclude>src/test/resources/**</exclude>
+                        <exclude>src/main/resources/**</exclude>
+                        <exclude>LICENSE.txt</exclude>
+                        <exclude>LICENSE-header.txt</exclude>
+                        <exclude>**/*.uml</exclude>
+                        <exclude>**/*.sh</exclude>
+                        -->
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
-                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven-checkstyle-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>verify-style</id>
+                        <phase>process-classes</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <includes>
-                        <include>src/**</include>
-                        <include>pom.xml</include>
-                    </includes>
-                    <excludes combine.children="append">
-                        <exclude>**/*.sample</exclude>
-                        <exclude>**/*.properties</exclude>
-                        <exclude>**/*.json</exclude>
-                    </excludes>
+                    <logViolationsToConsole>true</logViolationsToConsole>
+                    <checkstyleRules>
+                        <module name="Checker">
+                            <!-- Checks for whitespace                               -->
+                            <!-- See http://checkstyle.sf.net/config_whitespace.html -->
+                            <module name="FileTabCharacter">
+                                <property name="eachLine" value="true" />
+                            </module>
+                            <module name="TreeWalker">
+                                <module name="IllegalImport">
+                                    <property name="illegalPkgs" value="com.google.api.client.repackaged" />
+                                </module>
+                            </module>
+                        </module>
+                    </checkstyleRules>
                 </configuration>
             </plugin>
         </plugins>

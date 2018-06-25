@@ -36,19 +36,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.atos.paas.data.Application;
-import eu.atos.paas.data.ApplicationToCreate;
-import eu.atos.paas.data.CredentialsMap;
-import eu.atos.paas.credentials.Credentials;
-import eu.atos.paas.credentials.CredentialsUtils;
-import eu.atos.paas.data.Provider;
-import eu.atos.paas.data.CredentialsMap.Base64Transformer;
-import eu.atos.paas.data.CredentialsMap.PlainTransformer;
 import eu.atos.paas.Module;
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasSession;
@@ -56,6 +49,14 @@ import eu.atos.paas.PaasSession.DeployParameters;
 import eu.atos.paas.PaasSession.ScaleCommand;
 import eu.atos.paas.PaasSession.ScaleUpDownCommand;
 import eu.atos.paas.PaasSession.StartStopCommand;
+import eu.atos.paas.credentials.Credentials;
+import eu.atos.paas.credentials.CredentialsUtils;
+import eu.atos.paas.data.Application;
+import eu.atos.paas.data.ApplicationToCreate;
+import eu.atos.paas.data.CredentialsMap;
+import eu.atos.paas.data.CredentialsMap.Base64Transformer;
+import eu.atos.paas.data.CredentialsMap.PlainTransformer;
+import eu.atos.paas.data.Provider;
 import eu.atos.paas.resources.exceptions.AuthenticationException;
 import eu.atos.paas.resources.exceptions.CredentialsParsingException;
 import eu.atos.paas.resources.exceptions.EntityNotFoundException;
@@ -128,9 +129,9 @@ public abstract class PaasResource
      * 
      * Examples:
      *  HEROKU: 
-     *  	curl http://localhost:8080/heroku/applications -X POST -F file=@"<FILE>" -F model={\"name\":\"<APP_NAME>\"} -H"Content-Type: multipart/form-data" -H"apikey:<API_KEY>"
+     *      curl http://localhost:8080/heroku/applications -X POST -F file=@"<FILE>" -F model={\"name\":\"<APP_NAME>\"} -H"Content-Type: multipart/form-data" -H"apikey:<API_KEY>"
      *  CLOUD FOUNDRY:
-     *  	curl http://localhost:8080/pivotal/applications -X POST -F file=@"<FILE>" -F model={\"name\":\"<APP_NAME>\"} -H"Content-Type: multipart/form-data"  -H"credentials:<API_URL>" -H"credentials:<USER>" -H"credentials:<PASSWORD>" -H"credentials:<ORG>" -H"credentials:<SPACE>"  -H"credentials:<TRUE_FALSE>"
+     *      curl http://localhost:8080/pivotal/applications -X POST -F file=@"<FILE>" -F model={\"name\":\"<APP_NAME>\"} -H"Content-Type: multipart/form-data"  -H"credentials:<API_URL>" -H"credentials:<USER>" -H"credentials:<PASSWORD>" -H"credentials:<ORG>" -H"credentials:<SPACE>"  -H"credentials:<TRUE_FALSE>"
      *  
      * @param headers
      * @param form
@@ -193,7 +194,24 @@ public abstract class PaasResource
         PaasSession session = getSession(headers);
 
         application.validate();
-        return createApplicationImpl(session, application, null);
+        
+        File uploadedFile = null;
+        try {
+            if (application.getArtifact() != null) {
+                
+                uploadedFile = saveToFile(application.getArtifact());
+            }
+            return createApplicationImpl(session, application, uploadedFile);
+        } catch (IOException e)
+        {
+            throw new WebApplicationException(e);
+        }
+        finally
+        {
+            if (uploadedFile != null) {
+                uploadedFile.delete();
+            }
+        }
     }
     
     /*
@@ -368,8 +386,8 @@ public abstract class PaasResource
     /**
      * 
      * Examples for service parameter:
-     * 		HEROKU: cleardb:ignite
-     * 		CLOUD FOUNDRY:cleardb:mycleardb:spark
+     *     HEROKU: cleardb:ignite
+     *     CLOUD FOUNDRY:cleardb:mycleardb:spark
      * @param name
      * @param service
      * @param headers

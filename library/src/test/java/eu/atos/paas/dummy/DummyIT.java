@@ -11,6 +11,8 @@
 package eu.atos.paas.dummy;
 
 import java.net.URL;
+import java.util.Collections;
+import java.util.Map;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -45,8 +47,38 @@ public class DummyIT extends AbstractProviderIT {
             }
             
             @Override
-            public String getProperty(String propertyName) {
+            public String getImageName() {
                 return null;
+            }
+
+            @Override
+            public String getCode() {
+                return null;
+            }
+
+            @Override
+            public String getProperty(String propertyName, String defaultValue) {
+                return null;
+            }
+
+            @Override
+            public int getPropertyAsInt(String propertyName, int defaultValue) {
+                return 0;
+            }
+            
+            @Override
+            public Map<String, String> getProperties() {
+                return Collections.emptyMap();
+            }
+
+            @Override
+            public String getEnv(String envName) {
+                return null;
+            }
+
+            @Override
+            public Map<String, String> getEnvs() {
+                return Collections.emptyMap();
             }
         };
     }

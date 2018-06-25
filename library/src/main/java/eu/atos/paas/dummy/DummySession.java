@@ -10,8 +10,8 @@
  */
 package eu.atos.paas.dummy;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -77,10 +77,10 @@ public class DummySession implements PaasSession {
             throw new AlreadyExistsException(moduleName);
         }
 
-        URL url;
+        URI url;
         try {
-            url = new URL("http://www.example.com/" + moduleName);
-        } catch (MalformedURLException e) {
+            url = new URI("http://www.example.com/" + moduleName);
+        } catch (URISyntaxException e) {
             throw new PaasException(e.getMessage(), e);
         }
         ModuleImpl m = new ModuleImpl(moduleName, url, "web", 1, true);

@@ -16,7 +16,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +39,8 @@ import org.testng.annotations.Test;
 import eu.atos.paas.credentials.UserPasswordCredentials;
 import eu.atos.paas.data.Application;
 import eu.atos.paas.data.ApplicationToCreate;
+import eu.atos.paas.data.ApplicationToCreate.ArtifactType;
+import eu.atos.paas.data.ApplicationToCreate.Builder;
 import eu.atos.paas.data.CredentialsMap;
 import eu.atos.paas.data.Provider;
 import eu.atos.paas.dummy.DummyClient;
@@ -53,7 +54,6 @@ import eu.atos.paas.resources.exceptions.CredentialsParsingException;
  */
 public class PaasResourceTest {
 
-    private static final Map<String, String> EMPTY_PROPERTIES = Collections.<String, String>emptyMap();
     private static final String APP_NAME = "APP_NAME";
     private DummyResource resource;
     private DummyHttpHeaders headers;
@@ -157,8 +157,9 @@ public class PaasResourceTest {
     public void testCreateApplicationWithArtifact() throws IOException {
         
         InputStream is = new ByteArrayInputStream(new byte[] {});
-        ApplicationToCreate appToCreate = new ApplicationToCreate(APP_NAME, is, "", EMPTY_PROPERTIES);
-            
+        ApplicationToCreate appToCreate = new Builder(APP_NAME, is, ArtifactType.TARGET)
+                .build();
+        
         Application createdApp = resource.createApplication(headers, appToCreate);
         
         assertEquals(APP_NAME, createdApp.getName());
@@ -167,16 +168,40 @@ public class PaasResourceTest {
     
     @Test(priority = 6)
     public void testCreateApplicationWithGitUrl() throws IOException {
-        
-        ApplicationToCreate appToCreate = new ApplicationToCreate(
-                "other_app_name", 
-                new URL("https://github.com/octocat/Hello-World.git"), 
-                "Java", 
-                EMPTY_PROPERTIES);
+
+        ApplicationToCreate appToCreate = 
+                new Builder("other_app_name", new URL("https://github.com/octocat/Hello-World.git"))
+                .programmingLanguage("Java")
+                .build();
         
         Application createdApp = resource.createApplication(headers, appToCreate);
         
         assertEquals("other_app_name", createdApp.getName());
+        assertTrue(!createdApp.getUrl().toString().isEmpty());
+    }
+    
+    @Test(priority = 7)
+    public void testCreateApplicationWithZippedSource() {
+        InputStream is = new ByteArrayInputStream(new byte[] {});
+        
+        ApplicationToCreate appToCreate = new Builder("other_app_name2", is, ArtifactType.SOURCE)
+                .programmingLanguage("Java")
+                .build();
+
+        Application createdApp = resource.createApplication(headers, appToCreate);
+        assertEquals("other_app_name2", createdApp.getName());
+        assertTrue(!createdApp.getUrl().toString().isEmpty());
+    }
+    
+    @Test(priority = 8)
+    public void testCreateApplicationWithImageName() {
+        
+        ApplicationToCreate appToCreate = new Builder("other_app_name3", "mongodb/mongodb-centos")
+                .env("ROOTPWD", "password")
+                .build();
+
+        Application createdApp = resource.createApplication(headers, appToCreate);
+        assertEquals("other_app_name3", createdApp.getName());
         assertTrue(!createdApp.getUrl().toString().isEmpty());
     }
     

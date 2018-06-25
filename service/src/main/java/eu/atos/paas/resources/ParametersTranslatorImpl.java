@@ -21,13 +21,34 @@ public class ParametersTranslatorImpl implements ParametersTranslator {
     @Override
     public DeployParameters translate(ApplicationToCreate application, File uploadedFile) {
         
+        DeployParametersImpl.Builder b = getBuilder(application, uploadedFile);
+
+        DeployParametersImpl result = b.build();
+        
+        return result;
+    }
+
+    public static DeployParametersImpl.Builder getBuilder(ApplicationToCreate application, File uploadedFile) {
         String path = uploadedFile != null? uploadedFile.getAbsolutePath() : null;
         
-        DeployParametersImpl result = new DeployParametersImpl(
-                path,
-                application.getGitUrl(), 
-                application.getProperties());
-        return result;
+        DeployParametersImpl.Builder builder;
+        if (path != null) {
+            builder = DeployParametersImpl.Builder.fromPath(path);
+            
+        } else if (application.getGitUrl() != null) {
+            builder = DeployParametersImpl.Builder.fromGitUrl(application.getGitUrl());
+            
+        } else if (application.getImageName() != null) {
+            builder = DeployParametersImpl.Builder.fromImageName(application.getImageName());
+        
+        } else {
+            throw new IllegalStateException(String.format("Not valid (%s, %s)", application, uploadedFile));
+        }
+
+        builder
+            .envs(application.getEnvs())
+            .properties(application.getProperties());
+        return builder;
     }
 
 }
