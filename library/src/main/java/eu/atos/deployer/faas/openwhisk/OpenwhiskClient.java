@@ -8,29 +8,41 @@
  *  Contributors:
  *  Atos - initial implementation
  */
-package eu.atos.paas.openshift3;
+package eu.atos.deployer.faas.openwhisk;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import eu.atos.paas.PaasClient;
 import eu.atos.paas.PaasException;
 import eu.atos.paas.PaasSession;
+import eu.atos.paas.credentials.ApiUserPasswordCredentials;
 import eu.atos.paas.credentials.Credentials;
 
 
 /**
  * 
  */
-public class Openshift3Client implements PaasClient
+public class OpenwhiskClient implements PaasClient
 {
-    public static final String VERSION = "v3";
+    public static final String VERSION = "v1";
 
     @Override
     public PaasSession getSession(Credentials credentials) throws PaasException
     {
-        throw new UnsupportedOperationException("Openshift3 client not implemented");
+        ApiUserPasswordCredentials creds = (ApiUserPasswordCredentials) credentials;
+        try {
+            return  new OpenwhiskSession(new URL(creds.getApi()), creds.getUser(), creds.getPassword());
+        } catch (MalformedURLException e) {
+            throw new PaasException("Check the URL specified in the API field, it seems not to be wellformed", e);
+        }
     }
 
     @Override
     public String getVersion() {
         return VERSION;
     }
+
+
+
 }

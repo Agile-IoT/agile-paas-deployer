@@ -10,7 +10,7 @@
  */
 package eu.atos.paas;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +19,7 @@ public interface Module {
     
     String getName();
     
-    URL getUrl();
+    URI getUrl();
     
     State getState();
     

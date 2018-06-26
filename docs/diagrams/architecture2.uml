@@ -1,0 +1,57 @@
+@startuml
+
+frame "PUL server" {
+
+  [reverse proxy] as rp
+
+  frame "PUL master" as PUL_master {
+    [service(*)] as service_master
+  }
+
+  frame "PUL instance" as PUL_os {
+    [service(*)] as service_os
+
+    frame "library" as library_os {
+      [openshift driver]
+    }
+  }
+
+  frame "PUL instance" as PUL_cf {
+    [service(*)] as service_cf
+
+    frame library as library_cf {
+      [cloudfoundry driver]
+    }
+  }
+
+  frame "PUL instance" as PUL_hk {
+    [service(*)] as service_hk
+
+    frame library as library_hk {
+      [heroku driver]
+    }
+  }
+}
+
+cloud {
+  [OpenShift]
+  [CloudFoundry]
+  [Heroku]
+}
+
+[client] --> [rp] : /{heroku,openshift,cloudfoundry} 
+[rp] --> [service_master] : /
+[rp] --> [service_os] : /openshift
+[rp] --> [service_cf] : /cloudfoundry
+[rp] --> [service_hk] : /heroku
+[service_os] --> [openshift driver]
+[service_cf] --> [cloudfoundry driver]
+[service_hk] --> [heroku driver]
+[openshift driver] --> [OpenShift]
+[cloudfoundry driver] --> [CloudFoundry]
+[heroku driver] --> [Heroku]
+
+legend right
+  (*) All service components are the same, offering the same API
+endlegend
+@enduml

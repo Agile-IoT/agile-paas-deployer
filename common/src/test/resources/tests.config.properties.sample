@@ -23,3 +23,14 @@ cf_trustSelfSignedCerts=
 op_api=
 op_user=
 op_password=
+
+# OPENSHIFT3
+op3_api=
+op3_user=
+op3_password=
+op3_token=
+
+# OPENWHISK
+ow_api=
+ow_user=
+ow_password=

@@ -44,10 +44,10 @@
             "name":"OpenShift",
             "url":"http://www.example.com",
             "versions":["v2","v3"],
-            "defaultVersion":"v2"
+            "defaultVersion":"v3"
         },
         "resourceClass":"eu.atos.paas.resources.OpenShiftResource",
-        "clients":["eu.atos.paas.openshift2.Openshift2Client","eu.atos.paas.openshift3.Openshift3Client"]
+        "clients":["eu.atos.paas.openshift2.Openshift2Client","eu.atos.paas.openshift3.OpenShift3Client"]
     },
     "openshift.com":{
         "provider":{
@@ -57,6 +57,6 @@
             "defaultVersion":"v2"
         },
         "resourceClass":"eu.atos.paas.resources.OpenShiftResource",
-        "clients":["eu.atos.paas.openshift2.Openshift2Client","eu.atos.paas.openshift3.Openshift3Client"]
+        "clients":["eu.atos.paas.openshift2.Openshift2Client","eu.atos.paas.openshift3.OpenShift3Client"]
     }
 }

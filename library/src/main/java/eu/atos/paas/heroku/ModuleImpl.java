@@ -11,6 +11,8 @@
 package eu.atos.paas.heroku;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,7 +42,7 @@ public class ModuleImpl implements Module {
     private final App app;
     private final List<String> lServices;
     private final Map<String, String> mEnv;
-    private final URL url;
+    private final URI url;
     private final URL gitUrl;
     private final State state;
     private final Formation formation;
@@ -57,7 +59,7 @@ public class ModuleImpl implements Module {
     public ModuleImpl(App app, List<Addon> serviceList, Map<String, String> env, List<Formation> formations) {
         this.app = app;
         this.formation = findFormation(formations);
-        this.url = urlFromString(app.getWebUrl());
+        this.url = uriFromString(app.getWebUrl());
         this.gitUrl = urlFromString(app.getGitUrl());
         
         lServices = new ArrayList<String>(3);
@@ -87,7 +89,7 @@ public class ModuleImpl implements Module {
     
     
     @Override
-    public URL getUrl() {
+    public URI getUrl() {
         return url;
     }
     
@@ -143,6 +145,20 @@ public class ModuleImpl implements Module {
             return result;
             
         } catch (MalformedURLException e) {
+            /*
+             * this should not happen
+             */
+            throw new IllegalArgumentException("Error in URL=" + urlStr + " from provider ", e);
+        }
+    }
+    
+    private URI uriFromString(String urlStr) {
+        try {
+            
+            URI result = new URI(urlStr);
+            return result;
+            
+        } catch (URISyntaxException e) {
             /*
              * this should not happen
              */

@@ -69,7 +69,7 @@ public class Openshift2Session implements PaasSession
                 throw new AlreadyExistsException(moduleName);
             }
             IApplication app = connector.deployAppFromGit(
-                    moduleName, params.getGitUrl().toString(), params.getProperty(Properties.CARTRIDGE));
+                    moduleName, params.getGitUrl().toString(), params.getProperty(Properties.CARTRIDGE, ""));
             
             return new ModuleImpl(app);
 
@@ -109,7 +109,7 @@ public class Openshift2Session implements PaasSession
         
         try {
             String url = params.getGitUrl().toString();
-            IApplication app = connector.deployAppFromGit(moduleName, url, params.getProperty(Properties.CARTRIDGE));
+            IApplication app = connector.deployAppFromGit(moduleName, url, params.getProperty(Properties.CARTRIDGE, ""));
             return new ModuleImpl(app);
         
         } catch (OpenShiftException e) {
