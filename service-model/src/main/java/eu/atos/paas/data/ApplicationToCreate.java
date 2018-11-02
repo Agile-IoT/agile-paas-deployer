@@ -147,8 +147,9 @@ public class ApplicationToCreate {
 
     @Override
     public String toString() {
-        return String.format("ApplicationToCreate [name=%s, gitUrl=%s, artifact=%s, artifactType=%s]", 
-                name, gitUrl, artifact != null, artifactType);
+        return String.format(
+                "ApplicationToCreate [name=%s, gitUrl=%s, artifact=%s, artifactType=%s, envs=%s, properties=%s]", 
+                name, gitUrl, artifact != null, artifactType, envs, properties);
     }
     
     public static class Builder {

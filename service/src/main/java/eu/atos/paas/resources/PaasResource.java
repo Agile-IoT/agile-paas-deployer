@@ -170,7 +170,7 @@ public abstract class PaasResource
             }
             application.validate();
             
-            log.info("createApplication({})", application.getName());
+            log.info("createApplication({})", application);
             return createApplicationImpl(session, application, uploadedFile);
         
         } catch (IOException e)
