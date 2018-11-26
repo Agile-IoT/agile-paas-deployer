@@ -11,12 +11,9 @@
 package eu.atos.paas.resources;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -31,13 +28,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openshift.client.cartridge.IStandaloneCartridge;
 
+import eu.atos.paas.data.Application;
 import eu.atos.paas.data.ApplicationToCreate;
 import eu.atos.paas.data.CredentialsMap;
 import eu.atos.paas.credentials.ApiUserPasswordCredentials;
 import eu.atos.paas.credentials.Credentials;
 import eu.atos.paas.data.Provider;
 import eu.atos.paas.resources.exceptions.ResourceException;
-import eu.atos.paas.DeployParametersImpl;
+import io.swagger.annotations.ApiOperation;
 import eu.atos.paas.Module;
 import eu.atos.paas.PaasSession;
 import eu.atos.paas.PaasSession.DeployParameters;
@@ -58,38 +56,61 @@ public class OpenShiftResource extends PaasResource
     {
         super(provider, clientMap, new OpenShiftParametersTranslator());
     }
-    
-    
-//    @POST
-//    @Path("/applications/git")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public Response createApplication2(@Context HttpHeaders headers, @FormParam("appName") String appname, 
-//            @FormParam("appGitUrl") String appGitUrl)
-//    {
-//        try
-//        {
-//            log.info("createApplication({})", appname);
-//            
-//            PaasSession session = getSession(headers);
-//
-//            Application result;
-//            Module m = session.deploy(appname, new DeployParameters(appGitUrl, IStandaloneCartridge.NAME_JBOSSEWS));
-//            result = new Application(m.getName(), m.getUrl());
-//            
-//            // Response
-//            return generateJSONResponse(Response.Status.OK, OperationResult.OK,
-//                                        "POST /applications/",
-//                                        "application " + result.getName() + " created / deployed: " + result.getUrl());
-//        }
-//        catch (Exception e)
-//        {
-//            // Response
-//            return generateJSONResponse(Response.Status.INTERNAL_SERVER_ERROR, OperationResult.ERROR,
-//                                        "POST /applications/",
-//                                        "application not created / deployed: " + e.getMessage());
-//        }
-//    }
-    
+
+    @GET
+    @Path("applications/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value="Return the status of an application")
+    public Application getApplication(
+            @PathParam("name") String name, @Context HttpHeaders headers) {
+        throw new ResourceException(
+                new ErrorEntity(Status.NOT_FOUND, "Use /{provider}/applications/{project}/{name} endpoint"));
+    }
+
+    @GET
+    @Path("applications/{project}/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value="Return the status of an application")
+    public Application getApplication(
+            @PathParam("project") String project, @PathParam("name") String name, @Context HttpHeaders headers) {
+        
+        String composedName = buildComposedName(project, name);
+        return super.getApplication(composedName, headers);
+    }
+
+    @DELETE
+    @Path("applications/{project}/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value="Removes an application in the provider")
+    public Response deleteApplication(
+            @PathParam("project") String project, @PathParam("name") String name, @Context HttpHeaders headers) {
+        
+        String composedName = buildComposedName(project, name);
+        return super.deleteApplication(composedName, headers);
+    }
+
+    @PUT
+    @Path("applications/{project}/{name}/start")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value="Removes an application in the provider")
+    public Response startApplication(
+            @PathParam("project") String project, @PathParam("name") String name, @Context HttpHeaders headers) {
+        
+        String composedName = buildComposedName(project, name);
+        return super.startApplication(composedName, headers);
+    }
+
+    @PUT
+    @Path("applications/{project}/{name}/stop")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value="Removes an application in the provider")
+    public Response stopApplication(
+            @PathParam("project") String project, @PathParam("name") String name, @Context HttpHeaders headers) {
+        
+        String composedName = buildComposedName(project, name);
+        return super.stopApplication(composedName, headers);
+    }
+
     
     @PUT
     @Path("/applications/{name}/bind/{service}")

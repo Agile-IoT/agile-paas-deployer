@@ -10,6 +10,9 @@
  */
 package eu.atos.paas.openshift3;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.openshift.client.OpenShiftException;
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.ResourceKind;
@@ -22,6 +25,7 @@ import com.openshift.restclient.model.route.IRoute;
 import eu.atos.paas.AlreadyExistsException;
 import eu.atos.paas.ForbiddenException;
 import eu.atos.paas.Module;
+import eu.atos.paas.Module.State;
 import eu.atos.paas.NotDeployedException;
 import eu.atos.paas.NotFoundException;
 import eu.atos.paas.PaasException;
@@ -31,6 +35,7 @@ import eu.atos.paas.PaasSession.DeployParameters.Properties;
 import eu.atos.paas.ServiceApp;
 
 public class OpenShift3Session implements PaasSession {
+    private static final Logger logger = LoggerFactory.getLogger(OpenShift3Session.class);
 
     public static final String DEFAULT_PROJECT = "default-project";
     public static final int DEFAULT_PORT = 8080;
@@ -46,6 +51,8 @@ public class OpenShift3Session implements PaasSession {
     @Override
     public Module createApplication(String moduleName, DeployParameters params)
             throws PaasProviderException, AlreadyExistsException {
+        
+        logger.info("CREATE APPLICATION({})", params);
         
         String[] parts = splitName(moduleName);
         String projectName = parts[0];
@@ -87,28 +94,45 @@ public class OpenShift3Session implements PaasSession {
     @Override
     public Module updateApplication(String moduleName, DeployParameters params)
             throws NotFoundException, PaasProviderException {
-        // TODO Auto-generated method stub
-        return null;
+
+        logger.info("UPDATE APPLICATION({})", params);
+        
+        String[] parts = splitName(moduleName);
+        String projectName = parts[0];
+        String appName = parts[1];
+        
+        ModuleImpl m = getModuleImpl(projectName, appName);
+        
+        if (m == null) {
+            throw new NotFoundException(moduleName);
+        }
+        
+        /*
+         * TODO: update image name, number of instances, etc
+         */
+        
+        return m;
     }
 
     @Override
     public Module deploy(String moduleName, DeployParameters params)
             throws PaasProviderException, AlreadyExistsException {
-        // TODO Auto-generated method stub
-        return null;
+        return createApplication(moduleName, params);
     }
 
     @Override
     public void undeploy(String moduleName) throws NotFoundException, PaasProviderException {
         
         String[] parts = splitName(moduleName);
-        String serviceName = buildServiceName(parts[1]);
-        String dcName = buildDcName(parts[1]);
-        String routeName = buildRouteName(parts[1]);
         
-        IService service = getResource(ResourceKind.SERVICE, parts[0], serviceName);
-        IDeploymentConfig dc = getResource(ResourceKind.DEPLOYMENT_CONFIG, parts[0], dcName);
-        IRoute route = getResource(ResourceKind.ROUTE, parts[0], routeName);
+        ModuleImpl m = getModuleImpl(parts[0], parts[1]);
+        
+        if (m == null) {
+            throw new NotFoundException(moduleName);
+        }
+        IService service = m.getService();
+        IDeploymentConfig dc = m.getDc();
+        IRoute route = m.getRoute();
         
         if (service != null) {
             client.delete(service);
@@ -125,7 +149,38 @@ public class OpenShift3Session implements PaasSession {
     @Override
     public void startStop(Module module, StartStopCommand command)
             throws NotFoundException, NotDeployedException, PaasProviderException {
-        throw new UnsupportedOperationException("Unsupported startStop");
+
+        String[] parts = splitName(module.getName());
+        ModuleImpl m = getModuleImpl(parts[0], parts[1]);
+        
+        if (m == null) {
+            throw new NotFoundException(module.getName());
+        }
+        
+        if (State.UNDEPLOYED.equals(m.getState())) {
+            throw new NotDeployedException(module.getName());
+        }
+        
+        switch (command) {
+        case START:
+            if (State.STOPPED.equals(m.getState())) {
+                logger.info("START APPLICATION({})", module.getName());
+                m.getDc().setReplicas(1);
+            }
+            else {
+                /* does nothing */
+            }
+            break;
+        default:
+            if (State.STARTED.equals(m.getState())) {
+                logger.info("STOP APPLICATION({})", module.getName());
+                m.getDc().setReplicas(0);
+            }
+            else {
+                /* does nothing */
+            }
+            break;
+        }
     }
 
     @Override
@@ -159,7 +214,7 @@ public class OpenShift3Session implements PaasSession {
         return m;
     }
     
-    private Module getModuleImpl(String projectName, String moduleName) {
+    private ModuleImpl getModuleImpl(String projectName, String moduleName) {
         
         String serviceName = buildServiceName(moduleName);
         String dcName = buildDcName(moduleName);
@@ -176,7 +231,7 @@ public class OpenShift3Session implements PaasSession {
         }
         IRoute route = getResource(ResourceKind.ROUTE, projectName, routeName);
         
-        Module m = new ModuleImpl(service, dc, route);
+        ModuleImpl m = new ModuleImpl(service, dc, route);
         return m;
     }
     
