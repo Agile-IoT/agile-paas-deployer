@@ -170,7 +170,7 @@ public abstract class PaasResource
             }
             application.validate();
             
-            log.info("createApplication({})", application.getName());
+            log.info("createApplication({})", application);
             return createApplicationImpl(session, application, uploadedFile);
         
         } catch (IOException e)
@@ -264,12 +264,15 @@ public abstract class PaasResource
         return new Application(m.getName(), m.getUrl());
     }
 
+    public String buildComposedName(String project, String name) {
+        return String.format("%s/%s", project, name);
+    }
 
     @DELETE
     @Path("/applications/{name}")
     @ApiOperation(value="Removes an application in the provider")
     public Response deleteApplication(@PathParam("name") String name, @Context HttpHeaders headers)
-    {
+    { 
         log.info("deleteApplication({})", name);
         PaasSession session = getSession(headers);
 

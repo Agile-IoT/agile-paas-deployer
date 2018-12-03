@@ -98,6 +98,13 @@ public class HerokuSession implements PaasSession {
             
             boolean deployed;
             
+            String undeployed = connector.getAppEnvironmentValue(moduleName, UNDEPLOYED_FLAG);
+            Map<String, String> envs = params.getEnvs();
+            if (undeployed != null) {
+                envs.put(UNDEPLOYED_FLAG, undeployed);
+            }
+            connector.setConfig(moduleName, envs);
+            
             if (params.getGitUrl() != null) {
                 
                 deployed = connector.deployApp(moduleName, params.getGitUrl());

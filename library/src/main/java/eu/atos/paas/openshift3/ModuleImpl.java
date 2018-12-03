@@ -39,6 +39,18 @@ public class ModuleImpl implements Module
         this.route = route;
     }
 
+    public IDeploymentConfig getDc() {
+        return dc;
+    }
+    
+    public IService getService() {
+        return service;
+    }
+    
+    public IRoute getRoute() {
+        return route;
+    }
+    
     @Override
     public String getName() {
         return String.format("%s/%s", service.getNamespace(), service.getName());
@@ -64,7 +76,8 @@ public class ModuleImpl implements Module
     @Override
     public State getState() {
         
-        return getRunningInstances() > 0? State.STARTED : State.STOPPED;
+        int instances = getRunningInstances();
+        return instances > 0? State.STARTED : State.STOPPED;
     }
 
     @Override

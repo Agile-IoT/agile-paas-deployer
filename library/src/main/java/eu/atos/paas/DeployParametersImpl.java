@@ -88,6 +88,12 @@ public class DeployParametersImpl implements DeployParameters {
         return envs.get(envName);
     }
 
+    @Override
+    public String toString() {
+        return String.format("DeployParametersImpl [path=%s, gitUrl=%s, code=%s, imageName=%s, properties=%s, envs=%s]",
+                path, gitUrl, code, imageName, properties, envs);
+    }
+
     public static class Builder {
         
         private DeployParametersImpl o;

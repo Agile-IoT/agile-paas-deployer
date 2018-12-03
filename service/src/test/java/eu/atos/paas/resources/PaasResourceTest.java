@@ -55,6 +55,7 @@ import eu.atos.paas.resources.exceptions.CredentialsParsingException;
 public class PaasResourceTest {
 
     private static final String APP_NAME = "APP_NAME";
+    private static final String PROJECT_NAME = "default";
     private DummyResource resource;
     private DummyHttpHeaders headers;
     
@@ -205,9 +206,28 @@ public class PaasResourceTest {
         assertTrue(!createdApp.getUrl().toString().isEmpty());
     }
     
+    @Test(priority = 9)
+    public void testCreateApplicationWithComposedName() {
+        
+        String name = resource.buildComposedName(PROJECT_NAME, APP_NAME);
+        ApplicationToCreate appToCreate = new Builder(name, "mongodb/mongodb-centos")
+                .env("ROOTPWD", "password")
+                .build();
+
+        Application createdApp = resource.createApplication(headers, appToCreate);
+        assertEquals(name, createdApp.getName());
+        assertTrue(!createdApp.getUrl().toString().isEmpty());
+    }
+    
     @Test(priority = 10) 
     public void testStopApplication() {
         Response response = resource.stopApplication(APP_NAME, headers);
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
+    }
+     
+    @Test(priority = 15)
+    public void testStopApplicationWithComposedName() {
+        Response response = resource.stopApplication(PROJECT_NAME, APP_NAME, headers);
         assertEquals(Status.OK.getStatusCode(), response.getStatus());
     }
     
@@ -217,15 +237,34 @@ public class PaasResourceTest {
         assertEquals(Status.OK.getStatusCode(), response.getStatus());
     }
     
+    @Test(priority = 25)
+    public void testStartApplicationWithComposedName() {
+        Response response = resource.startApplication(PROJECT_NAME, APP_NAME, headers);
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
+    }
+    
     @Test(priority = 30)
     public void testGetApplication() {
         Application app = resource.getApplication(APP_NAME, headers);
         assertEquals(APP_NAME, app.getName());
     }
     
+    @Test(priority = 32)
+    public void testGetApplicationWithComposedName() {
+        String name = resource.buildComposedName(PROJECT_NAME, APP_NAME);
+        Application app = resource.getApplication(PROJECT_NAME, APP_NAME, headers);
+        assertEquals(name, app.getName());
+    }
+    
     @Test(priority = 90) 
     public void testDeleteApplication() throws IOException {
         Response response = resource.deleteApplication(APP_NAME, headers);
+        assertEquals(Status.OK.getStatusCode(), response.getStatus());
+    }
+
+    @Test(priority = 90) 
+    public void testDeleteApplicationWithComposedName() throws IOException {
+        Response response = resource.deleteApplication(PROJECT_NAME, APP_NAME, headers);
         assertEquals(Status.OK.getStatusCode(), response.getStatus());
     }
 

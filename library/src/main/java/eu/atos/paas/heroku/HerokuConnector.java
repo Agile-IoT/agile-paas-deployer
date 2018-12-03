@@ -401,6 +401,11 @@ public class HerokuConnector
         _hApiClient.updateConfig(applicationName, envValues);
     }
     
+    public void setConfig(String applicationName, Map<String, String> envMap) {
+        
+        _hApiClient.updateConfig(applicationName, envMap);
+    }
+    
     public void removeConfig(String applicationName, String key) {
         Map<String, String> envValues = _hApiClient.listConfig(applicationName);
         envValues.put(key, null);
