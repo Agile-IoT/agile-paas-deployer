@@ -23,6 +23,7 @@ import static org.testng.AssertJUnit.*;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Base class for integration tests in library project.
@@ -40,6 +41,8 @@ public abstract class AbstractProviderIT {
     protected static String APP_NAME = "paastest";
     protected static String APP_NAME_NOT_EXISTS = "notexists";
     protected int waitSecondsAfterMethod = 0;
+    protected int retryTimes = 60;
+    protected int retryPeriod = 1;
     
     protected void initialize() {
         this.initialized = true;
@@ -84,6 +87,7 @@ public abstract class AbstractProviderIT {
         
         Module m = session.createApplication(APP_NAME, params);
         assertNotNull(m);
+        wait(untilStartedOrUndeployed(APP_NAME), retryTimes, retryPeriod);
     }
     
     @Test(priority = 13, groups = "default")
@@ -146,6 +150,10 @@ public abstract class AbstractProviderIT {
 
         Module m = session.getModule(APP_NAME);
         session.startStop(m, StartStopCommand.STOP);
+        
+        boolean w = wait(untilStopped(APP_NAME), retryTimes, retryPeriod);
+        System.out.println("w = " + w);
+
     }
     
     @Test(priority = 35, groups = "default")
@@ -178,8 +186,10 @@ public abstract class AbstractProviderIT {
 
         Module m = session.getModule(APP_NAME);
         session.startStop(m, StartStopCommand.START);
+        
+        wait(untilStarted(APP_NAME), retryTimes, retryPeriod);
     }
-    
+
     @Test(priority = 43, groups = "default")
     public void getStartedApplication() {
         beforeMethod();
@@ -209,6 +219,8 @@ public abstract class AbstractProviderIT {
         beforeMethod();
 
         Module m = session.createApplication(APP_NAME_NOT_EXISTS, params);
+        wait(untilStartedOrUndeployed(APP_NAME_NOT_EXISTS), retryTimes, retryPeriod);
+        m = session.getModule(APP_NAME_NOT_EXISTS);
         try {
             if (State.STARTED.equals(m.getState())) {
                 /* nothing to test here */
@@ -260,6 +272,58 @@ public abstract class AbstractProviderIT {
         if (!initialized) { 
             throw new SkipException("Not initialized");
         }
+    }
+    
+    protected boolean wait(Supplier<Boolean> until, int retryTimes, int retryPeriod) {
+        int i = 0;
+        while (i < retryTimes && !until.get()) {
+            try {
+                Thread.sleep(retryPeriod * 1000);
+                i++;
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e.getMessage(), e);
+            }
+        }
+        return i < retryTimes;
+    }
+    
+    protected Supplier<Boolean> untilStarted(final String name) {
+        Supplier<Boolean> f = new Supplier<Boolean>() {
+
+            @Override
+            public Boolean get() {
+                Module m = session.getModule(name);
+                State s = m.getState();
+                return State.STARTED.equals(s);
+            }
+        };
+        return f;
+    }
+    
+    protected Supplier<Boolean> untilStartedOrUndeployed(final String name) {
+        Supplier<Boolean> f = new Supplier<Boolean>() {
+
+            @Override
+            public Boolean get() {
+                Module m = session.getModule(name);
+                State s = m.getState();
+                return State.UNDEPLOYED.equals(s) || State.STARTED.equals(s);
+            }
+        };
+        return f;
+    }
+
+    protected Supplier<Boolean> untilStopped(final String name) {
+        Supplier<Boolean> f = new Supplier<Boolean>() {
+
+            @Override
+            public Boolean get() {
+                Module m = session.getModule(name);
+                State s = m.getState();
+                return State.STOPPED.equals(s);
+            }
+        };
+        return f;
     }
     
     private static final class NonExistentModule implements Module {

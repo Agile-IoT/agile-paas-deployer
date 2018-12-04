@@ -10,6 +10,7 @@
  */
 package eu.atos.paas.openshift3;
 
+
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -31,17 +32,25 @@ public class OpenShiftIT extends AbstractProviderIT {
         
         PaasClient client = new PaasClientFactory().getClient("openshift3");
         
+        /*
+         * Overwrite APP_NAME to include project name
+         */
+        AbstractProviderIT.APP_NAME = String.format("%s/%s", 
+                OpenShift3Session.DEFAULT_PROJECT, AbstractProviderIT.APP_NAME);
+        AbstractProviderIT.APP_NAME_NOT_EXISTS = String.format("%s/%s", 
+                OpenShift3Session.DEFAULT_PROJECT, AbstractProviderIT.APP_NAME_NOT_EXISTS);
+        
         session = client.getSession(new ApiUserPasswordCredentials(
                 TestConfigProperties.getInstance().getOp3_api(), 
                 TestConfigProperties.getInstance().getOp3_user(),
                 TestConfigProperties.getInstance().getOp3_password()));
 
-        this.params = DeployParametersImpl.Builder.fromImageName("centos/mongodb-26-centos7")
+//        this.params = DeployParametersImpl.Builder.fromImageName("centos/mongodb-26-centos7")
+        this.params = DeployParametersImpl.Builder.fromImageName("openshiftkatacoda/blog-django-py")
             .env("MONGODB_ADMIN_PASSWORD", "a-super-password")
             .env("MONGODB_USER", "a-user")
             .env("MONGODB_PASSWORD", "a-password")
             .env("MONGODB_DATABASE", "a-db")
             .build();
     }
-    
 }
