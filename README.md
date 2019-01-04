@@ -12,7 +12,13 @@ Depending on the supported provider, it accepts deploying applications by:
 * specifying the GIT URL of the code to deploy;
 * specifying the name of a Docker image.
 
+
 ---
+
+## Usage in AGILE
+
+To run agile-paas-deployer as an AGILE container, include the following in your agile-stack Dockerfile: https://github.com/Agile-IoT/agile-stack/commit/bdf106750e32e4135ed1b6b7f380d688a35f2201
+
 ## Usage
 1. Compile project
 
